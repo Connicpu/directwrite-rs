@@ -87,4 +87,34 @@ impl<'a> ParamBuilder<'a> {
             locale: self.locale.unwrap_or("en-US").to_wide_null(),
         })
     }
+    
+    pub fn family(mut self, family: &'a str) -> Self {
+        self.family = Some(family);
+        self
+    }
+    
+    pub fn weight(mut self, weight: FontWeight) -> Self {
+        self.weight = weight;
+        self
+    }
+    
+    pub fn style(mut self, style: FontStyle) -> Self {
+        self.style = style;
+        self
+    }
+    
+    pub fn stretch(mut self, stretch: FontStretch) -> Self {
+        self.stretch = stretch;
+        self
+    }
+    
+    pub fn size(mut self, size: f32) -> Self {
+        self.size = Some(size);
+        self
+    }
+    
+    pub fn locale(mut self, locale: &'a str) -> Self {
+        self.locale = Some(locale);
+        self
+    }
 }
