@@ -6,6 +6,7 @@ use helpers::ToWide;
 use internal::FromParams;
 use comptr::ComPtr;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct TextFormat {
     ptr: ComPtr<IDWriteTextFormat>,
 }

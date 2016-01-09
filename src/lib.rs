@@ -3,6 +3,7 @@ extern crate kernel32;
 extern crate uuid;
 
 pub use factory::Factory;
+pub use text_format::TextFormat;
 
 #[macro_use]
 mod macros;
