@@ -15,6 +15,10 @@ impl TextFormat {
     pub unsafe fn get_ptr(&self) -> ComPtr<IDWriteTextFormat> {
         self.ptr.clone()
     }
+    
+    pub unsafe fn get_raw(&self) -> *mut IDWriteTextFormat {
+        self.ptr.raw_value()
+    }
 }
 
 unsafe impl FromParams for TextFormat {

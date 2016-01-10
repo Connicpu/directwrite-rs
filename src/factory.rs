@@ -1,6 +1,5 @@
 use comptr::ComPtr;
 use error::DWriteError;
-use text_format;
 use load_dll;
 use winapi::*;
 
@@ -9,17 +8,13 @@ pub struct Factory {
 }
 
 impl Factory {
-    pub fn create() -> Result<Factory, DWriteError> {
+    pub fn new() -> Result<Factory, DWriteError> {
         let dwrite = try!(load_dll::DWrite::load());
         let ptr = try!(dwrite.create_factory(false));
         Ok(Factory { ptr: ptr })
     }
     
-    pub fn create_text_format(
-        &self,
-        params: text_format::Params,
-    ) -> Result<text_format::TextFormat, DWriteError> {
-        use internal::FromParams;
-        FromParams::from_params(unsafe { &mut *self.ptr.raw_value() }, params)
+    pub fn create<T: ::internal::FromParams>(&self, params: T::Params) -> Result<T, DWriteError> {
+        T::from_params(unsafe { &mut *self.ptr.raw_value() }, params)
     }
 }
