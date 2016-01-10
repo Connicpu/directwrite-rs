@@ -1,13 +1,13 @@
 [package]
 name = "directwrite"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Connor Hilarides <connorcpu@live.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
 to be used with direct2d for easy text rendering.
 """
 repository = "https://github.com/Connorcpu/directwrite-rs"
-license = "MIT"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 winapi = "0.2"
