@@ -29,6 +29,15 @@ impl TextLayout {
         }
     }
     
+    pub fn get_measured_offset(&self) -> (f32, f32) {
+        unsafe {
+            let mut metrics: DWRITE_TEXT_METRICS = mem::uninitialized();
+            self.ptr().GetMetrics(&mut metrics);
+            
+            (metrics.left, metrics.top)
+        }
+    }
+    
     unsafe fn ptr(&self) -> &mut IDWriteTextLayout {
         &mut *self.ptr.raw_value()
     }
@@ -50,6 +59,10 @@ unsafe impl FromParams for TextLayout {
             );
             
             if SUCCEEDED(result) {
+                if params.centered {
+                    ptr.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+                }
+                
                 Ok(TextLayout { ptr: ptr })
             } else {
                 Err(From::from(result))
@@ -63,6 +76,7 @@ pub struct Params {
     format: TextFormat,
     width: f32,
     height: f32,
+    centered: bool,
 }
 
 pub struct ParamBuilder<'a> {
@@ -70,6 +84,7 @@ pub struct ParamBuilder<'a> {
     format: Option<TextFormat>,
     width: Option<f32>,
     height: Option<f32>,
+    centered: bool,
 }
 
 impl<'a> ParamBuilder<'a> {
@@ -79,6 +94,7 @@ impl<'a> ParamBuilder<'a> {
             format: None,
             width: None,
             height: None,
+            centered: false,
         }
     }
     
@@ -87,11 +103,13 @@ impl<'a> ParamBuilder<'a> {
             ParamBuilder {
                 text: Some(text), format: Some(format),
                 width: Some(width), height: Some(height),
+                centered,
             } => Some(Params {
                 text: text.to_wide_null(),
                 format: format,
                 width: width,
                 height: height,
+                centered: centered,
             }),
             _ => None,
         }
@@ -119,5 +137,10 @@ impl<'a> ParamBuilder<'a> {
     
     pub fn size(self, width: f32, height: f32) -> Self {
         self.width(width).height(height)
+    }
+    
+    pub fn centered(mut self, centered: bool) -> Self {
+        self.centered = centered;
+        self
     }
 }
