@@ -1,6 +1,6 @@
 [package]
 name = "directwrite"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Connor Hilarides <connorcpu@live.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
