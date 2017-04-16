@@ -144,12 +144,43 @@ impl TextLayout {
 
     // TODO: Inline objects somehow?
 
+    /// Get the number of LineMetrics objects that you need room for when calling
+    /// `get_line_metrics_slice`
     pub fn get_line_metrics_count(&self) -> usize {
         unsafe {
             let mut count = 0;
             self.ptr().GetLineMetrics(ptr::null_mut(), 0, &mut count);
             count as usize
         }
+    }
+
+    /// Retrieves the information about each individual text line of the text string. You should
+    /// first call `get_line_metrics_count` to know how large your slice must be to fit all of
+    /// the metrics objects. The return value will contain the actual number of elements in the
+    /// layout, but the official documentation does *not* specify whether the array will be filled
+    /// with any values in the Err case, so that behavior is not guaranteed between windows
+    /// versions.
+    pub fn get_line_metrics_slice(&self, buf: &mut [metrics::LineMetrics]) -> Result<usize, usize> {
+        assert!(buf.len() <= u32::MAX as usize);
+        unsafe {
+            let mut actual_count = 0;
+            let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_LINE_METRICS;
+            let res = self.ptr().GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
+
+            if res == S_OK {
+                Ok(actual_count as usize)
+            } else {
+                Err(actual_count as usize)
+            }
+        }
+    }
+
+    /// etrieves the information about each individual text line of the text string. Resizes `buf`
+    /// to fit all of the elements exactly.
+    pub fn get_line_metrics(&self, buf: &mut Vec<metrics::LineMetrics>) {
+        let count = self.get_line_metrics_count();
+        buf.resize(count, Default::default());
+        assert_eq!(self.get_line_metrics_slice(buf), Ok(count));
     }
 
     /// Retrieves overall metrics for the formatted string.
