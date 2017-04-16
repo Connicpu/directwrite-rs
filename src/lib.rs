@@ -1,3 +1,5 @@
+#![cfg(windows)]
+
 extern crate winapi;
 extern crate kernel32;
 extern crate uuid;
@@ -10,9 +12,10 @@ pub use text_layout::TextLayout;
 mod macros;
 
 pub mod comptr;
-pub mod factory;
+pub mod drawing_effect;
 pub mod error;
 pub mod enums;
+pub mod factory;
 pub mod internal;
 pub mod text_format;
 pub mod text_layout;

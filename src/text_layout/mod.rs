@@ -5,6 +5,7 @@ use enums::{FontStretch, FontStyle, FontWeight};
 use helpers::InternalConstructor;
 use comptr::ComPtr;
 use text_format::TextFormat;
+use drawing_effect::DrawingEffect;
 
 pub use self::builder::{Params, ParamBuilder};
 
@@ -218,7 +219,6 @@ impl TextLayout {
         }
     }
 
-
     /// The application calls this function passing in a specific pixel location relative to the
     /// top-left location of the layout box and obtains the information about the correspondent
     /// hit-test metrics of the text string where the hit-test has occurred. Returns None if the
@@ -308,6 +308,57 @@ impl TextLayout {
 
             metrics.set_len(actual_count as usize);
             true
+        }
+    }
+
+    /// Sets the drawing style for text within a text range.
+    pub fn set_drawing_effect<E>(&self, effect: &E, range: TextRange)
+        where E: DrawingEffect
+    {
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            self.ptr().SetDrawingEffect(effect.get_effect_ptr(), range);
+        }
+    }
+
+    /// Sets the font style for text within a text range.
+    pub fn set_font_style(&self, style: FontStyle, range: TextRange) {
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            self.ptr().SetFontStyle(DWRITE_FONT_STYLE(style as u32), range);
+        }
+    }
+
+    /// Sets the font weight for text within a text range.
+    pub fn set_font_weight(&self, weight: FontWeight, range: TextRange) {
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            self.ptr().SetFontWeight(DWRITE_FONT_WEIGHT(weight as u32), range);
+        }
+    }
+
+    /// Sets underlining for text within a specified text range.
+    pub fn set_underline(&self, underline: bool, range: TextRange) {
+        let underline = if underline { 0 } else { 1 };
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            self.ptr().SetUnderline(underline, range);
         }
     }
 }
