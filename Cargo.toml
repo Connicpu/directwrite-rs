@@ -1,7 +1,7 @@
 [package]
 name = "directwrite"
-version = "0.0.5"
-authors = ["Connor Hilarides <connorcpu@live.com>"]
+version = "0.0.6"
+authors = ["Conni Hilarides <connorcpu@live.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
 to be used with direct2d for easy text rendering.
@@ -11,6 +11,6 @@ license = "MIT/Apache-2.0"
 
 [dependencies]
 winapi = "0.2"
-uuid = "0.1"
+uuid = "0.4"
 kernel32-sys = "0.2"
-user32-sys = "0.1"
+user32-sys = "0.2"
