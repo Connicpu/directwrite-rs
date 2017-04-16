@@ -255,3 +255,72 @@ impl OverhangMetrics {
         self.metrics.bottom
     }
 }
+
+/// Describes the region obtained by a hit test.
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct HitTestMetrics {
+    metrics: DWRITE_HIT_TEST_METRICS,
+}
+
+impl Default for HitTestMetrics {
+    #[inline]
+    fn default() -> Self {
+        unsafe { mem::zeroed() }
+    }
+}
+
+impl InternalConstructor for HitTestMetrics {
+    type Arguments = DWRITE_HIT_TEST_METRICS;
+    #[inline]
+    fn build(args: Self::Arguments) -> Self {
+        HitTestMetrics { metrics: args }
+    }
+}
+
+impl HitTestMetrics {
+    /// The first text position within the hit region.
+    pub fn text_position(&self) -> u32 {
+        self.metrics.textPosition
+    }
+
+    /// The number of text positions within the hit region.
+    pub fn length(&self) -> u32 {
+        self.metrics.length
+    }
+
+    /// The x-coordinate of the upper-left corner of the hit region.
+    pub fn left(&self) -> f32 {
+        self.metrics.left
+    }
+
+    /// The y-coordinate of the upper-left corner of the hit region.
+    pub fn top(&self) -> f32 {
+        self.metrics.top
+    }
+
+    /// The width of the hit region.
+    pub fn width(&self) -> f32 {
+        self.metrics.width
+    }
+
+    /// The height of the hit region.
+    pub fn height(&self) -> f32 {
+        self.metrics.height
+    }
+
+    /// The BIDI level of the text positions within the hit region.
+    pub fn bidi_level(&self) -> u32 {
+        self.metrics.bidiLevel
+    }
+
+    /// true if the hit region contains text; otherwise, false.
+    pub fn is_text(&self) -> bool {
+        self.metrics.isText != 0
+    }
+
+    /// true if the text range is trimmed; otherwise, false.
+    pub fn is_trimmed(&self) -> bool {
+        self.metrics.isTrimmed != 0
+    }
+}

@@ -2,11 +2,13 @@ use std::{ptr, mem, u32};
 use winapi::*;
 use error::DWriteError;
 use enums::{FontStretch, FontStyle, FontWeight};
-use helpers::{InternalConstructor, ToWide};
-use internal::FromParams;
+use helpers::InternalConstructor;
 use comptr::ComPtr;
 use text_format::TextFormat;
 
+pub use self::builder::{Params, ParamBuilder};
+
+pub mod builder;
 pub mod metrics;
 
 /// The TextLayout interface represents a block of text after it has been fully analyzed and formatted.
@@ -179,7 +181,9 @@ impl TextLayout {
     /// to fit all of the elements exactly.
     pub fn get_line_metrics(&self, buf: &mut Vec<metrics::LineMetrics>) {
         let count = self.get_line_metrics_count();
-        buf.resize(count, Default::default());
+        unsafe {
+            buf.set_len(count);
+        }
         assert_eq!(self.get_line_metrics_slice(buf), Ok(count));
     }
 
@@ -213,35 +217,102 @@ impl TextLayout {
             metrics::OverhangMetrics::build(metrics)
         }
     }
-}
 
-unsafe impl FromParams for TextLayout {
-    type Params = Params;
 
-    fn from_params(factory: &mut IDWriteFactory, params: Params) -> Result<Self, DWriteError> {
+    /// The application calls this function passing in a specific pixel location relative to the
+    /// top-left location of the layout box and obtains the information about the correspondent
+    /// hit-test metrics of the text string where the hit-test has occurred. Returns None if the
+    /// specified pixel location is outside the string.
+    pub fn hit_test_point(&self, point_x: f32, point_y: f32) -> HitTestPoint {
         unsafe {
-            let mut ptr: ComPtr<IDWriteTextLayout> = ComPtr::new();
-            let result = factory.CreateTextLayout(params.text.as_ptr(),
-                                                  params.text.len() as u32,
-                                                  params.format.get_raw(),
-                                                  params.width,
-                                                  params.height,
-                                                  ptr.raw_addr());
+            let mut trail = 0;
+            let mut inside = 0;
+            let mut metrics = mem::uninitialized();
+            self.ptr().HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
 
-            if SUCCEEDED(result) {
-                if params.centered {
-                    ptr.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-                }
-
-                Ok(TextLayout { ptr: ptr })
-            } else {
-                Err(From::from(result))
+            HitTestPoint {
+                metrics: InternalConstructor::build(metrics),
+                is_inside: inside != 0,
+                is_trailing_hit: trail != 0,
             }
+        }
+    }
+
+    /// The application calls this function to get the pixel location relative to the top-left of
+    /// the layout box given the text position and the logical side of the position. This function
+    /// is normally used as part of caret positioning of text where the caret is drawn at the
+    /// location corresponding to the current text editing position. It may also be used as a way
+    /// to programmatically obtain the geometry of a particular text position in UI automation.
+    pub fn hit_test_text_position(&self,
+                                  position: u32,
+                                  trailing: bool)
+                                  -> Option<HitTestTextPosition> {
+        let trailing = if trailing { 0 } else { 1 };
+        unsafe {
+            let (mut x, mut y) = (0.0, 0.0);
+            let mut metrics = mem::uninitialized();
+            let res = self.ptr()
+                .HitTestTextPosition(position, trailing, &mut x, &mut y, &mut metrics);
+            if res != S_OK {
+                return None;
+            }
+
+            Some(HitTestTextPosition {
+                metrics: InternalConstructor::build(metrics),
+                point_x: x,
+                point_y: y,
+            })
+        }
+    }
+
+    /// The application calls this function to get a set of hit-test metrics corresponding to a
+    /// range of text positions. One of the main usages is to implement highlight selection of
+    /// the text string.
+    pub fn hit_test_text_range(&self,
+                               position: u32,
+                               length: u32,
+                               origin_x: f32,
+                               origin_y: f32,
+                               metrics: &mut Vec<metrics::HitTestMetrics>)
+                               -> bool {
+
+
+        unsafe {
+            // Calculate the total number of items we need
+            let mut actual_count = 0;
+            let res = self.ptr().HitTestTextRange(position,
+                                                  length,
+                                                  origin_x,
+                                                  origin_y,
+                                                  ptr::null_mut(),
+                                                  0,
+                                                  &mut actual_count);
+            if res != S_OK {
+                return false;
+            }
+
+            metrics.set_len(actual_count as usize);
+            let buf_ptr = metrics[..].as_mut_ptr() as *mut _;
+            let len = metrics.len() as u32;
+            let res = self.ptr().HitTestTextRange(position,
+                                                  length,
+                                                  origin_x,
+                                                  origin_y,
+                                                  buf_ptr,
+                                                  len,
+                                                  &mut actual_count);
+            if res != S_OK {
+                metrics.set_len(0);
+                return false;
+            }
+
+            metrics.set_len(actual_count as usize);
+            true
         }
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct TextRange {
     pub start: u32,
     pub length: u32,
@@ -256,78 +327,28 @@ impl From<DWRITE_TEXT_RANGE> for TextRange {
     }
 }
 
-pub struct Params {
-    text: Vec<u16>,
-    format: TextFormat,
-    width: f32,
-    height: f32,
-    centered: bool,
+#[derive(Copy, Clone)]
+pub struct HitTestPoint {
+    /// The output geometry fully enclosing the hit-test location. When is_inside is set to false,
+    /// this structure represents the geometry enclosing the edge closest to the hit-test location.
+    pub metrics: metrics::HitTestMetrics,
+    /// An output flag that indicates whether the hit-test location is inside the text string. When
+    /// false, the position nearest the text's edge is returned.
+    pub is_inside: bool,
+    /// An output flag that indicates whether the hit-test location is at the leading or the
+    /// trailing side of the character. When is_inside is set to false, this value is set according
+    /// to the output hitTestMetrics->textPosition value to represent the edge closest to the
+    /// hit-test location.
+    pub is_trailing_hit: bool,
 }
 
-pub struct ParamBuilder<'a> {
-    text: Option<&'a str>,
-    format: Option<TextFormat>,
-    width: Option<f32>,
-    height: Option<f32>,
-    centered: bool,
-}
+#[derive(Copy, Clone)]
+pub struct HitTestTextPosition {
+    /// The output pixel location X, relative to the top-left location of the layout box.
+    pub point_x: f32,
+    /// The output pixel location Y, relative to the top-left location of the layout box.
+    pub point_y: f32,
 
-impl<'a> ParamBuilder<'a> {
-    pub fn new() -> ParamBuilder<'static> {
-        ParamBuilder {
-            text: None,
-            format: None,
-            width: None,
-            height: None,
-            centered: false,
-        }
-    }
-
-    pub fn build(self) -> Option<Params> {
-        match self {
-            ParamBuilder { text: Some(text),
-                           format: Some(format),
-                           width: Some(width),
-                           height: Some(height),
-                           centered } => {
-                Some(Params {
-                    text: text.to_wide_null(),
-                    format: format,
-                    width: width,
-                    height: height,
-                    centered: centered,
-                })
-            }
-            _ => None,
-        }
-    }
-
-    pub fn text(mut self, text: &'a str) -> Self {
-        self.text = Some(text);
-        self
-    }
-
-    pub fn font(mut self, font: TextFormat) -> Self {
-        self.format = Some(font);
-        self
-    }
-
-    pub fn width(mut self, width: f32) -> Self {
-        self.width = Some(width);
-        self
-    }
-
-    pub fn height(mut self, height: f32) -> Self {
-        self.height = Some(height);
-        self
-    }
-
-    pub fn size(self, width: f32, height: f32) -> Self {
-        self.width(width).height(height)
-    }
-
-    pub fn centered(mut self, centered: bool) -> Self {
-        self.centered = centered;
-        self
-    }
+    /// The output geometry fully enclosing the specified text position.
+    pub metrics: metrics::HitTestMetrics,
 }
