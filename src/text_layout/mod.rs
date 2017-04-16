@@ -267,7 +267,7 @@ impl TextLayout {
 
     /// The application calls this function to get a set of hit-test metrics corresponding to a
     /// range of text positions. One of the main usages is to implement highlight selection of
-    /// the text string.
+    /// the text string. origin_x and origin_y are added to the hit-test metrics returned.
     pub fn hit_test_text_range(&self,
                                position: u32,
                                length: u32,
