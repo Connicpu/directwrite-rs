@@ -2,6 +2,7 @@ use winapi::dwrite::*;
 use helpers::InternalConstructor;
 use std::mem;
 
+/// Contains the metrics associated with text after layout. All coordinates are in device independent pixels (DIPs).
 #[derive(Copy, Clone)]
 pub struct Metrics {
     metrics: DWRITE_TEXT_METRICS,
@@ -80,6 +81,7 @@ impl Metrics {
     }
 }
 
+/// Contains information about a glyph cluster.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ClusterMetrics {
@@ -145,6 +147,7 @@ impl ClusterMetrics {
     }
 }
 
+/// Contains information about a formatted line of text.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct LineMetrics {
