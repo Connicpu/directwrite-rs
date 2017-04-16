@@ -183,13 +183,34 @@ impl TextLayout {
         assert_eq!(self.get_line_metrics_slice(buf), Ok(count));
     }
 
+    /// Gets the layout maximum height.
+    pub fn get_max_height(&self) -> f32 {
+        unsafe { self.ptr().GetMaxHeight() }
+    }
+
+    /// Gets the layout maximum width.
+    pub fn get_max_width(&self) -> f32 {
+        unsafe { self.ptr().GetMaxWidth() }
+    }
+
     /// Retrieves overall metrics for the formatted string.
     pub fn get_metrics(&self) -> metrics::Metrics {
         unsafe {
-            let mut metrics: DWRITE_TEXT_METRICS = mem::zeroed();
+            let mut metrics = mem::zeroed();
             self.ptr().GetMetrics(&mut metrics);
 
             metrics::Metrics::build(metrics)
+        }
+    }
+
+    /// Returns the overhangs (in DIPs) of the layout and all objects contained in it, including
+    /// text glyphs and inline objects.
+    pub fn get_overhang_metrics(&self) -> metrics::OverhangMetrics {
+        unsafe {
+            let mut metrics = mem::zeroed();
+            self.ptr().GetOverhangMetrics(&mut metrics);
+
+            metrics::OverhangMetrics::build(metrics)
         }
     }
 }
