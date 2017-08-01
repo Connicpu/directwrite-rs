@@ -1,7 +1,15 @@
-use winapi::*;
 use std::{ptr, mem};
 use std::cmp::PartialEq;
 use std::ops::{Drop, Deref, DerefMut};
+use std::fmt;
+
+use winapi::ctypes::c_void;
+use winapi::shared::ntdef::HRESULT;
+use winapi::shared::minwindef::*;
+use winapi::shared::winerror::{SUCCEEDED, E_POINTER};
+use winapi::shared::guiddef::{IID, REFIID};
+use winapi::um::unknwnbase::IUnknown;
+use winapi::um::dwrite::{IDWriteFactory, IDWriteTextFormat, IDWriteTextLayout};
 
 pub trait ComUnknown {
     unsafe fn add_ref(ptr: *mut Self) -> ULONG;
@@ -19,9 +27,16 @@ impl_com_refcount! { IDWriteFactory, "b859ee5a-d838-4b5b-a2e8-1adc7d93db48" }
 impl_com_refcount! { IDWriteTextFormat, "9c906818-31d7-4fd3-a151-7c5e225db55a" }
 impl_com_refcount! { IDWriteTextLayout, "53737037-6d14-410b-9bfe-0b182bb70961" }
 
-#[derive(Debug)]
 pub struct ComPtr<T: ComUnknown> {
     ptr: *mut T,
+}
+
+impl<T: ComUnknown> fmt::Debug for ComPtr<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_tuple("ComPtr")
+            .field(&self.ptr)
+            .finish()
+    }
 }
 
 #[allow(dead_code)] // I'm not done, I'll need at least some of it :P

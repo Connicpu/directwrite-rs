@@ -1,7 +1,8 @@
 use comptr::ComPtr;
 use error::DWriteError;
 use load_dll;
-use winapi::*;
+
+use winapi::um::dwrite::IDWriteFactory;
 
 pub struct Factory {
     ptr: ComPtr<IDWriteFactory>,

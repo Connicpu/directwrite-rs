@@ -1,5 +1,4 @@
 use std::{ptr, mem, u32};
-use winapi::*;
 use error::DWriteError;
 use enums::{FontStretch, FontStyle, FontWeight};
 use helpers::InternalConstructor;
@@ -8,6 +7,9 @@ use text_format::TextFormat;
 use drawing_effect::DrawingEffect;
 
 pub use self::builder::{Params, ParamBuilder};
+
+use winapi::shared::winerror::S_OK;
+use winapi::um::dwrite::*;
 
 pub mod builder;
 pub mod metrics;
@@ -113,7 +115,7 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((FontStretch::from_u32(stretch.0).unwrap(), range.into()))
+            Ok((FontStretch::from_u32(stretch).unwrap(), range.into()))
         }
     }
 
@@ -127,7 +129,7 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((FontStyle::from_u32(style.0).unwrap(), range.into()))
+            Ok((FontStyle::from_u32(style).unwrap(), range.into()))
         }
     }
 
@@ -141,7 +143,7 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((FontWeight::from_u32(weight.0).unwrap(), range.into()))
+            Ok((FontWeight::from_u32(weight).unwrap(), range.into()))
         }
     }
 
@@ -333,7 +335,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetFontStyle(DWRITE_FONT_STYLE(style as u32), range);
+            self.ptr().SetFontStyle(style as u32, range);
         }
     }
 
@@ -345,7 +347,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetFontWeight(DWRITE_FONT_WEIGHT(weight as u32), range);
+            self.ptr().SetFontWeight(weight as u32, range);
         }
     }
 

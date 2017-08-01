@@ -1,4 +1,4 @@
-use winapi::dwrite::*;
+use winapi::um::dwrite::*;
 use helpers::InternalConstructor;
 use std::mem;
 

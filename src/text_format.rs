@@ -1,10 +1,12 @@
 use std::ptr;
 use enums::*;
-use winapi::*;
 use error::DWriteError;
 use helpers::ToWide;
 use internal::FromParams;
 use comptr::ComPtr;
+
+use winapi::shared::winerror::SUCCEEDED;
+use winapi::um::dwrite::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextFormat {
@@ -33,9 +35,9 @@ unsafe impl FromParams for TextFormat {
             let mut ptr: ComPtr<IDWriteTextFormat> = ComPtr::new();
             let result = factory.CreateTextFormat(params.family.as_ptr(),
                                                   ptr::null_mut(),
-                                                  DWRITE_FONT_WEIGHT(params.weight as u32),
-                                                  DWRITE_FONT_STYLE(params.style as u32),
-                                                  DWRITE_FONT_STRETCH(params.stretch as u32),
+                                                  params.weight as u32,
+                                                  params.style as u32,
+                                                  params.stretch as u32,
                                                   params.size,
                                                   params.locale.as_ptr(),
                                                   ptr.raw_addr());

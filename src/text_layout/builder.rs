@@ -1,9 +1,11 @@
 use {TextFormat, TextLayout};
-use winapi::*;
 use comptr::ComPtr;
 use internal::FromParams;
 use error::DWriteError;
 use helpers::ToWide;
+
+use winapi::shared::winerror::SUCCEEDED;
+use winapi::um::dwrite::*;
 
 pub struct Params {
     text: Vec<u16>,

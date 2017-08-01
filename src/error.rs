@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt::{self, Display};
-use winapi::*;
+
+use winapi::shared::ntdef::HRESULT;
 
 #[derive(Clone, Debug)]
 pub enum DWriteError {

@@ -1,8 +1,14 @@
-use winapi::*;
 use std::{ptr, mem, ffi};
-use kernel32;
 use helpers::*;
 use comptr::ComPtr;
+
+use winapi::shared::winerror::SUCCEEDED;
+use winapi::shared::ntdef::HRESULT;
+use winapi::shared::minwindef::HMODULE;
+use winapi::shared::guiddef::REFIID;
+use winapi::um::unknwnbase::IUnknown;
+use winapi::um::dwrite::*;
+use winapi::um::libloaderapi::*;
 
 type CreateFactory = unsafe extern "system" fn(
     DWRITE_FACTORY_TYPE, REFIID, *mut *mut IUnknown,
@@ -17,9 +23,9 @@ impl DWrite {
     pub fn load() -> Result<DWrite, HRESULT> {
         unsafe {
             let dll = ffi::CString::new("DWrite.dll").unwrap();
-            let mut handle = kernel32::GetModuleHandleA(dll.as_ptr());
+            let mut handle = GetModuleHandleA(dll.as_ptr());
             if handle == ptr::null_mut() {
-                handle = kernel32::LoadLibraryA(dll.as_ptr());
+                handle = LoadLibraryA(dll.as_ptr());
             }
             
             if handle != ptr::null_mut() {
@@ -33,7 +39,7 @@ impl DWrite {
     pub fn create_factory(&self, isolated: bool) -> Result<ComPtr<IDWriteFactory>, HRESULT> {
         unsafe {
             let procedure = ffi::CString::new("DWriteCreateFactory").unwrap();
-            let create_factory_ptr = kernel32::GetProcAddress(self.handle, procedure.as_ptr());
+            let create_factory_ptr = GetProcAddress(self.handle, procedure.as_ptr());
             
             if create_factory_ptr == ptr::null_mut() {
                 panic!("Error loading function DWriteCreateFactory: {:?}", last_error_string());

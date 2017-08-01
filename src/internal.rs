@@ -1,5 +1,5 @@
 use error::DWriteError;
-use winapi::*;
+use winapi::um::dwrite::*;
 
 pub unsafe trait FromParams: Sized {
     type Params;

@@ -1,7 +1,6 @@
 #![cfg(windows)]
 
 extern crate winapi;
-extern crate kernel32;
 extern crate uuid;
 
 pub use factory::Factory;
