@@ -1,16 +1,12 @@
 #![cfg(windows)]
 
 extern crate winapi;
-extern crate uuid;
+extern crate wio;
 
 pub use factory::Factory;
 pub use text_format::TextFormat;
 pub use text_layout::TextLayout;
 
-#[macro_use]
-mod macros;
-
-pub mod comptr;
 pub mod drawing_effect;
 pub mod error;
 pub mod enums;

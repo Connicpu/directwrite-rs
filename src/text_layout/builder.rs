@@ -1,5 +1,6 @@
+use std::ptr;
 use {TextFormat, TextLayout};
-use comptr::ComPtr;
+use wio::com::ComPtr;
 use internal::FromParams;
 use error::DWriteError;
 use helpers::ToWide;
@@ -88,15 +89,16 @@ unsafe impl FromParams for TextLayout {
 
     fn from_params(factory: &mut IDWriteFactory, params: Params) -> Result<Self, DWriteError> {
         unsafe {
-            let mut ptr: ComPtr<IDWriteTextLayout> = ComPtr::new();
+            let mut ptr: *mut IDWriteTextLayout = ptr::null_mut();
             let result = factory.CreateTextLayout(params.text.as_ptr(),
                                                   params.text.len() as u32,
                                                   params.format.get_raw(),
                                                   params.width,
                                                   params.height,
-                                                  ptr.raw_addr());
+                                                  &mut ptr);
 
             if SUCCEEDED(result) {
+                let ptr = ComPtr::from_raw(ptr);
                 if params.centered {
                     ptr.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
                 }

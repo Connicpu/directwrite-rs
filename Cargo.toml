@@ -11,11 +11,9 @@ documentation = "https://docs.rs/directwrite/*/x86_64-pc-windows-msvc/directwrit
 license = "MIT/Apache-2.0"
 
 [dependencies]
-uuid = "0.4"
+wio = "0.2"
 
-# Eventually: Use 0.3 when it's pushed to crates.io
 [dependencies.winapi]
-git = "https://github.com/retep998/winapi-rs.git"
-branch = "dev"
+version = "0.3"
 features = ["dwrite", "winbase", "libloaderapi", "errhandlingapi"]
 
