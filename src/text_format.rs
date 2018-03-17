@@ -3,12 +3,12 @@ use enums::*;
 use error::DWriteError;
 use helpers::ToWide;
 use internal::FromParams;
-use comptr::ComPtr;
+use wio::com::ComPtr;
 
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct TextFormat {
     ptr: ComPtr<IDWriteTextFormat>,
 }
@@ -23,7 +23,7 @@ impl TextFormat {
     }
 
     pub unsafe fn get_raw(&self) -> *mut IDWriteTextFormat {
-        self.ptr.raw_value()
+        self.ptr.as_raw()
     }
 }
 
@@ -32,7 +32,7 @@ unsafe impl FromParams for TextFormat {
 
     fn from_params(factory: &mut IDWriteFactory, params: Params) -> Result<Self, DWriteError> {
         unsafe {
-            let mut ptr: ComPtr<IDWriteTextFormat> = ComPtr::new();
+            let mut ptr: *mut IDWriteTextFormat = ptr::null_mut();
             let result = factory.CreateTextFormat(params.family.as_ptr(),
                                                   ptr::null_mut(),
                                                   params.weight as u32,
@@ -40,10 +40,10 @@ unsafe impl FromParams for TextFormat {
                                                   params.stretch as u32,
                                                   params.size,
                                                   params.locale.as_ptr(),
-                                                  ptr.raw_addr());
+                                                  &mut ptr);
 
             if SUCCEEDED(result) {
-                Ok(TextFormat { ptr: ptr })
+                Ok(TextFormat { ptr: ComPtr::from_raw(ptr) })
             } else {
                 Err(From::from(result))
             }

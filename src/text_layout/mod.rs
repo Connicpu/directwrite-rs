@@ -2,7 +2,7 @@ use std::{ptr, mem, u32};
 use error::DWriteError;
 use enums::{FontStretch, FontStyle, FontWeight};
 use helpers::InternalConstructor;
-use comptr::ComPtr;
+use wio::com::ComPtr;
 use text_format::TextFormat;
 use drawing_effect::DrawingEffect;
 
@@ -15,7 +15,7 @@ pub mod builder;
 pub mod metrics;
 
 /// The TextLayout interface represents a block of text after it has been fully analyzed and formatted.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct TextLayout {
     ptr: ComPtr<IDWriteTextLayout>,
 }
@@ -30,15 +30,11 @@ impl TextLayout {
     }
 
     pub unsafe fn get_raw(&self) -> *mut IDWriteTextLayout {
-        self.ptr.raw_value()
-    }
-
-    unsafe fn ptr(&self) -> &mut IDWriteTextLayout {
-        &mut *self.ptr.raw_value()
+        self.ptr.as_raw()
     }
 
     pub fn as_format(&self) -> TextFormat {
-        unsafe { TextFormat::from_ptr(self.ptr.query_interface().unwrap()) }
+        unsafe { TextFormat::from_ptr(self.ptr.clone().up()) }
     }
 
     /// Determines the minimum possible width the layout can be set to without emergency breaking
@@ -46,7 +42,7 @@ impl TextLayout {
     pub fn determine_min_width(&self) -> f32 {
         unsafe {
             let mut value = 0.0;
-            self.ptr().DetermineMinWidth(&mut value);
+            self.ptr.DetermineMinWidth(&mut value);
             value
         }
     }
@@ -57,7 +53,7 @@ impl TextLayout {
     pub fn get_cluster_metrics_count(&self) -> usize {
         unsafe {
             let mut count = 0;
-            self.ptr().GetClusterMetrics(ptr::null_mut(), 0, &mut count);
+            self.ptr.GetClusterMetrics(ptr::null_mut(), 0, &mut count);
             count as usize
         }
     }
@@ -73,7 +69,7 @@ impl TextLayout {
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_CLUSTER_METRICS;
-            let res = self.ptr().GetClusterMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
+            let res = self.ptr.GetClusterMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
                 Ok(actual_count as usize)
@@ -97,7 +93,7 @@ impl TextLayout {
         unsafe {
             let mut font_size = 0.0;
             let mut range = mem::uninitialized();
-            let res = self.ptr().GetFontSize(position, &mut font_size, &mut range);
+            let res = self.ptr.GetFontSize(position, &mut font_size, &mut range);
             if res < 0 {
                 return Err(res.into());
             }
@@ -110,7 +106,7 @@ impl TextLayout {
     pub fn get_font_stretch(&self, position: u32) -> Result<(FontStretch, TextRange), DWriteError> {
         unsafe {
             let (mut stretch, mut range) = mem::uninitialized();
-            let res = self.ptr().GetFontStretch(position, &mut stretch, &mut range);
+            let res = self.ptr.GetFontStretch(position, &mut stretch, &mut range);
             if res < 0 {
                 return Err(res.into());
             }
@@ -124,7 +120,7 @@ impl TextLayout {
     pub fn get_font_style(&self, position: u32) -> Result<(FontStyle, TextRange), DWriteError> {
         unsafe {
             let (mut style, mut range) = mem::uninitialized();
-            let res = self.ptr().GetFontStyle(position, &mut style, &mut range);
+            let res = self.ptr.GetFontStyle(position, &mut style, &mut range);
             if res < 0 {
                 return Err(res.into());
             }
@@ -138,7 +134,7 @@ impl TextLayout {
     pub fn get_font_weight(&self, position: u32) -> Result<(FontWeight, TextRange), DWriteError> {
         unsafe {
             let (mut weight, mut range) = mem::uninitialized();
-            let res = self.ptr().GetFontWeight(position, &mut weight, &mut range);
+            let res = self.ptr.GetFontWeight(position, &mut weight, &mut range);
             if res < 0 {
                 return Err(res.into());
             }
@@ -154,7 +150,7 @@ impl TextLayout {
     pub fn get_line_metrics_count(&self) -> usize {
         unsafe {
             let mut count = 0;
-            self.ptr().GetLineMetrics(ptr::null_mut(), 0, &mut count);
+            self.ptr.GetLineMetrics(ptr::null_mut(), 0, &mut count);
             count as usize
         }
     }
@@ -170,7 +166,7 @@ impl TextLayout {
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_LINE_METRICS;
-            let res = self.ptr().GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
+            let res = self.ptr.GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
                 Ok(actual_count as usize)
@@ -192,19 +188,19 @@ impl TextLayout {
 
     /// Gets the layout maximum height.
     pub fn get_max_height(&self) -> f32 {
-        unsafe { self.ptr().GetMaxHeight() }
+        unsafe { self.ptr.GetMaxHeight() }
     }
 
     /// Gets the layout maximum width.
     pub fn get_max_width(&self) -> f32 {
-        unsafe { self.ptr().GetMaxWidth() }
+        unsafe { self.ptr.GetMaxWidth() }
     }
 
     /// Retrieves overall metrics for the formatted string.
     pub fn get_metrics(&self) -> metrics::Metrics {
         unsafe {
             let mut metrics = mem::zeroed();
-            self.ptr().GetMetrics(&mut metrics);
+            self.ptr.GetMetrics(&mut metrics);
 
             metrics::Metrics::build(metrics)
         }
@@ -215,7 +211,7 @@ impl TextLayout {
     pub fn get_overhang_metrics(&self) -> metrics::OverhangMetrics {
         unsafe {
             let mut metrics = mem::zeroed();
-            self.ptr().GetOverhangMetrics(&mut metrics);
+            self.ptr.GetOverhangMetrics(&mut metrics);
 
             metrics::OverhangMetrics::build(metrics)
         }
@@ -230,7 +226,7 @@ impl TextLayout {
             let mut trail = 0;
             let mut inside = 0;
             let mut metrics = mem::uninitialized();
-            self.ptr().HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
+            self.ptr.HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
 
             HitTestPoint {
                 metrics: InternalConstructor::build(metrics),
@@ -253,7 +249,7 @@ impl TextLayout {
         unsafe {
             let (mut x, mut y) = (0.0, 0.0);
             let mut metrics = mem::uninitialized();
-            let res = self.ptr()
+            let res = self.ptr
                 .HitTestTextPosition(position, trailing, &mut x, &mut y, &mut metrics);
             if res != S_OK {
                 return None;
@@ -282,7 +278,7 @@ impl TextLayout {
         unsafe {
             // Calculate the total number of items we need
             let mut actual_count = 0;
-            let res = self.ptr().HitTestTextRange(position,
+            let res = self.ptr.HitTestTextRange(position,
                                                   length,
                                                   origin_x,
                                                   origin_y,
@@ -296,7 +292,7 @@ impl TextLayout {
             metrics.set_len(actual_count as usize);
             let buf_ptr = metrics[..].as_mut_ptr() as *mut _;
             let len = metrics.len() as u32;
-            let res = self.ptr().HitTestTextRange(position,
+            let res = self.ptr.HitTestTextRange(position,
                                                   length,
                                                   origin_x,
                                                   origin_y,
@@ -323,7 +319,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetDrawingEffect(effect.get_effect_ptr(), range);
+            self.ptr.SetDrawingEffect(effect.get_effect_ptr(), range);
         }
     }
 
@@ -335,7 +331,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetFontStyle(style as u32, range);
+            self.ptr.SetFontStyle(style as u32, range);
         }
     }
 
@@ -347,7 +343,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetFontWeight(weight as u32, range);
+            self.ptr.SetFontWeight(weight as u32, range);
         }
     }
 
@@ -360,7 +356,7 @@ impl TextLayout {
         };
 
         unsafe {
-            self.ptr().SetUnderline(underline, range);
+            self.ptr.SetUnderline(underline, range);
         }
     }
 }

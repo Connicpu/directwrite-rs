@@ -1,7 +1,8 @@
 use std::{ptr, mem, ffi};
 use helpers::*;
-use comptr::ComPtr;
+use wio::com::ComPtr;
 
+use winapi::Interface;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::shared::ntdef::HRESULT;
 use winapi::shared::minwindef::HMODULE;
@@ -41,20 +42,20 @@ impl DWrite {
             let procedure = ffi::CString::new("DWriteCreateFactory").unwrap();
             let create_factory_ptr = GetProcAddress(self.handle, procedure.as_ptr());
             
-            if create_factory_ptr == ptr::null_mut() {
+            if create_factory_ptr.is_null() {
                 panic!("Error loading function DWriteCreateFactory: {:?}", last_error_string());
             }
             
             let create_factory: CreateFactory = mem::transmute(create_factory_ptr);
-            let mut ptr = ComPtr::<IDWriteFactory>::new();
+            let mut ptr: *mut IDWriteFactory = ptr::null_mut();
             let result = create_factory(
                 if isolated { DWRITE_FACTORY_TYPE_ISOLATED } else { DWRITE_FACTORY_TYPE_SHARED },
-                &ptr.iid(),
-                ptr.raw_addr() as *mut *mut _,
+                &IDWriteFactory::uuidof(),
+                &mut ptr as *mut _ as *mut *mut IUnknown,
             );
             
             if SUCCEEDED(result) {
-                Ok(ptr)
+                Ok(ComPtr::from_raw(ptr))
             } else {
                 Err(result)
             }

@@ -1,4 +1,4 @@
-use comptr::ComPtr;
+use wio::com::ComPtr;
 use error::DWriteError;
 use load_dll;
 
@@ -16,6 +16,6 @@ impl Factory {
     }
     
     pub fn create<T: ::internal::FromParams>(&self, params: T::Params) -> Result<T, DWriteError> {
-        T::from_params(unsafe { &mut *self.ptr.raw_value() }, params)
+        T::from_params(unsafe { &mut *self.ptr.as_raw() }, params)
     }
 }
