@@ -3,10 +3,8 @@ use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 
 use winapi::shared::minwindef::*;
-use winapi::shared::winerror::FACILITY_WIN32;
 use winapi::um::winnt::*;
 use winapi::um::winbase::*;
-use winapi::um::errhandlingapi::*;
 
 pub trait InternalConstructor {
     type Arguments;
@@ -21,14 +19,6 @@ pub trait GetRaw {
 pub trait FromRaw {
     type Raw;
     unsafe fn from_raw(raw: *mut Self::Raw) -> Self;
-}
-
-pub fn hresult_from_win32(win32: DWORD) -> HRESULT {
-    if win32 as HRESULT <= 0 {
-        win32 as HRESULT
-    } else {
-        ((win32 & 0x0000FFFF) | ((FACILITY_WIN32 as DWORD) << 16) | 0x80000000) as HRESULT
-    }
 }
 
 pub fn hresult_to_string(hr: HRESULT) -> Option<String> {
@@ -54,14 +44,6 @@ pub fn hresult_to_string(hr: HRESULT) -> Option<String> {
 
         Some(message)
     }
-}
-
-pub fn last_error_hr() -> HRESULT {
-    hresult_from_win32(unsafe { GetLastError() })
-}
-
-pub fn last_error_string() -> Option<String> {
-    hresult_to_string(last_error_hr())
 }
 
 pub trait ToWide {

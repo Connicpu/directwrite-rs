@@ -1,6 +1,6 @@
 [package]
 name = "directwrite"
-version = "0.0.9"
+version = "0.1.0"
 authors = ["Conni Hilarides <connorcpu@live.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
@@ -10,10 +10,13 @@ repository = "https://github.com/Connicpu/directwrite-rs"
 documentation = "https://docs.rs/directwrite/*/x86_64-pc-windows-msvc/directwrite/"
 license = "MIT/Apache-2.0"
 
-[dependencies]
+[target.'cfg(windows)'.dependencies]
 wio = "0.2"
 
-[dependencies.winapi]
+[target.'cfg(windows)'.dependencies.winapi]
 version = "0.3"
-features = ["dwrite", "winbase", "libloaderapi", "errhandlingapi"]
+features = ["dwrite", "winbase"]
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
 

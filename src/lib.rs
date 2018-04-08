@@ -16,4 +16,3 @@ pub mod text_format;
 pub mod text_layout;
 
 mod helpers;
-mod load_dll;
