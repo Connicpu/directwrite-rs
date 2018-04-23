@@ -1,7 +1,7 @@
 [package]
 name = "directwrite"
 version = "0.1.0"
-authors = ["Conni Hilarides <connorcpu@live.com>"]
+authors = ["Connie Hilarides <conni_h@outlook.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
 to be used with direct2d for easy text rendering.

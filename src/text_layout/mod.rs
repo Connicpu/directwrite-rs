@@ -54,7 +54,8 @@ impl TextLayout {
         unsafe {
             let mut renderer = TextRendererComRef::new(renderer);
 
-            let hr = self.ptr.Draw(context.0, renderer.as_raw(), origin_x, origin_y);
+            let hr = self.ptr
+                .Draw(context.0, renderer.as_raw(), origin_x, origin_y);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -377,11 +378,11 @@ impl TextLayout {
     }
 
     /// Sets the drawing style for text within a text range.
-    pub fn set_drawing_effect(
-        &self,
-        effect: &impl DrawingEffect,
-        range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    pub fn set_drawing_effect<E, T>(&self, effect: &E, range: T) -> DWResult<()>
+    where
+        E: DrawingEffect,
+        T: Into<TextRange>,
+    {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -399,7 +400,10 @@ impl TextLayout {
     }
 
     /// Sets the font style for text within a text range.
-    pub fn set_font_style(&self, style: FontStyle, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_font_style<T>(&self, style: FontStyle, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -417,7 +421,10 @@ impl TextLayout {
     }
 
     /// Sets the font weight for text within a text range.
-    pub fn set_font_weight(&self, weight: FontWeight, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_font_weight<T>(&self, weight: FontWeight, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -434,11 +441,11 @@ impl TextLayout {
         }
     }
 
-    pub fn set_inline_object(
-        &self,
-        iobj: impl IntoInlineObject,
-        range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    pub fn set_inline_object<I, T>(&self, iobj: I, range: T) -> DWResult<()>
+    where
+        I: IntoInlineObject,
+        T: Into<TextRange>,
+    {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -456,7 +463,10 @@ impl TextLayout {
         }
     }
 
-    pub fn set_locale_name(&self, locale: &str, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_locale_name<T>(&self, locale: &str, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
         let range = range.into();
 
         let locale = locale.to_wide_null();
@@ -498,11 +508,10 @@ impl TextLayout {
     }
 
     /// Sets strikethrough for text within a specified text range.
-    pub fn set_strikethrough(
-        &self,
-        strikethrough: bool,
-        range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    pub fn set_strikethrough<T>(&self, strikethrough: bool, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
         let range = range.into();
 
         let strikethrough = if strikethrough { 1 } else { 0 };
@@ -524,7 +533,10 @@ impl TextLayout {
     // TODO: Typography
 
     /// Sets underlining for text within a specified text range.
-    pub fn set_underline(&self, underline: bool, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_underline<T>(&self, underline: bool, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
         let range = range.into();
 
         let underline = if underline { 1 } else { 0 };
@@ -609,7 +621,8 @@ impl From<ops::RangeFull> for TextRange {
     }
 }
 
-impl From<ops::RangeInclusive<u32>> for TextRange {
+// TODO: Re-enable when 1.26 drops
+/*impl From<ops::RangeInclusive<u32>> for TextRange {
     fn from(mut range: ops::RangeInclusive<u32>) -> Self {
         /*assert!(range.end + 1 >= range.start, "Range end cannot come before range start");
         TextRange {
@@ -625,7 +638,7 @@ impl From<ops::RangeInclusive<u32>> for TextRange {
 
         TextRange { start, length }
     }
-}
+}*/
 
 #[derive(Copy, Clone)]
 pub struct HitTestPoint {
