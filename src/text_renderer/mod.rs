@@ -101,7 +101,7 @@ impl<'a> TextRendererComRef<'a> {
         }
     }
 
-    pub unsafe fn as_raw(&mut self) -> *mut IDWriteTextRenderer {
-        self as *mut _ as *mut _
+    pub unsafe fn as_raw(&mut self) -> &mut IDWriteTextRenderer {
+        &mut *(self as *mut _ as *mut _)
     }
 }

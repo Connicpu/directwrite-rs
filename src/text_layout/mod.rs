@@ -5,6 +5,7 @@ use factory::Factory;
 use helpers::InternalConstructor;
 use inline_object::IntoInlineObject;
 use text_format::TextFormat;
+use text_renderer::{Context, TextRenderer, TextRendererComRef};
 
 use std::{mem, ops, ptr, u32};
 
@@ -43,7 +44,24 @@ impl TextLayout {
         }
     }
 
-    // TODO: Perhaps look into a way that Draw can be implemented? I could create a Trait
+    pub fn draw(
+        &self,
+        renderer: &mut TextRenderer,
+        origin_x: f32,
+        origin_y: f32,
+        context: Context,
+    ) -> DWResult<()> {
+        unsafe {
+            let mut renderer = TextRendererComRef::new(renderer);
+
+            let hr = self.ptr.Draw(context.0, renderer.as_raw(), origin_x, origin_y);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
 
     /// Gets the number of ClusterMetrics objects which exist for this TextLayout
     pub fn get_cluster_metrics_count(&self) -> usize {
@@ -142,7 +160,10 @@ impl TextLayout {
     }
 
     /// Gets the inline object at the position as-is. May return ptr::null_mut()
-    pub fn get_inline_object(&self, position: u32) -> DWResult<(*mut IDWriteInlineObject, TextRange)> {
+    pub fn get_inline_object(
+        &self,
+        position: u32,
+    ) -> DWResult<(*mut IDWriteInlineObject, TextRange)> {
         unsafe {
             let mut range = mem::uninitialized();
             let mut ptr = ptr::null_mut();
