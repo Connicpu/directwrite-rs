@@ -1,8 +1,6 @@
 extern crate directwrite;
 
-use directwrite::Factory;
-use directwrite::text_format::{self, TextFormat};
-use directwrite::text_layout::{self, TextLayout};
+use directwrite::{Factory, TextFormat, TextLayout};
 
 #[test]
 fn create_factory() {
@@ -13,14 +11,10 @@ fn create_factory() {
 fn create_format() {
     let factory = Factory::new().unwrap();
 
-    factory
-        .create::<TextFormat>(
-            text_format::ParamBuilder::new()
-                .family("Segoe UI")
-                .size(16.0)
-                .build()
-                .unwrap(),
-        )
+    TextFormat::create(&factory)
+        .with_family("Segoe UI")
+        .with_size(16.0)
+        .build()
         .unwrap();
 }
 
@@ -28,25 +22,44 @@ fn create_format() {
 fn create_layout() {
     let factory = Factory::new().unwrap();
 
-    let format = factory
-        .create::<TextFormat>(
-            text_format::ParamBuilder::new()
-                .family("Segoe UI")
-                .size(16.0)
-                .build()
-                .unwrap(),
-        )
+    let font = TextFormat::create(&factory)
+        .with_family("Segoe UI")
+        .with_size(16.0)
+        .build()
         .unwrap();
 
-    factory
-        .create::<TextLayout>(
-            text_layout::ParamBuilder::new()
-                .text("This is some test text!")
-                .font(format)
-                .width(300.0)
-                .height(200.0)
-                .build()
-                .unwrap(),
-        )
+    TextLayout::create(&factory)
+        .with_text("This is some test text!")
+        .with_font(&font)
+        .with_width(300.0)
+        .with_height(200.0)
+        .build()
         .unwrap();
+}
+
+#[test]
+fn set_attributes() {
+    let factory = Factory::new().unwrap();
+
+    let font = TextFormat::create(&factory)
+        .with_family("Segoe UI")
+        .with_size(16.0)
+        .build()
+        .unwrap();
+
+    let text = "This is some test text!";
+
+    let layout = TextLayout::create(&factory)
+        .with_text(text)
+        .with_font(&font)
+        .with_width(300.0)
+        .with_height(200.0)
+        .build()
+        .unwrap();
+
+    layout.set_underline(true, ..text.len() as u32).unwrap();
+    let (is_underlined, range) = layout.get_underline(0).unwrap();
+    assert!(is_underlined);
+    assert_eq!(range.start, 0);
+    assert_eq!(range.length as usize, text.len());
 }

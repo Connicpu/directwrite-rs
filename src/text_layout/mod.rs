@@ -1,15 +1,19 @@
-use std::{ptr, mem, u32};
-use error::DWriteError;
-use enums::{FontStretch, FontStyle, FontWeight};
-use helpers::InternalConstructor;
-use wio::com::ComPtr;
-use text_format::TextFormat;
 use drawing_effect::DrawingEffect;
+use enums::{FontStretch, FontStyle, FontWeight};
+use error::DWResult;
+use factory::Factory;
+use helpers::InternalConstructor;
+use inline_object::IntoInlineObject;
+use text_format::TextFormat;
 
-pub use self::builder::{Params, ParamBuilder};
+use std::{mem, ops, ptr, u32};
 
-use winapi::shared::winerror::S_OK;
+use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
+use wio::com::ComPtr;
+use wio::wide::ToWide;
+
+pub use self::builder::TextLayoutBuilder;
 
 pub mod builder;
 pub mod metrics;
@@ -21,20 +25,12 @@ pub struct TextLayout {
 }
 
 impl TextLayout {
-    pub unsafe fn from_ptr(ptr: ComPtr<IDWriteTextLayout>) -> Self {
-        TextLayout { ptr: ptr }
-    }
-
-    pub unsafe fn get_ptr(&self) -> ComPtr<IDWriteTextLayout> {
-        self.ptr.clone()
-    }
-
-    pub unsafe fn get_raw(&self) -> *mut IDWriteTextLayout {
-        self.ptr.as_raw()
+    pub fn create<'a>(factory: &'a Factory) -> TextLayoutBuilder<'a> {
+        unsafe { TextLayoutBuilder::new(&*factory.get_raw()) }
     }
 
     pub fn as_format(&self) -> TextFormat {
-        unsafe { TextFormat::from_ptr(self.ptr.clone().up()) }
+        unsafe { TextFormat::from_raw(self.ptr.clone().up().into_raw()) }
     }
 
     /// Determines the minimum possible width the layout can be set to without emergency breaking
@@ -62,14 +58,16 @@ impl TextLayout {
     /// slice is large enough to hold all of the metrics, which can be obtained by calling
     /// `get_cluster_metrics_count`. If the slice is not large enough, it will return
     /// Err(actual_count), otherwise returns Ok(actual_count).
-    pub fn get_cluster_metrics_slice(&self,
-                                     buf: &mut [metrics::ClusterMetrics])
-                                     -> Result<usize, usize> {
+    pub fn get_cluster_metrics_slice(
+        &self,
+        buf: &mut [metrics::ClusterMetrics],
+    ) -> Result<usize, usize> {
         assert!(buf.len() <= u32::MAX as usize);
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_CLUSTER_METRICS;
-            let res = self.ptr.GetClusterMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
+            let res = self.ptr
+                .GetClusterMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
                 Ok(actual_count as usize)
@@ -89,7 +87,7 @@ impl TextLayout {
 
     /// Gets the font em height of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_size(&self, position: u32) -> Result<(f32, TextRange), DWriteError> {
+    pub fn get_font_size(&self, position: u32) -> DWResult<(f32, TextRange)> {
         unsafe {
             let mut font_size = 0.0;
             let mut range = mem::uninitialized();
@@ -103,7 +101,7 @@ impl TextLayout {
 
     /// Gets the font stretch of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_stretch(&self, position: u32) -> Result<(FontStretch, TextRange), DWriteError> {
+    pub fn get_font_stretch(&self, position: u32) -> DWResult<(FontStretch, TextRange)> {
         unsafe {
             let (mut stretch, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontStretch(position, &mut stretch, &mut range);
@@ -117,7 +115,7 @@ impl TextLayout {
 
     /// Gets the font style of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_style(&self, position: u32) -> Result<(FontStyle, TextRange), DWriteError> {
+    pub fn get_font_style(&self, position: u32) -> DWResult<(FontStyle, TextRange)> {
         unsafe {
             let (mut style, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontStyle(position, &mut style, &mut range);
@@ -131,7 +129,7 @@ impl TextLayout {
 
     /// Gets the font weight of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_weight(&self, position: u32) -> Result<(FontWeight, TextRange), DWriteError> {
+    pub fn get_font_weight(&self, position: u32) -> DWResult<(FontWeight, TextRange)> {
         unsafe {
             let (mut weight, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontWeight(position, &mut weight, &mut range);
@@ -143,7 +141,19 @@ impl TextLayout {
         }
     }
 
-    // TODO: Inline objects somehow?
+    /// Gets the inline object at the position as-is. May return ptr::null_mut()
+    pub fn get_inline_object(&self, position: u32) -> DWResult<(*mut IDWriteInlineObject, TextRange)> {
+        unsafe {
+            let mut range = mem::uninitialized();
+            let mut ptr = ptr::null_mut();
+            let hr = self.ptr.GetInlineObject(position, &mut ptr, &mut range);
+            if SUCCEEDED(hr) {
+                Ok((ptr, range.into()))
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
 
     /// Get the number of LineMetrics objects that you need room for when calling
     /// `get_line_metrics_slice`
@@ -166,7 +176,8 @@ impl TextLayout {
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_LINE_METRICS;
-            let res = self.ptr.GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
+            let res = self.ptr
+                .GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
                 Ok(actual_count as usize)
@@ -176,11 +187,13 @@ impl TextLayout {
         }
     }
 
-    /// etrieves the information about each individual text line of the text string. Resizes `buf`
-    /// to fit all of the elements exactly.
+    /// Retrieves the information about each individual text line of the text string. Resizes `buf`
+    /// to fit all of the elements.
     pub fn get_line_metrics(&self, buf: &mut Vec<metrics::LineMetrics>) {
         let count = self.get_line_metrics_count();
         unsafe {
+            buf.clear();
+            buf.reserve(count);
             buf.set_len(count);
         }
         assert_eq!(self.get_line_metrics_slice(buf), Ok(count));
@@ -217,6 +230,33 @@ impl TextLayout {
         }
     }
 
+    pub fn get_strikethrough(&self, position: u32) -> DWResult<(bool, TextRange)> {
+        unsafe {
+            let (mut strikethrough, mut range) = mem::uninitialized();
+            let res = self.ptr
+                .GetStrikethrough(position, &mut strikethrough, &mut range);
+            if res < 0 {
+                return Err(res.into());
+            }
+
+            Ok((strikethrough != 0, range.into()))
+        }
+    }
+
+    // TODO: Typography
+
+    pub fn get_underline(&self, position: u32) -> DWResult<(bool, TextRange)> {
+        unsafe {
+            let (mut underline, mut range) = mem::uninitialized();
+            let res = self.ptr.GetUnderline(position, &mut underline, &mut range);
+            if res < 0 {
+                return Err(res.into());
+            }
+
+            Ok((underline != 0, range.into()))
+        }
+    }
+
     /// The application calls this function passing in a specific pixel location relative to the
     /// top-left location of the layout box and obtains the information about the correspondent
     /// hit-test metrics of the text string where the hit-test has occurred. Returns None if the
@@ -226,7 +266,8 @@ impl TextLayout {
             let mut trail = 0;
             let mut inside = 0;
             let mut metrics = mem::uninitialized();
-            self.ptr.HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
+            self.ptr
+                .HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
 
             HitTestPoint {
                 metrics: InternalConstructor::build(metrics),
@@ -241,16 +282,18 @@ impl TextLayout {
     /// is normally used as part of caret positioning of text where the caret is drawn at the
     /// location corresponding to the current text editing position. It may also be used as a way
     /// to programmatically obtain the geometry of a particular text position in UI automation.
-    pub fn hit_test_text_position(&self,
-                                  position: u32,
-                                  trailing: bool)
-                                  -> Option<HitTestTextPosition> {
+    pub fn hit_test_text_position(
+        &self,
+        position: u32,
+        trailing: bool,
+    ) -> Option<HitTestTextPosition> {
         let trailing = if trailing { 0 } else { 1 };
         unsafe {
             let (mut x, mut y) = (0.0, 0.0);
             let mut metrics = mem::uninitialized();
-            let res = self.ptr
-                .HitTestTextPosition(position, trailing, &mut x, &mut y, &mut metrics);
+            let res =
+                self.ptr
+                    .HitTestTextPosition(position, trailing, &mut x, &mut y, &mut metrics);
             if res != S_OK {
                 return None;
             }
@@ -266,25 +309,26 @@ impl TextLayout {
     /// The application calls this function to get a set of hit-test metrics corresponding to a
     /// range of text positions. One of the main usages is to implement highlight selection of
     /// the text string. origin_x and origin_y are added to the hit-test metrics returned.
-    pub fn hit_test_text_range(&self,
-                               position: u32,
-                               length: u32,
-                               origin_x: f32,
-                               origin_y: f32,
-                               metrics: &mut Vec<metrics::HitTestMetrics>)
-                               -> bool {
-
-
+    pub fn hit_test_text_range(
+        &self,
+        position: u32,
+        length: u32,
+        origin_x: f32,
+        origin_y: f32,
+        metrics: &mut Vec<metrics::HitTestMetrics>,
+    ) -> bool {
         unsafe {
             // Calculate the total number of items we need
             let mut actual_count = 0;
-            let res = self.ptr.HitTestTextRange(position,
-                                                  length,
-                                                  origin_x,
-                                                  origin_y,
-                                                  ptr::null_mut(),
-                                                  0,
-                                                  &mut actual_count);
+            let res = self.ptr.HitTestTextRange(
+                position,
+                length,
+                origin_x,
+                origin_y,
+                ptr::null_mut(),
+                0,
+                &mut actual_count,
+            );
             if res != S_OK {
                 return false;
             }
@@ -292,13 +336,15 @@ impl TextLayout {
             metrics.set_len(actual_count as usize);
             let buf_ptr = metrics[..].as_mut_ptr() as *mut _;
             let len = metrics.len() as u32;
-            let res = self.ptr.HitTestTextRange(position,
-                                                  length,
-                                                  origin_x,
-                                                  origin_y,
-                                                  buf_ptr,
-                                                  len,
-                                                  &mut actual_count);
+            let res = self.ptr.HitTestTextRange(
+                position,
+                length,
+                origin_x,
+                origin_y,
+                buf_ptr,
+                len,
+                &mut actual_count,
+            );
             if res != S_OK {
                 metrics.set_len(0);
                 return false;
@@ -310,54 +356,180 @@ impl TextLayout {
     }
 
     /// Sets the drawing style for text within a text range.
-    pub fn set_drawing_effect<E>(&self, effect: &E, range: TextRange)
-        where E: DrawingEffect
-    {
+    pub fn set_drawing_effect(
+        &self,
+        effect: &impl DrawingEffect,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
             length: range.length,
         };
 
         unsafe {
-            self.ptr.SetDrawingEffect(effect.get_effect_ptr(), range);
+            let hr = self.ptr.SetDrawingEffect(effect.get_effect_ptr(), range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
         }
     }
 
     /// Sets the font style for text within a text range.
-    pub fn set_font_style(&self, style: FontStyle, range: TextRange) {
+    pub fn set_font_style(&self, style: FontStyle, range: impl Into<TextRange>) -> DWResult<()> {
+        let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
             length: range.length,
         };
 
         unsafe {
-            self.ptr.SetFontStyle(style as u32, range);
+            let hr = self.ptr.SetFontStyle(style as u32, range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
         }
     }
 
     /// Sets the font weight for text within a text range.
-    pub fn set_font_weight(&self, weight: FontWeight, range: TextRange) {
+    pub fn set_font_weight(&self, weight: FontWeight, range: impl Into<TextRange>) -> DWResult<()> {
+        let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
             length: range.length,
         };
 
         unsafe {
-            self.ptr.SetFontWeight(weight as u32, range);
+            let hr = self.ptr.SetFontWeight(weight as u32, range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
         }
     }
 
-    /// Sets underlining for text within a specified text range.
-    pub fn set_underline(&self, underline: bool, range: TextRange) {
-        let underline = if underline { 0 } else { 1 };
+    pub fn set_inline_object(
+        &self,
+        iobj: impl IntoInlineObject,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
             length: range.length,
         };
 
         unsafe {
-            self.ptr.SetUnderline(underline, range);
+            let iobj = iobj.into_iobj();
+            let hr = self.ptr.SetInlineObject(iobj, range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
         }
+    }
+
+    pub fn set_locale_name(&self, locale: &str, range: impl Into<TextRange>) -> DWResult<()> {
+        let range = range.into();
+
+        let locale = locale.to_wide_null();
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            let hr = self.ptr.SetLocaleName(locale.as_ptr(), range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    pub fn set_max_height(&self, maxh: f32) -> DWResult<()> {
+        unsafe {
+            let hr = self.ptr.SetMaxHeight(maxh);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    pub fn set_max_width(&self, maxw: f32) -> DWResult<()> {
+        unsafe {
+            let hr = self.ptr.SetMaxWidth(maxw);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    /// Sets strikethrough for text within a specified text range.
+    pub fn set_strikethrough(
+        &self,
+        strikethrough: bool,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        let range = range.into();
+
+        let strikethrough = if strikethrough { 1 } else { 0 };
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            let hr = self.ptr.SetStrikethrough(strikethrough, range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    // TODO: Typography
+
+    /// Sets underlining for text within a specified text range.
+    pub fn set_underline(&self, underline: bool, range: impl Into<TextRange>) -> DWResult<()> {
+        let range = range.into();
+
+        let underline = if underline { 1 } else { 0 };
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            let hr = self.ptr.SetUnderline(underline, range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    pub unsafe fn from_raw(raw: *mut IDWriteTextLayout) -> Self {
+        TextLayout {
+            ptr: ComPtr::from_raw(raw),
+        }
+    }
+
+    pub unsafe fn get_raw(&self) -> *mut IDWriteTextLayout {
+        self.ptr.as_raw()
     }
 }
 
@@ -373,6 +545,64 @@ impl From<DWRITE_TEXT_RANGE> for TextRange {
             start: range.startPosition,
             length: range.length,
         }
+    }
+}
+
+impl From<ops::Range<u32>> for TextRange {
+    fn from(range: ops::Range<u32>) -> Self {
+        assert!(
+            range.end >= range.start,
+            "Range end cannot come before range start"
+        );
+        TextRange {
+            start: range.start,
+            length: range.end - range.start,
+        }
+    }
+}
+
+impl From<ops::RangeTo<u32>> for TextRange {
+    fn from(range: ops::RangeTo<u32>) -> Self {
+        TextRange {
+            start: 0,
+            length: range.end,
+        }
+    }
+}
+
+impl From<ops::RangeFrom<u32>> for TextRange {
+    fn from(range: ops::RangeFrom<u32>) -> Self {
+        TextRange {
+            start: range.start,
+            length: u32::MAX,
+        }
+    }
+}
+
+impl From<ops::RangeFull> for TextRange {
+    fn from(_range: ops::RangeFull) -> Self {
+        TextRange {
+            start: 0,
+            length: u32::MAX,
+        }
+    }
+}
+
+impl From<ops::RangeInclusive<u32>> for TextRange {
+    fn from(mut range: ops::RangeInclusive<u32>) -> Self {
+        /*assert!(range.end + 1 >= range.start, "Range end cannot come before range start");
+        TextRange {
+            start: range.start,
+            length: (range.end + 1) - range.start,
+        }*/
+
+        // TODO: Accessing `RangeInclusive` directly is nightly-only, so
+        // I'm relying on the implementation of size_hint for RangeInclusive
+        // to get the values I want.
+        let length = range.size_hint().0 as u32;
+        let start = range.nth(0).unwrap_or(0);
+
+        TextRange { start, length }
     }
 }
 

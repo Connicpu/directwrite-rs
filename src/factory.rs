@@ -4,8 +4,8 @@ use std::ptr;
 
 use winapi::Interface;
 use winapi::shared::winerror::SUCCEEDED;
-use winapi::um::unknwnbase::IUnknown;
 use winapi::um::dwrite::{DWriteCreateFactory, IDWriteFactory, DWRITE_FACTORY_TYPE_SHARED};
+use winapi::um::unknwnbase::IUnknown;
 use wio::com::ComPtr;
 
 pub struct Factory {
@@ -13,6 +13,16 @@ pub struct Factory {
 }
 
 impl Factory {
+    pub unsafe fn from_raw(raw: *mut IDWriteFactory) -> Self {
+        Factory {
+            ptr: ComPtr::from_raw(raw),
+        }
+    }
+
+    pub unsafe fn get_raw(&self) -> *mut IDWriteFactory {
+        self.ptr.as_raw()
+    }
+
     pub fn new() -> Result<Factory, DWriteError> {
         unsafe {
             let mut ptr: *mut IDWriteFactory = ptr::null_mut();
@@ -30,9 +40,5 @@ impl Factory {
                 Err(hr.into())
             }
         }
-    }
-
-    pub fn create<T: ::internal::FromParams>(&self, params: T::Params) -> Result<T, DWriteError> {
-        T::from_params(unsafe { &mut *self.ptr.as_raw() }, params)
     }
 }

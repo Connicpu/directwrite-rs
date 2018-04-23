@@ -1,32 +1,26 @@
-use std::ptr;
-use {TextFormat, TextLayout};
-use wio::com::ComPtr;
-use internal::FromParams;
 use error::DWriteError;
-use helpers::ToWide;
+use {TextFormat, TextLayout};
+
+use std::ptr;
 
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::*;
+use wio::com::ComPtr;
+use wio::wide::ToWide;
 
-pub struct Params {
-    text: Vec<u16>,
-    format: TextFormat,
-    width: f32,
-    height: f32,
-    centered: bool,
-}
-
-pub struct ParamBuilder<'a> {
+pub struct TextLayoutBuilder<'a> {
+    factory: &'a IDWriteFactory,
     text: Option<&'a str>,
-    format: Option<TextFormat>,
+    format: Option<&'a TextFormat>,
     width: Option<f32>,
     height: Option<f32>,
     centered: bool,
 }
 
-impl<'a> ParamBuilder<'a> {
-    pub fn new() -> ParamBuilder<'static> {
-        ParamBuilder {
+impl<'a> TextLayoutBuilder<'a> {
+    pub fn new(factory: &'a IDWriteFactory) -> TextLayoutBuilder<'a> {
+        TextLayoutBuilder {
+            factory,
             text: None,
             format: None,
             width: None,
@@ -35,71 +29,26 @@ impl<'a> ParamBuilder<'a> {
         }
     }
 
-    pub fn build(self) -> Option<Params> {
-        match self {
-            ParamBuilder { text: Some(text),
-                           format: Some(format),
-                           width: Some(width),
-                           height: Some(height),
-                           centered } => {
-                Some(Params {
-                    text: text.to_wide_null(),
-                    format: format,
-                    width: width,
-                    height: height,
-                    centered: centered,
-                })
-            }
-            _ => None,
-        }
-    }
-
-    pub fn text(mut self, text: &'a str) -> Self {
-        self.text = Some(text);
-        self
-    }
-
-    pub fn font(mut self, font: TextFormat) -> Self {
-        self.format = Some(font);
-        self
-    }
-
-    pub fn width(mut self, width: f32) -> Self {
-        self.width = Some(width);
-        self
-    }
-
-    pub fn height(mut self, height: f32) -> Self {
-        self.height = Some(height);
-        self
-    }
-
-    pub fn size(self, width: f32, height: f32) -> Self {
-        self.width(width).height(height)
-    }
-
-    pub fn centered(mut self, centered: bool) -> Self {
-        self.centered = centered;
-        self
-    }
-}
-
-unsafe impl FromParams for TextLayout {
-    type Params = Params;
-
-    fn from_params(factory: &mut IDWriteFactory, params: Params) -> Result<Self, DWriteError> {
+    pub fn build(self) -> Result<TextLayout, DWriteError> {
         unsafe {
+            let text = self.text.expect("`text` must be specified").to_wide_null();
+            let format = self.format.expect("`format` must be specified");
+            let width = self.width.expect("`width` or `size` must be specified");
+            let height = self.height.expect("`height` or `size` must be specified");
+
             let mut ptr: *mut IDWriteTextLayout = ptr::null_mut();
-            let result = factory.CreateTextLayout(params.text.as_ptr(),
-                                                  params.text.len() as u32,
-                                                  params.format.get_raw(),
-                                                  params.width,
-                                                  params.height,
-                                                  &mut ptr);
+            let result = self.factory.CreateTextLayout(
+                text.as_ptr(),
+                text.len() as u32,
+                format.get_raw(),
+                width,
+                height,
+                &mut ptr,
+            );
 
             if SUCCEEDED(result) {
                 let ptr = ComPtr::from_raw(ptr);
-                if params.centered {
+                if self.centered {
                     ptr.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
                 }
 
@@ -108,5 +57,34 @@ unsafe impl FromParams for TextLayout {
                 Err(From::from(result))
             }
         }
+    }
+
+    pub fn with_text(mut self, text: &'a str) -> Self {
+        self.text = Some(text);
+        self
+    }
+
+    pub fn with_font(mut self, font: &'a TextFormat) -> Self {
+        self.format = Some(font);
+        self
+    }
+
+    pub fn with_width(mut self, width: f32) -> Self {
+        self.width = Some(width);
+        self
+    }
+
+    pub fn with_height(mut self, height: f32) -> Self {
+        self.height = Some(height);
+        self
+    }
+
+    pub fn with_size(self, width: f32, height: f32) -> Self {
+        self.with_width(width).with_height(height)
+    }
+
+    pub fn with_centered(mut self, centered: bool) -> Self {
+        self.centered = centered;
+        self
     }
 }

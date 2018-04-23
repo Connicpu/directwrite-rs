@@ -1,40 +1,45 @@
+use helpers::hresult_to_string;
+
+use std::borrow::Cow;
 use std::error::Error;
-use std::fmt::{self, Display};
+use std::fmt;
+use std::result;
 
 use winapi::shared::ntdef::HRESULT;
 
-#[derive(Clone, Debug)]
-pub enum DWriteError {
-    ComError {
-        hr: HRESULT,
-        desc: Option<String>
-    },
+pub type DWResult<T> = result::Result<T, DWriteError>;
+
+#[derive(Copy, Clone)]
+pub struct DWriteError(pub HRESULT);
+
+impl DWriteError {
+    fn message(&self) -> Cow<str> {
+        hresult_to_string(self.0)
+            .map(Cow::Owned)
+            .unwrap_or(Cow::Borrowed("Unknown COM Error"))
+    }
 }
 
 impl From<HRESULT> for DWriteError {
     fn from(hr: HRESULT) -> DWriteError {
-        use helpers::*;
-        DWriteError::ComError {
-            hr: hr,
-            desc: hresult_to_string(hr),
-        }
+        DWriteError(hr)
     }
 }
 
-impl Display for DWriteError {
+impl fmt::Debug for DWriteError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "DWriteError({:x}, {:?})", self.0, self.message())
+    }
+}
+
+impl fmt::Display for DWriteError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(&self.message())
     }
 }
 
 impl Error for DWriteError {
     fn description(&self) -> &str {
-        match *self {
-            DWriteError::ComError { ref desc, .. } => match *desc {
-                Some(ref desc) => desc,
-                None => "Unknown COM Error Description",
-            }
-        }
+        "DirectWrite Error"
     }
 }
-

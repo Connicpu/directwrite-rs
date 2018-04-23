@@ -11,8 +11,11 @@ pub mod drawing_effect;
 pub mod error;
 pub mod enums;
 pub mod factory;
-pub mod internal;
+pub mod font_collection;
+pub mod font_face;
+pub mod inline_object;
 pub mod text_format;
 pub mod text_layout;
+pub mod text_renderer;
 
 mod helpers;
