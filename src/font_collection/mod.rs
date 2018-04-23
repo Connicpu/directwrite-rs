@@ -16,3 +16,6 @@ impl FontCollection {
         self.ptr.as_raw()
     }
 }
+
+unsafe impl Send for FontCollection {}
+unsafe impl Sync for FontCollection {}

@@ -42,3 +42,6 @@ impl Factory {
         }
     }
 }
+
+unsafe impl Send for Factory {}
+unsafe impl Sync for Factory {}

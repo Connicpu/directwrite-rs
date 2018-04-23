@@ -238,3 +238,6 @@ pub struct LineSpacing {
     pub spacing: f32,
     pub baseline: f32,
 }
+
+unsafe impl Send for TextFormat {}
+unsafe impl Sync for TextFormat {}

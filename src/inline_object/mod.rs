@@ -46,7 +46,7 @@ impl InlineObjectContainer {
     }
 }
 
-pub trait InlineObject: Any {
+pub trait InlineObject: Any + Send + Sync {
     fn draw(&self, context: &DrawingContext) -> DWResult<()>;
     fn get_metrics(&self) -> DWResult<InlineObjectMetrics>;
     fn get_overhang_metrics(&self) -> DWResult<InlineObjectOverhang>;
@@ -107,3 +107,6 @@ unsafe impl IntoInlineObject for Arc<InlineObjectContainer> {
         InlineObjectContainer::into_raw(self)
     }
 }
+
+unsafe impl Send for InlineObjectContainer {}
+unsafe impl Sync for InlineObjectContainer {}

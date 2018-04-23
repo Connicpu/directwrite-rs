@@ -16,3 +16,6 @@ impl FontFace {
         self.ptr.as_raw()
     }
 }
+
+unsafe impl Send for FontFace {}
+unsafe impl Sync for FontFace {}

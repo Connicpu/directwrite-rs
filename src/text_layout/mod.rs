@@ -665,3 +665,6 @@ pub struct HitTestTextPosition {
     /// The output geometry fully enclosing the specified text position.
     pub metrics: metrics::HitTestMetrics,
 }
+
+unsafe impl Send for TextLayout {}
+unsafe impl Sync for TextLayout {}
