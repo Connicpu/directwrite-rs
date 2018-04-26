@@ -13,16 +13,6 @@ pub struct Factory {
 }
 
 impl Factory {
-    pub unsafe fn from_raw(raw: *mut IDWriteFactory) -> Self {
-        Factory {
-            ptr: ComPtr::from_raw(raw),
-        }
-    }
-
-    pub unsafe fn get_raw(&self) -> *mut IDWriteFactory {
-        self.ptr.as_raw()
-    }
-
     pub fn new() -> Result<Factory, DWriteError> {
         unsafe {
             let mut ptr: *mut IDWriteFactory = ptr::null_mut();
@@ -40,6 +30,16 @@ impl Factory {
                 Err(hr.into())
             }
         }
+    }
+
+    pub unsafe fn from_raw(raw: *mut IDWriteFactory) -> Self {
+        Factory {
+            ptr: ComPtr::from_raw(raw),
+        }
+    }
+
+    pub unsafe fn get_raw(&self) -> *mut IDWriteFactory {
+        self.ptr.as_raw()
     }
 }
 
