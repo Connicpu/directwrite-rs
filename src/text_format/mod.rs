@@ -200,7 +200,7 @@ impl TextFormat {
         }
     }
 
-    pub fn set_text_alignment(&self, value: ReadingDirection) -> DWResult<()> {
+    pub fn set_text_alignment(&self, value: TextAlignment) -> DWResult<()> {
         unsafe {
             let hr = self.ptr.SetTextAlignment(value as u32);
             if SUCCEEDED(hr) {
