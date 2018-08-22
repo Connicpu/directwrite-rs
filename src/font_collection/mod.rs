@@ -16,6 +16,7 @@ pub struct FontCollection {
 }
 
 impl FontCollection {
+    /// Finds the font family with the specified family name and returns its index
     pub fn find_family_name(&self, family_name: &str) -> DWResult<Option<u32>>{
         unsafe{
             let family = family_name.to_wide_null();
@@ -36,6 +37,7 @@ impl FontCollection {
         }
     }
 
+    /// Creates a FontFamily object given a zero-based font family index
     pub fn get_font_family(&self, index: u32) -> DWResult<FontFamily>{
         unsafe{
             let mut ff = ptr::null_mut();
@@ -48,12 +50,15 @@ impl FontCollection {
         }
     }
 
+    /// Gets the number of font families in the collection
     pub fn get_font_family_count(&self) -> DWResult<u32>{
         unsafe{
            Ok(self.ptr.GetFontFamilyCount())
         }
     }
 
+    /// Gets the font object that corresponds to the same physical font as the specified font face object. 
+    /// The specified physical font must belong to the font collection. 
     pub fn get_font_from_font_face(&self, font_face: &FontFace) -> DWResult<Font>{
         unsafe{
             let mut f = ptr::null_mut();
@@ -66,6 +71,7 @@ impl FontCollection {
         }
     }
 
+    /// Gets a FontCollection object which represents the set of installed fonts. 
     pub fn get_system_font_collection(factory: &Factory, check_for_updates: bool) -> DWResult<FontCollection>{
         unsafe{
             let mut fc = ptr::null_mut();
