@@ -18,7 +18,6 @@ pub mod font_family;
 pub mod font_file;
 pub mod font_list;
 pub mod inline_object;
-pub mod localized_strings;
 pub mod text_format;
 pub mod text_layout;
 pub mod text_renderer;
