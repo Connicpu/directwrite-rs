@@ -1,8 +1,8 @@
 use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
 
-//pub use self::builder::FontFileBuilder;
-//pub mod builder;
+pub use self::builder::FontFileBuilder;
+pub mod builder;
 
 pub struct FontFile {
     ptr: ComPtr<IDWriteFontFile>,
