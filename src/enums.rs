@@ -59,6 +59,12 @@ dw_enums! {
         ExtraBlack = 950,
     }
 
+    pub enum FontSimulations {
+        None = 0,
+        Bold = 1,
+        Oblique = 2,
+    }
+
     pub enum FontStyle {
         Normal = 0,
         Oblique = 1,

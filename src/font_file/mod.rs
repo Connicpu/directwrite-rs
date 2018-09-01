@@ -2,7 +2,7 @@ use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
 
 pub struct FontFile {
-    ptr: ComPtr<IDWriteFontFile>
+    ptr: ComPtr<IDWriteFontFile>,
 }
 
 impl FontFile {

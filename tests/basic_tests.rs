@@ -2,7 +2,6 @@ extern crate directwrite;
 
 use directwrite::{Factory, TextFormat, TextLayout};
 use directwrite::font_collection::FontCollection;
-use directwrite::font_family::FontFamily;
 
 #[test]
 fn create_factory() {
