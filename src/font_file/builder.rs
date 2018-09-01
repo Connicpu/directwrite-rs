@@ -1,8 +1,10 @@
 use error::DWriteError;
 use font_file::FontFile;
+use font_file::loader::{FontFileLoader, FontFileLoaderComRef};
 
 use std::ptr;
 
+use winapi::ctypes::c_void;
 use winapi::shared::minwindef::FILETIME;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFactory, IDWriteFontFile};
@@ -43,6 +45,24 @@ impl<'a> FontFileBuilder<'a> {
             } else {
                 Err(From::from(result))
             }
+        }
+    }
+
+    pub fn from_loader(self, mut loader: Box<FontFileLoader>, key: &str) -> Result<FontFile, DWriteError> {
+        unsafe {
+            let mut comref = FontFileLoaderComRef::new(&mut *loader);
+            let mut ptr: *mut IDWriteFontFile = ptr::null_mut();
+            let result = self.factory.CreateCustomFontFileReference(
+                key.as_ptr() as *const c_void,
+                key.len() as u32,
+                comref.as_raw(),
+                &mut ptr,
+            );
+            if SUCCEEDED(result) {
+                Ok(FontFile::from_raw(ptr))
+            } else {
+                Err(From::from(result))
+            }          
         }
     }
 
