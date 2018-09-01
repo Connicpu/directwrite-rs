@@ -59,6 +59,17 @@ dw_enums! {
         ExtraBlack = 950,
     }
 
+    pub enum FontFaceType{
+        CFF = 0, 
+        TrueType = 1,
+        OpenTypeCollection = 2, 
+        Type1 = 3, 
+        Bitmap = 4, 
+        Unknown = 5, 
+        RawCFF = 6,
+        TrueTypeCollection = 7,
+    }
+
     pub enum FontSimulations {
         None = 0,
         Bold = 1,

@@ -1,4 +1,4 @@
-use enums::FontSimulations;
+use enums::{FontFaceType, FontSimulations};
 use error::DWResult;
 use font_file::FontFile;
 use helpers::InternalConstructor;
@@ -15,10 +15,6 @@ pub mod metrics;
 
 pub struct FontFace {
     ptr: ComPtr<IDWriteFontFace>,
-}
-
-pub enum FontFaceType{
-    CFF, TrueType, OpenTypeCollection, Type1, Bitmap, Unknown, RawCFF, TrueTypeCollection
 }
 
 impl FontFace {
@@ -154,6 +150,13 @@ impl FontFace {
 
     pub unsafe fn get_raw(&self) -> *mut IDWriteFontFace {
         self.ptr.as_raw()
+    }
+
+    /// Obtains the file format type of a font face. 
+    pub fn get_type(&self) -> FontFaceType {
+        unsafe {
+            FontFaceType::from_u32(self.ptr.GetType()).unwrap()
+        }
     }
 
     /// Obtains the algorithmic style simulation flags of a font face.
