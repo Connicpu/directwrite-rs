@@ -11,6 +11,10 @@ use winapi::um::dwrite::IDWriteFontCollection;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
+pub use font_collection::builder::FontCollectionBuilder;
+pub mod builder;
+pub mod loader;
+
 pub struct FontCollection {
     ptr: ComPtr<IDWriteFontCollection>,
 }
