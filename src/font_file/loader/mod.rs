@@ -1,16 +1,13 @@
 use error::DWResult;
-use factory::Factory;
 
 use std::borrow::Cow;
 
-use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::*;
 
 pub mod vtbl;
 
 pub trait FontFileLoader {
     fn create_stream_from_key(&mut self, context: &CreateStreamFromKey) -> DWResult<Box<FontFileStream>>;
-    fn to_raw(&mut self) -> *mut IDWriteFontFileLoader;
 }
 
 pub trait FontFileStream {
@@ -20,33 +17,6 @@ pub trait FontFileStream {
     fn read_file_fragment(&mut self, context: &ReadFileFragment) -> DWResult<(Vec<u8>, Cow<str>)>;
     fn release_file_fragment(&mut self, context: &ReleaseFileFragment) -> ();
     fn to_raw(&mut self) -> *mut IDWriteFontFileStream;
-}
-
-/// Registers a font file loader with DirectWrite. Must be called once and only once
-/// before creating an object with a given FontFileLoader.
-pub fn register_font_file_loader(factory: Factory, mut loader: Box<FontFileLoader>) -> DWResult<()> {
-    unsafe {
-        let ptr = &*(factory.get_raw());
-        let hr = ptr.RegisterFontFileLoader(loader.to_raw());
-        if SUCCEEDED(hr) {
-            return Ok(())
-        } else{
-            return Err(hr.into())
-        }
-    }
-}
-
-/// Unregisters a font file loader with DirectWrite.
-pub fn unregister_font_file_loader(factory: Factory, mut loader: Box<FontFileLoader>) -> DWResult<()> {
-    unsafe {
-        let ptr = &*(factory.get_raw());
-        let hr = ptr.UnregisterFontFileLoader(loader.to_raw());
-        if SUCCEEDED(hr) {
-            return Ok(())
-        } else{
-            return Err(hr.into())
-        }
-    }
 }
 
 pub struct CreateStreamFromKey<'a> {
