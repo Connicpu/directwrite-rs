@@ -3,7 +3,6 @@ use wio::com::ComPtr;
 
 pub use self::builder::FontFileBuilder;
 pub mod builder;
-pub mod loader;
 
 pub struct FontFile {
     ptr: ComPtr<IDWriteFontFile>,
