@@ -71,6 +71,7 @@ fn query_fonts(){
 
     let collection = FontCollection::get_system_font_collection(&factory, true).unwrap();
     let count = collection.get_font_family_count().unwrap();
+    assert!(count > 0);
 
     for i in 0..count{
         let family = collection.get_font_family(i).unwrap();
