@@ -1,12 +1,13 @@
 use enums::{FontFaceType, FontSimulations};
 use error::DWriteError;
+use factory::Factory;
 use font_face::FontFace;
 use font_file::FontFile;
 
 use std::ptr;
 
 use winapi::shared::winerror::SUCCEEDED;
-use winapi::um::dwrite::{IDWriteFactory, IDWriteFontFace};
+use winapi::um::dwrite::{IDWriteFactory, IDWriteFontFace, IDWriteFontFile};
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
@@ -33,16 +34,17 @@ impl<'a> FontFaceBuilder<'a> {
         unsafe {
             let font_face_type = self.font_face_type.expect("`font_face_type` must be specified");
             let files = self.files.expect("`files` must be specified");
-            let face_index = self.files.expect("`face_index` must be specified");
+            let face_index = self.face_index.expect("`face_index` must be specified");
             let font_face_simulation_flags = self.font_face_simulation_flags.expect("`font_face_simulation_flags` must be specified");
 
             let mut ptr: *mut IDWriteFontFace = ptr::null_mut();
             let result = self.factory.CreateFontFace(
                 font_face_type.to_u32(),
                 files.len() as u32,
-                files.iter().map(|f| f.get_raw()).collect(),
+                files.iter().map(|f| f.get_raw()).collect::<Vec<*mut IDWriteFontFile>>().as_ptr(),
                 face_index,
-                font_face_simulation_flags.to_u32()
+                font_face_simulation_flags.to_u32(),
+                &mut ptr
             );
 
             if SUCCEEDED(result) {
@@ -65,12 +67,12 @@ impl<'a> FontFaceBuilder<'a> {
     }
 
     pub fn with_face_index(mut self, face_index: u32) -> Self {
-        self.face_index = Some(face_index)
+        self.face_index = Some(face_index);
         self
     }
 
     pub fn with_font_face_simulation_flags(mut self, font_face_simulation_flags: FontSimulations) -> Self {
-        self.font_face_simulation_flags = Some(font_face_simulation_flags)
+        self.font_face_simulation_flags = Some(font_face_simulation_flags);
         self
     }
 }

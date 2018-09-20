@@ -2,6 +2,9 @@ extern crate directwrite;
 
 use directwrite::{Factory, TextFormat, TextLayout};
 use directwrite::font_collection::FontCollection;
+use directwrite::font_file::FontFile;
+use directwrite::font_face::FontFace;
+use directwrite::enums::*;
 
 #[test]
 fn create_factory() {
@@ -78,4 +81,24 @@ fn query_fonts(){
         let family_name = family.get_family_name().unwrap();
         assert_eq!(collection.find_family_name(&family_name).unwrap().unwrap(), i);
     }
+
+    let ffile = FontFile::create(&factory)
+        .with_file_path("tests/test_fonts/OpenSans-Regular.ttf")
+        .build()
+        .unwrap();
+
+    let fface = FontFace::create(&factory)
+        .with_files(vec![ffile])
+        .with_font_face_type(FontFaceType::TrueType)
+        .with_face_index(0)
+        .with_font_face_simulation_flags(FontSimulations::None)
+        .build()
+        .unwrap();
+
+    let fmetrics = fface.get_metrics();
+    assert_eq!(fmetrics.design_units_per_em(), 2048);
+    assert_eq!(fmetrics.descent(), 600);
+    let gmetrics = fface.get_design_glyph_metrics(&[0, 25, 96], true).unwrap();
+    assert_eq!(gmetrics[0].advance_width(), 1229);
+    assert_eq!(gmetrics[1].advance_width(), 1171);
 }

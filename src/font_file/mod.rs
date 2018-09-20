@@ -1,3 +1,4 @@
+use factory::Factory;
 use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
 
@@ -9,6 +10,10 @@ pub struct FontFile {
 }
 
 impl FontFile {
+    pub fn create(factory: &Factory) -> FontFileBuilder {
+        unsafe { FontFileBuilder::new(&*factory.get_raw()) }
+    }
+
     pub unsafe fn from_raw(raw: *mut IDWriteFontFile) -> Self {
         FontFile {
             ptr: ComPtr::from_raw(raw),

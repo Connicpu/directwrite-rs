@@ -1,5 +1,6 @@
 use enums::{FontFaceType, FontSimulations};
 use error::DWResult;
+use factory::Factory;
 use font_file::FontFile;
 use helpers::InternalConstructor;
 
@@ -9,8 +10,10 @@ use winapi::shared::winerror::{E_UNEXPECTED, SUCCEEDED};
 use winapi::um::dwrite::{DWRITE_GLYPH_OFFSET, DWRITE_MATRIX, IDWriteFontFace, IDWriteGeometrySink};
 use wio::com::ComPtr;
 
+pub use self::builder::FontFaceBuilder;
 pub use self::metrics::FontMetrics;
 pub use self::metrics::GlyphMetrics;
+pub mod builder;
 pub mod metrics;
 
 pub struct FontFace {
@@ -18,6 +21,9 @@ pub struct FontFace {
 }
 
 impl FontFace {
+    pub fn create(factory: &Factory) -> FontFaceBuilder {
+        unsafe { FontFaceBuilder::new(&*factory.get_raw()) }
+    }
     pub unsafe fn from_raw(raw: *mut IDWriteFontFace) -> Self {
         FontFace {
             ptr: ComPtr::from_raw(raw),
