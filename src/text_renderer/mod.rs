@@ -3,8 +3,9 @@ use error::DWResult;
 use font_face::FontFace;
 
 use winapi::ctypes::c_void;
-use winapi::um::dwrite::{IDWriteInlineObject, IDWriteTextRenderer, IDWriteTextRendererVtbl,
-                         DWRITE_MATRIX};
+use winapi::um::dwrite::{
+    IDWriteInlineObject, IDWriteTextRenderer, IDWriteTextRendererVtbl, DWRITE_MATRIX,
+};
 use winapi::um::unknwnbase::IUnknown;
 
 pub mod vtbl;

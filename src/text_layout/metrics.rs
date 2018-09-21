@@ -1,6 +1,8 @@
-use winapi::um::dwrite::*;
 use helpers::InternalConstructor;
+
 use std::mem;
+
+use winapi::um::dwrite::*;
 
 /// Contains the metrics associated with text after layout. All coordinates are in device independent pixels (DIPs).
 #[derive(Copy, Clone)]

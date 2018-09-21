@@ -12,7 +12,7 @@ use wio::wide::ToWide;
 pub struct FontFileBuilder<'a> {
     factory: &'a IDWriteFactory,
     file_path: Option<&'a str>,
-    last_write_time: Option<FILETIME>
+    last_write_time: Option<FILETIME>,
 }
 
 impl<'a> FontFileBuilder<'a> {
@@ -26,16 +26,19 @@ impl<'a> FontFileBuilder<'a> {
 
     pub fn build(self) -> Result<FontFile, DWriteError> {
         unsafe {
-            let file_path = self.file_path.expect("`file_path` must be specified").to_wide_null();
-            let last_write_time = match self.last_write_time{ Some(t) => { &t }
-                                                              None => { ptr::null() }};
+            let file_path = self
+                .file_path
+                .expect("`file_path` must be specified")
+                .to_wide_null();
+            let last_write_time = match self.last_write_time {
+                Some(t) => &t,
+                None => ptr::null(),
+            };
 
             let mut ptr: *mut IDWriteFontFile = ptr::null_mut();
-            let result = self.factory.CreateFontFileReference(
-                file_path.as_ptr(),
-                last_write_time,
-                &mut ptr,
-            );
+            let result =
+                self.factory
+                    .CreateFontFileReference(file_path.as_ptr(), last_write_time, &mut ptr);
 
             if SUCCEEDED(result) {
                 let ptr = ComPtr::from_raw(ptr);

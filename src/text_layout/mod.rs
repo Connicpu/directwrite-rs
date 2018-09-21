@@ -2,9 +2,9 @@ use drawing_effect::DrawingEffect;
 use enums::{FontStretch, FontStyle, FontWeight};
 use error::DWResult;
 use factory::Factory;
+use font_collection::FontCollection;
 use helpers::InternalConstructor;
 use inline_object::IntoInlineObject;
-use font_collection::FontCollection;
 use text_format::TextFormat;
 use text_renderer::{Context, TextRenderer, TextRendererComRef};
 
@@ -55,7 +55,8 @@ impl TextLayout {
         unsafe {
             let mut renderer = TextRendererComRef::new(renderer);
 
-            let hr = self.ptr
+            let hr = self
+                .ptr
                 .Draw(context.0, renderer.as_raw(), origin_x, origin_y);
             if SUCCEEDED(hr) {
                 Ok(())
@@ -86,7 +87,8 @@ impl TextLayout {
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_CLUSTER_METRICS;
-            let res = self.ptr
+            let res = self
+                .ptr
                 .GetClusterMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
@@ -111,9 +113,11 @@ impl TextLayout {
         unsafe {
             let mut collection = ptr::null_mut();
             let mut range = mem::uninitialized();
-            let res = self.ptr.GetFontCollection(position, &mut collection, &mut range);
+            let res = self
+                .ptr
+                .GetFontCollection(position, &mut collection, &mut range);
             if res < 0 {
-                return Err(res.into())
+                return Err(res.into());
             }
             Ok((FontCollection::from_raw(collection), range.into()))
         }
@@ -213,7 +217,8 @@ impl TextLayout {
         unsafe {
             let mut actual_count = 0;
             let buf_ptr = buf.as_mut_ptr() as *mut DWRITE_LINE_METRICS;
-            let res = self.ptr
+            let res = self
+                .ptr
                 .GetLineMetrics(buf_ptr, buf.len() as u32, &mut actual_count);
 
             if res == S_OK {
@@ -270,7 +275,8 @@ impl TextLayout {
     pub fn get_strikethrough(&self, position: u32) -> DWResult<(bool, TextRange)> {
         unsafe {
             let (mut strikethrough, mut range) = mem::uninitialized();
-            let res = self.ptr
+            let res = self
+                .ptr
                 .GetStrikethrough(position, &mut strikethrough, &mut range);
             if res < 0 {
                 return Err(res.into());
@@ -426,8 +432,8 @@ impl TextLayout {
         };
 
         unsafe {
-            let hr = self.ptr.SetFontCollection(collection.get_raw(), range); 
-            if SUCCEEDED(hr){
+            let hr = self.ptr.SetFontCollection(collection.get_raw(), range);
+            if SUCCEEDED(hr) {
                 Ok(())
             } else {
                 Err(hr.into())

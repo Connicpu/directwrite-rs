@@ -4,15 +4,16 @@ use std::mem;
 use std::panic::catch_unwind;
 use std::sync::Arc;
 
-use winapi::Interface;
 use winapi::ctypes::c_void;
 use winapi::shared::guiddef::{IsEqualIID, REFIID};
 use winapi::shared::minwindef::{BOOL, FLOAT, ULONG};
 use winapi::shared::winerror::{E_FAIL, E_NOTIMPL, HRESULT, SUCCEEDED, S_OK};
-use winapi::um::dwrite::{IDWriteInlineObject, IDWriteInlineObjectVtbl, IDWriteTextRenderer,
-                         DWRITE_BREAK_CONDITION, DWRITE_INLINE_OBJECT_METRICS,
-                         DWRITE_OVERHANG_METRICS};
+use winapi::um::dwrite::{
+    IDWriteInlineObject, IDWriteInlineObjectVtbl, IDWriteTextRenderer, DWRITE_BREAK_CONDITION,
+    DWRITE_INLINE_OBJECT_METRICS, DWRITE_OVERHANG_METRICS,
+};
 use winapi::um::unknwnbase::{IUnknown, IUnknownVtbl};
+use winapi::Interface;
 use wio::com::ComPtr;
 
 pub static INLINE_OBJECT_VTBL: IDWriteInlineObjectVtbl = IDWriteInlineObjectVtbl {

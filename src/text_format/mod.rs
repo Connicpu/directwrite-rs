@@ -84,7 +84,8 @@ impl TextFormat {
             let mut method = 0;
             let mut spacing = 0.0;
             let mut baseline = 0.0;
-            let hr = self.ptr
+            let hr = self
+                .ptr
                 .GetLineSpacing(&mut method, &mut spacing, &mut baseline);
             if SUCCEEDED(hr) {
                 let method = LineSpacingMethod::from_u32(method).ok_or(E_UNEXPECTED)?;

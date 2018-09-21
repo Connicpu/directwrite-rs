@@ -8,8 +8,8 @@ pub use text_format::TextFormat;
 pub use text_layout::TextLayout;
 
 pub mod drawing_effect;
-pub mod error;
 pub mod enums;
+pub mod error;
 pub mod factory;
 pub mod font;
 pub mod font_collection;

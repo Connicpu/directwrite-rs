@@ -37,11 +37,13 @@ impl<'a> TextFormatBuilder<'a> {
 
     pub fn build(self) -> Result<TextFormat, DWriteError> {
         unsafe {
-            let family = self.family
+            let family = self
+                .family
                 .expect("`family` must be specified")
                 .to_wide_null();
 
-            let collection = self.collection
+            let collection = self
+                .collection
                 .map(|col| col.get_raw())
                 .unwrap_or(ptr::null_mut());
 

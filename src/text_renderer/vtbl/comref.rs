@@ -1,13 +1,13 @@
 use enums::*;
 use error::DWResult;
 use font_face::FontFace;
-use text_renderer::{Context, DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline,
-                    TextRendererComRef};
+use text_renderer::{
+    Context, DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline, TextRendererComRef,
+};
 
 use std::panic::catch_unwind;
 use std::slice;
 
-use winapi::Interface;
 use winapi::ctypes::c_void;
 use winapi::shared::guiddef::{IsEqualIID, REFIID};
 use winapi::shared::minwindef::{BOOL, FLOAT, ULONG};
@@ -15,6 +15,7 @@ use winapi::shared::winerror::{E_FAIL, E_NOTIMPL, HRESULT, SUCCEEDED, S_OK};
 use winapi::um::dcommon::*;
 use winapi::um::dwrite::*;
 use winapi::um::unknwnbase::*;
+use winapi::Interface;
 
 pub static TEXT_RENDERER_COMREF_VTBL: IDWriteTextRendererVtbl = IDWriteTextRendererVtbl {
     parent: IDWritePixelSnappingVtbl {

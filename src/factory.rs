@@ -2,10 +2,10 @@ use error::DWriteError;
 
 use std::ptr;
 
-use winapi::Interface;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{DWriteCreateFactory, IDWriteFactory, DWRITE_FACTORY_TYPE_SHARED};
 use winapi::um::unknwnbase::IUnknown;
+use winapi::Interface;
 use wio::com::ComPtr;
 
 pub struct Factory {

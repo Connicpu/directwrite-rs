@@ -22,7 +22,7 @@ macro_rules! dw_enums {
             pub fn to_u32(self) -> u32 {
                 self as u32
             }
-            
+
             pub fn from_u32(value: u32) -> Option<Self> {
                 match value {
                     $($eval => Some($ename :: $ekey),)*
@@ -60,12 +60,12 @@ dw_enums! {
     }
 
     pub enum FontFaceType{
-        CFF = 0, 
+        CFF = 0,
         TrueType = 1,
-        OpenTypeCollection = 2, 
-        Type1 = 3, 
-        Bitmap = 4, 
-        Unknown = 5, 
+        OpenTypeCollection = 2,
+        Type1 = 3,
+        Bitmap = 4,
+        Unknown = 5,
         RawCFF = 6,
         TrueTypeCollection = 7,
     }

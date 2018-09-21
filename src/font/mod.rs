@@ -1,12 +1,12 @@
-use winapi::um::dwrite::{IDWriteFont};
+use winapi::um::dwrite::IDWriteFont;
 use wio::com::ComPtr;
 
-pub struct Font{
-	ptr: ComPtr<IDWriteFont>,
+pub struct Font {
+    ptr: ComPtr<IDWriteFont>,
 }
 
-impl Font{
-	pub unsafe fn from_raw(raw: *mut IDWriteFont) -> Self {
+impl Font {
+    pub unsafe fn from_raw(raw: *mut IDWriteFont) -> Self {
         Font {
             ptr: ComPtr::from_raw(raw),
         }
