@@ -11,6 +11,8 @@ use winapi::um::dwrite::IDWriteFontCollection;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
+#[repr(C)]
+#[derive(Clone)]
 pub struct FontCollection {
     ptr: ComPtr<IDWriteFontCollection>,
 }

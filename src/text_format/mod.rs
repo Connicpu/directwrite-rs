@@ -15,6 +15,7 @@ pub use self::builder::TextFormatBuilder;
 
 pub mod builder;
 
+#[repr(C)]
 #[derive(Clone, PartialEq)]
 pub struct TextFormat {
     ptr: ComPtr<IDWriteTextFormat>,
@@ -49,9 +50,7 @@ impl TextFormat {
             if SUCCEEDED(hr) {
                 buf.set_len(len as usize);
                 let osstr = OsString::from_wide(&buf);
-                let ff_name = osstr
-                    .into_string()
-                    .unwrap_or_else(|e| e.to_string_lossy().into_owned());
+                let ff_name = osstr.to_string_lossy().into_owned();
                 Ok(ff_name)
             } else {
                 Err(hr.into())

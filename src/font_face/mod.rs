@@ -18,6 +18,8 @@ pub use self::metrics::GlyphMetrics;
 pub mod builder;
 pub mod metrics;
 
+#[repr(C)]
+#[derive(Clone)]
 pub struct FontFace {
     ptr: ComPtr<IDWriteFontFace>,
 }

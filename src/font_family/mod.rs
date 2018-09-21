@@ -11,6 +11,8 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFamily;
 use wio::com::ComPtr;
 
+#[repr(C)]
+#[derive(Clone)]
 pub struct FontFamily {
     ptr: ComPtr<IDWriteFontFamily>,
 }

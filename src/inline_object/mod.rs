@@ -33,8 +33,7 @@ impl InlineObjectContainer {
     ) -> Option<Arc<InlineObjectContainer>> {
         let ptr = ptr as *const InlineObjectContainer;
 
-        let qi_fn = (*(*ptr).com_vtbl).parent.QueryInterface as *mut c_void;
-        if qi_fn == vtbl::query_interface as *mut c_void {
+        if (*ptr).com_vtbl == &vtbl::INLINE_OBJECT_VTBL {
             Some(Arc::from_raw(ptr))
         } else {
             None

@@ -21,6 +21,7 @@ pub mod builder;
 pub mod metrics;
 
 /// The TextLayout interface represents a block of text after it has been fully analyzed and formatted.
+#[repr(C)]
 #[derive(Clone, PartialEq)]
 pub struct TextLayout {
     ptr: ComPtr<IDWriteTextLayout>,

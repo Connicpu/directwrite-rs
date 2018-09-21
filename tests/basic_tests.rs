@@ -91,7 +91,7 @@ fn query_fonts() {
         .unwrap();
 
     let fface = FontFace::create(&factory)
-        .with_files(vec![ffile])
+        .with_files(&[ffile])
         .with_font_face_type(FontFaceType::TrueType)
         .with_face_index(0)
         .with_font_face_simulation_flags(FontSimulations::None)

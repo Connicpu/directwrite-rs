@@ -9,16 +9,16 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFactory, IDWriteFontFace, IDWriteFontFile};
 use wio::com::ComPtr;
 
-pub struct FontFaceBuilder<'a> {
+pub struct FontFaceBuilder<'a, 'b> {
     factory: &'a IDWriteFactory,
     font_face_type: Option<FontFaceType>,
-    files: Option<Vec<FontFile>>,
+    files: Option<&'b [FontFile]>,
     face_index: Option<u32>,
     font_face_simulation_flags: Option<FontSimulations>,
 }
 
-impl<'a> FontFaceBuilder<'a> {
-    pub fn new(factory: &'a IDWriteFactory) -> FontFaceBuilder<'a> {
+impl<'a, 'b> FontFaceBuilder<'a, 'b> {
+    pub fn new(factory: &'a IDWriteFactory) -> FontFaceBuilder<'a, 'b> {
         FontFaceBuilder {
             factory,
             font_face_type: None,
@@ -43,11 +43,10 @@ impl<'a> FontFaceBuilder<'a> {
             let result = self.factory.CreateFontFace(
                 font_face_type.to_u32(),
                 files.len() as u32,
-                files
-                    .iter()
-                    .map(|f| f.get_raw())
-                    .collect::<Vec<*mut IDWriteFontFile>>()
-                    .as_ptr(),
+                // FontFile is a repr(C) wrapper of a single *mut IDWriteFontFile,
+                // so a *const [FontFace] is safely castable to pointer to an array
+                // of fontfile pointers.
+                files.as_ptr() as *const *mut IDWriteFontFile,
                 face_index,
                 font_face_simulation_flags.to_u32(),
                 &mut ptr,
@@ -67,7 +66,7 @@ impl<'a> FontFaceBuilder<'a> {
         self
     }
 
-    pub fn with_files(mut self, files: Vec<FontFile>) -> Self {
+    pub fn with_files(mut self, files: &'b [FontFile]) -> Self {
         self.files = Some(files);
         self
     }

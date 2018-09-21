@@ -5,6 +5,8 @@ use wio::com::ComPtr;
 pub use self::builder::FontFileBuilder;
 pub mod builder;
 
+#[repr(C)]
+#[derive(Clone)]
 pub struct FontFile {
     ptr: ComPtr<IDWriteFontFile>,
 }

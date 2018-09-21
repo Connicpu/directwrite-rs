@@ -1,6 +1,8 @@
 use winapi::um::dwrite::IDWriteFontList;
 use wio::com::ComPtr;
 
+#[repr(C)]
+#[derive(Clone)]
 pub struct FontList {
     ptr: ComPtr<IDWriteFontList>,
 }
