@@ -4,6 +4,7 @@ use error::DWResult;
 use factory::Factory;
 use helpers::InternalConstructor;
 use inline_object::IntoInlineObject;
+use font_collection::FontCollection;
 use text_format::TextFormat;
 use text_renderer::{Context, TextRenderer, TextRendererComRef};
 
@@ -102,6 +103,20 @@ impl TextLayout {
         let count = self.get_cluster_metrics_count();
         buf.resize(count, Default::default());
         assert_eq!(self.get_cluster_metrics_slice(buf), Ok(count));
+    }
+
+    /// Gets the font collection of the text at the specified position. Also returns the text range
+    /// which has identical formatting to the current character.
+    pub fn get_font_collection(&self, position: u32) -> DWResult<(FontCollection, TextRange)> {
+        unsafe {
+            let mut collection = ptr::null_mut();
+            let mut range = mem::uninitialized();
+            let res = self.ptr.GetFontCollection(position, &mut collection, &mut range);
+            if res < 0 {
+                return Err(res.into())
+            }
+            Ok((FontCollection::from_raw(collection), range.into()))
+        }
     }
 
     /// Gets the font em height of the text at the specified position. Also returns the text range
@@ -392,6 +407,27 @@ impl TextLayout {
         unsafe {
             let hr = self.ptr.SetDrawingEffect(effect.get_effect_ptr(), range);
             if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    /// Sets the font collection for text within a text range.
+    pub fn set_font_collection<T>(&self, collection: FontCollection, range: T) -> DWResult<()>
+    where
+        T: Into<TextRange>,
+    {
+        let range = range.into();
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            let hr = self.ptr.SetFontCollection(collection.get_raw(), range); 
+            if SUCCEEDED(hr){
                 Ok(())
             } else {
                 Err(hr.into())
