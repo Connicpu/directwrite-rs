@@ -48,7 +48,7 @@ impl<'a, 'b> FontFaceBuilder<'a, 'b> {
                 // of fontfile pointers.
                 files.as_ptr() as *const *mut IDWriteFontFile,
                 face_index,
-                font_face_simulation_flags.to_u32(),
+                font_face_simulation_flags.0,
                 &mut ptr,
             );
 

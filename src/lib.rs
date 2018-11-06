@@ -1,5 +1,13 @@
 #![cfg(windows)]
 
+#[macro_use]
+extern crate auto_enum;
+
+#[macro_use]
+extern crate derive_com_wrapper;
+
+extern crate checked_enum;
+extern crate com_wrapper;
 extern crate winapi;
 extern crate wio;
 
@@ -17,6 +25,8 @@ pub mod font_face;
 pub mod font_family;
 pub mod font_file;
 pub mod font_list;
+pub mod geometry_sink;
+pub mod glyphs;
 pub mod inline_object;
 pub mod text_format;
 pub mod text_layout;

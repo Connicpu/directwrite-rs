@@ -18,10 +18,7 @@ pub struct InlineObjectContainer {
 }
 
 impl InlineObjectContainer {
-    pub fn new<O>(obj: O) -> Arc<InlineObjectContainer>
-    where
-        O: Into<Box<InlineObject>>,
-    {
+    pub fn new(obj: impl Into<Box<InlineObject>>) -> Arc<InlineObjectContainer> {
         Arc::new(InlineObjectContainer {
             com_vtbl: &vtbl::INLINE_OBJECT_VTBL,
             obj: obj.into(),

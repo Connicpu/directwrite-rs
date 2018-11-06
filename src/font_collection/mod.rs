@@ -11,8 +11,9 @@ use winapi::um::dwrite::IDWriteFontCollection;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
-#[repr(C)]
-#[derive(Clone)]
+#[derive(ComWrapper)]
+#[com(send, sync, debug)]
+#[repr(transparent)]
 pub struct FontCollection {
     ptr: ComPtr<IDWriteFontCollection>,
 }
@@ -32,12 +33,6 @@ impl FontCollection {
             } else {
                 Err(hr.into())
             }
-        }
-    }
-
-    pub unsafe fn from_raw(raw: *mut IDWriteFontCollection) -> Self {
-        FontCollection {
-            ptr: ComPtr::from_raw(raw),
         }
     }
 
@@ -90,11 +85,4 @@ impl FontCollection {
             }
         }
     }
-
-    pub unsafe fn get_raw(&self) -> *mut IDWriteFontCollection {
-        self.ptr.as_raw()
-    }
 }
-
-unsafe impl Send for FontCollection {}
-unsafe impl Sync for FontCollection {}

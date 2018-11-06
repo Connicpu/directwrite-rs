@@ -1,6 +1,6 @@
 [package]
 name = "directwrite"
-version = "0.1.4"
+version = "0.3.0-alpha1"
 authors = ["Connie Hilarides <conni_h@outlook.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
@@ -12,9 +12,13 @@ license = "MIT/Apache-2.0"
 
 [target.'cfg(windows)'.dependencies]
 wio = "0.2"
+auto-enum = "0.1.2"
+checked-enum = "0.1.1-alpha1"
+com-wrapper = "0.1.0-alpha1"
+derive-com-wrapper = "0.1.0-alpha2"
 
 [target.'cfg(windows)'.dependencies.winapi]
-version = "0.3.5"
+version = "0.3.6"
 features = ["dwrite", "winbase", "winnls"]
 
 [package.metadata.docs.rs]

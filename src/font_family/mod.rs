@@ -11,19 +11,14 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFamily;
 use wio::com::ComPtr;
 
-#[repr(C)]
-#[derive(Clone)]
+#[derive(ComWrapper)]
+#[com(send, sync, debug)]
+#[repr(transparent)]
 pub struct FontFamily {
     ptr: ComPtr<IDWriteFontFamily>,
 }
 
 impl FontFamily {
-    pub unsafe fn from_raw(raw: *mut IDWriteFontFamily) -> Self {
-        FontFamily {
-            ptr: ComPtr::from_raw(raw),
-        }
-    }
-
     /// Shortcut method based on GetFamilyNames to get the family name in the current locale (or EN-US or the first locale available, if not found)
     pub fn get_family_name(&self) -> DWResult<String> {
         unsafe {
@@ -69,7 +64,7 @@ impl FontFamily {
         unsafe {
             let mut font = ptr::null_mut();
             let hr = self.ptr.GetFirstMatchingFont(
-                weight as u32,
+                weight.0,
                 stretch as u32,
                 style as u32,
                 &mut font,
@@ -93,7 +88,7 @@ impl FontFamily {
             let mut list = ptr::null_mut();
             let hr =
                 self.ptr
-                    .GetMatchingFonts(weight as u32, stretch as u32, style as u32, &mut list);
+                    .GetMatchingFonts(weight.0, stretch as u32, style as u32, &mut list);
             if SUCCEEDED(hr) {
                 Ok(FontList::from_raw(list))
             } else {
@@ -101,11 +96,4 @@ impl FontFamily {
             }
         }
     }
-
-    pub unsafe fn get_raw(&self) -> *mut IDWriteFontFamily {
-        self.ptr.as_raw()
-    }
 }
-
-unsafe impl Send for FontFamily {}
-unsafe impl Sync for FontFamily {}

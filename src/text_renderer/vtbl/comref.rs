@@ -1,4 +1,3 @@
-use enums::*;
 use error::DWResult;
 use font_face::FontFace;
 use text_renderer::{
@@ -162,7 +161,7 @@ pub unsafe extern "system" fn draw_glyph_run(
             context: Context(context),
             baseline_origin_x,
             baseline_origin_y,
-            measuring_mode: MeasuringMode::from_u32(measuring_mode).ok_or(E_FAIL)?,
+            measuring_mode: measuring_mode.into(),
             font_face: FontFace::from_raw(run.fontFace),
             font_em_size: run.fontEmSize,
             glyph_count: run.glyphCount,
@@ -258,10 +257,10 @@ pub unsafe extern "system" fn draw_strikethrough(
             width: desc.width,
             thickness: desc.thickness,
             offset: desc.offset,
-            reading_direction: ReadingDirection::from_u32(desc.readingDirection).ok_or(E_FAIL)?,
-            flow_direction: FlowDirection::from_u32(desc.flowDirection).ok_or(E_FAIL)?,
+            reading_direction: desc.readingDirection.into(),
+            flow_direction: desc.flowDirection.into(),
             locale_name: locale,
-            measuring_mode: MeasuringMode::from_u32(desc.measuringMode).ok_or(E_FAIL)?,
+            measuring_mode: desc.measuringMode.into(),
             client_effect: if client_effect.is_null() {
                 None
             } else {
@@ -310,10 +309,10 @@ pub unsafe extern "system" fn draw_underline(
             width: desc.width,
             thickness: desc.thickness,
             offset: desc.offset,
-            reading_direction: ReadingDirection::from_u32(desc.readingDirection).ok_or(E_FAIL)?,
-            flow_direction: FlowDirection::from_u32(desc.flowDirection).ok_or(E_FAIL)?,
+            reading_direction: desc.readingDirection.into(),
+            flow_direction: desc.flowDirection.into(),
             locale_name: locale,
-            measuring_mode: MeasuringMode::from_u32(desc.measuringMode).ok_or(E_FAIL)?,
+            measuring_mode: desc.measuringMode.into(),
             client_effect: if client_effect.is_null() {
                 None
             } else {

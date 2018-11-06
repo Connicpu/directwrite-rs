@@ -53,7 +53,7 @@ fn set_attributes() {
 
     let text = "This is some test text!";
 
-    let layout = TextLayout::create(&factory)
+    let mut layout = TextLayout::create(&factory)
         .with_text(text)
         .with_font(&font)
         .with_width(300.0)
@@ -94,7 +94,7 @@ fn query_fonts() {
         .with_files(&[ffile])
         .with_font_face_type(FontFaceType::TrueType)
         .with_face_index(0)
-        .with_font_face_simulation_flags(FontSimulations::None)
+        .with_font_face_simulation_flags(FontSimulations::NONE)
         .build()
         .unwrap();
 

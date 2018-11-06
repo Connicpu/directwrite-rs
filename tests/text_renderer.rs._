@@ -1,0 +1,83 @@
+extern crate directwrite;
+extern crate winapi;
+
+use directwrite::error::DWResult;
+use directwrite::text_renderer::{
+    Context, DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline, TextRenderer,
+};
+use directwrite::{Factory, TextFormat, TextLayout};
+use winapi::um::dwrite::DWRITE_MATRIX;
+
+pub struct DummyRenderer(i32, i32);
+
+impl TextRenderer for DummyRenderer {
+    fn current_transform(&self, _context: Context) -> DWResult<DWRITE_MATRIX> {
+        // Identity
+        Ok(DWRITE_MATRIX {
+            m11: 1.0,
+            m12: 0.0,
+            m21: 0.0,
+            m22: 1.0,
+            dx: 0.0,
+            dy: 0.0,
+        })
+    }
+
+    fn pixels_per_dip(&self, _context: Context) -> DWResult<f32> {
+        Ok(1.0)
+    }
+
+    fn is_pixel_snapping_disabled(&self, _context: Context) -> DWResult<bool> {
+        Ok(true)
+    }
+
+    fn draw_glyph_run(&mut self, _context: &DrawGlyphRun) -> DWResult<()> {
+        self.0 += 1;
+        Ok(())
+    }
+
+    fn draw_inline_object(&mut self, _context: &DrawInlineObject) -> DWResult<()> {
+        Ok(())
+    }
+
+    fn draw_strikethrough(&mut self, _context: &DrawStrikethrough) -> DWResult<()> {
+        Ok(())
+    }
+
+    fn draw_underline(&mut self, _context: &DrawUnderline) -> DWResult<()> {
+        self.1 += 1;
+        Ok(())
+    }
+}
+
+#[test]
+fn basic_rendering() {
+    let factory = Factory::new().unwrap();
+
+    let font = TextFormat::create(&factory)
+        .with_family("Segoe UI")
+        .with_size(16.0)
+        .build()
+        .unwrap();
+
+    let mut layout = TextLayout::create(&factory)
+        .with_text("abc def")
+        .with_font(&font)
+        .with_width(300.0)
+        .with_height(200.0)
+        .build()
+        .unwrap();
+
+    let mut renderer = DummyRenderer(0, 0);
+
+    layout.draw(&mut renderer, 0.0, 0.0, Context::default()).unwrap();
+
+    assert_eq!(renderer.0, 2);
+    assert_eq!(renderer.1, 0);
+
+    layout.set_underline(true, 0..3).unwrap();
+    layout.draw(&mut renderer, 0.0, 0.0, Context::default()).unwrap();
+
+    assert_eq!(renderer.0, 5);
+    assert_eq!(renderer.1, 1);
+}

@@ -27,7 +27,7 @@ impl<'a> TextFormatBuilder<'a> {
             factory,
             family: None,
             collection: None,
-            weight: FontWeight::Normal,
+            weight: FontWeight::NORMAL,
             style: FontStyle::Normal,
             stretch: FontStretch::Normal,
             size: None,
@@ -54,7 +54,7 @@ impl<'a> TextFormatBuilder<'a> {
             let result = self.factory.CreateTextFormat(
                 family.as_ptr(),
                 collection,
-                self.weight as u32,
+                self.weight.0,
                 self.style as u32,
                 self.stretch as u32,
                 size,

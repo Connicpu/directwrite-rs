@@ -2,14 +2,14 @@ use enums::{FontFaceType, FontSimulations};
 use error::DWResult;
 use factory::Factory;
 use font_file::FontFile;
+use geometry_sink::ComGeometrySink;
+use glyphs::GlyphOffset;
 use helpers::InternalConstructor;
 
 use std::{mem, ptr, u32};
 
-use winapi::shared::winerror::{E_UNEXPECTED, SUCCEEDED};
-use winapi::um::dwrite::{
-    IDWriteFontFace, IDWriteGeometrySink, DWRITE_GLYPH_OFFSET, DWRITE_MATRIX,
-};
+use winapi::shared::winerror::SUCCEEDED;
+use winapi::um::dwrite::{IDWriteFontFace, DWRITE_MATRIX};
 use wio::com::ComPtr;
 
 pub use self::builder::FontFaceBuilder;
@@ -18,20 +18,16 @@ pub use self::metrics::GlyphMetrics;
 pub mod builder;
 pub mod metrics;
 
-#[repr(C)]
-#[derive(Clone)]
+#[derive(ComWrapper)]
+#[com(send, sync, debug)]
+#[repr(transparent)]
 pub struct FontFace {
     ptr: ComPtr<IDWriteFontFace>,
 }
 
 impl FontFace {
-    pub fn create(factory: &Factory) -> FontFaceBuilder {
+    pub fn create<'a, 'b>(factory: &'a Factory) -> FontFaceBuilder<'a, 'b> {
         unsafe { FontFaceBuilder::new(&*factory.get_raw()) }
-    }
-    pub unsafe fn from_raw(raw: *mut IDWriteFontFace) -> Self {
-        FontFace {
-            ptr: ComPtr::from_raw(raw),
-        }
     }
 
     /// Obtains ideal (resolution-independent) glyph metrics in font design units.
@@ -167,10 +163,10 @@ impl FontFace {
         em_size: f32,
         glyph_indices: &[u16],
         glyph_advances: Option<&[f32]>,
-        glyph_offsets: Option<&[DWRITE_GLYPH_OFFSET]>,
+        glyph_offsets: Option<&[GlyphOffset]>,
         is_sideways: bool,
         is_rtl: bool,
-        geometry_sink: *mut IDWriteGeometrySink,
+        geometry_sink: Option<&impl ComGeometrySink>,
     ) -> DWResult<()> {
         unsafe {
             assert!(
@@ -185,13 +181,16 @@ impl FontFace {
                     None => ptr::null(),
                 },
                 match glyph_offsets {
-                    Some(g) => g.as_ptr(),
+                    Some(g) => g.as_ptr() as *const _,
                     None => ptr::null(),
                 },
                 glyph_indices.len() as u32,
                 if is_sideways { 1 } else { 0 },
                 if is_rtl { 1 } else { 0 },
-                geometry_sink,
+                match geometry_sink {
+                    Some(sink) => sink.as_ptr(),
+                    None => ptr::null_mut(),
+                },
             );
             if SUCCEEDED(hr) {
                 Ok(())
@@ -217,18 +216,14 @@ impl FontFace {
         }
     }
 
-    pub unsafe fn get_raw(&self) -> *mut IDWriteFontFace {
-        self.ptr.as_raw()
-    }
-
     /// Obtains the file format type of a font face.
     pub fn get_type(&self) -> FontFaceType {
         unsafe { FontFaceType::from_u32(self.ptr.GetType()).unwrap() }
     }
 
     /// Obtains the algorithmic style simulation flags of a font face.
-    pub fn get_simulations(&self) -> DWResult<FontSimulations> {
-        unsafe { FontSimulations::from_u32(self.ptr.GetSimulations()).ok_or(E_UNEXPECTED.into()) }
+    pub fn get_simulations(&self) -> FontSimulations {
+        unsafe { FontSimulations(self.ptr.GetSimulations()) }
     }
 
     /// Determines whether the font is a symbol font.
@@ -236,6 +231,3 @@ impl FontFace {
         unsafe { self.ptr.IsSymbolFont() > 0 }
     }
 }
-
-unsafe impl Send for FontFace {}
-unsafe impl Sync for FontFace {}
