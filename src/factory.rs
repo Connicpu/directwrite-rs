@@ -8,6 +8,9 @@ use winapi::um::unknwnbase::IUnknown;
 use winapi::Interface;
 use wio::com::ComPtr;
 
+#[derive(Clone, ComWrapper)]
+#[com(send, sync)]
+#[repr(transparent)]
 pub struct Factory {
     ptr: ComPtr<IDWriteFactory>,
 }
@@ -31,17 +34,5 @@ impl Factory {
             }
         }
     }
-
-    pub unsafe fn from_raw(raw: *mut IDWriteFactory) -> Self {
-        Factory {
-            ptr: ComPtr::from_raw(raw),
-        }
-    }
-
-    pub unsafe fn get_raw(&self) -> *mut IDWriteFactory {
-        self.ptr.as_raw()
-    }
 }
 
-unsafe impl Send for Factory {}
-unsafe impl Sync for Factory {}

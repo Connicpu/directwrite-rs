@@ -11,6 +11,7 @@ use text_renderer::{Context, TextRenderer, TextRendererComRef};
 use std::{mem, ops, ptr, u32};
 
 use checked_enum::UncheckedEnum;
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;

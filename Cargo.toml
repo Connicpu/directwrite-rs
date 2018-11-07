@@ -15,7 +15,8 @@ wio = "0.2"
 auto-enum = "0.1.2"
 checked-enum = "0.1.1-alpha1"
 com-wrapper = "0.1.0-alpha1"
-derive-com-wrapper = "0.1.0-alpha2"
+derive-com-wrapper = "0.1.0-alpha4"
+math2d = { version = "0.1.3", features = ["d2d"] }
 
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3.6"

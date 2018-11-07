@@ -6,6 +6,7 @@ use helpers::get_system_locale;
 
 use std::ptr;
 
+use com_wrapper::ComWrapper;
 use winapi::ctypes::wchar_t;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFamily;

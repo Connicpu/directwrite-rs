@@ -1,8 +1,11 @@
 use factory::Factory;
+
+use com_wrapper::ComWrapper;
 use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
 
 pub use self::builder::FontFileBuilder;
+
 pub mod builder;
 
 #[derive(ComWrapper)]

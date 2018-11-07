@@ -8,6 +8,7 @@ extern crate derive_com_wrapper;
 
 extern crate checked_enum;
 extern crate com_wrapper;
+extern crate math2d;
 extern crate winapi;
 extern crate wio;
 
@@ -28,6 +29,9 @@ pub mod font_list;
 pub mod geometry_sink;
 pub mod glyphs;
 pub mod inline_object;
+pub mod localized_strings;
+pub mod metrics;
+pub mod rendering_params;
 pub mod text_format;
 pub mod text_layout;
 pub mod text_renderer;

@@ -3,6 +3,7 @@ use {TextFormat, TextLayout};
 
 use std::ptr;
 
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;

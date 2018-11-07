@@ -7,6 +7,7 @@ use text_renderer::{
 use std::panic::catch_unwind;
 use std::slice;
 
+use com_wrapper::ComWrapper;
 use winapi::ctypes::c_void;
 use winapi::shared::guiddef::{IsEqualIID, REFIID};
 use winapi::shared::minwindef::{BOOL, FLOAT, ULONG};

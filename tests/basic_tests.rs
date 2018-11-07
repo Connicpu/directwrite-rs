@@ -72,15 +72,15 @@ fn set_attributes() {
 fn query_fonts() {
     let factory = Factory::new().unwrap();
 
-    let collection = FontCollection::get_system_font_collection(&factory, true).unwrap();
-    let count = collection.get_font_family_count().unwrap();
+    let collection = FontCollection::system_font_collection(&factory, true).unwrap();
+    let count = collection.family_count();
     assert!(count > 0);
 
     for i in 0..count {
-        let family = collection.get_font_family(i).unwrap();
+        let family = collection.family(i).unwrap();
         let family_name = family.get_family_name().unwrap();
         assert_eq!(
-            collection.find_family_name(&family_name).unwrap().unwrap(),
+            collection.find_family_name(&family_name).unwrap(),
             i
         );
     }
@@ -98,10 +98,10 @@ fn query_fonts() {
         .build()
         .unwrap();
 
-    let fmetrics = fface.get_metrics();
-    assert_eq!(fmetrics.design_units_per_em(), 2048);
-    assert_eq!(fmetrics.descent(), 600);
-    let gmetrics = fface.get_design_glyph_metrics(&[0, 25, 96], true).unwrap();
-    assert_eq!(gmetrics[0].advance_width(), 1229);
-    assert_eq!(gmetrics[1].advance_width(), 1171);
+    let fmetrics = fface.metrics();
+    assert_eq!(fmetrics.design_units_per_em, 2048);
+    assert_eq!(fmetrics.descent, 600);
+    let gmetrics = fface.design_glyph_metrics(&[0, 25, 96], true).unwrap();
+    assert_eq!(gmetrics[0].advance_width, 1229);
+    assert_eq!(gmetrics[1].advance_width, 1171);
 }

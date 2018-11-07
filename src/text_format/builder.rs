@@ -5,6 +5,7 @@ use text_format::TextFormat;
 
 use std::ptr;
 
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFactory, IDWriteTextFormat};
 use wio::com::ComPtr;

@@ -7,6 +7,7 @@ use std::ffi::OsString;
 use std::ptr;
 
 use checked_enum::UncheckedEnum;
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteTextFormat;
 use wio::com::ComPtr;
