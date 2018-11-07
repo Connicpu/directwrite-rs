@@ -7,6 +7,8 @@ pub use enums::font_face_type::FontFaceType;
 #[doc(inline)]
 pub use enums::font_feature_tag::FontFeatureTag;
 #[doc(inline)]
+pub use enums::font_file_type::FontFileType;
+#[doc(inline)]
 pub use enums::font_simulations::FontSimulations;
 #[doc(inline)]
 pub use enums::font_stretch::FontStretch;
@@ -39,6 +41,8 @@ pub mod flow_direction;
 pub mod font_face_type;
 #[doc(hidden)]
 pub mod font_feature_tag;
+#[doc(hidden)]
+pub mod font_file_type;
 #[doc(hidden)]
 pub mod font_simulations;
 #[doc(hidden)]

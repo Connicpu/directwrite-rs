@@ -11,10 +11,10 @@ fn main() {
     let segoe_id = collection.find_family_name("Segoe UI").unwrap();
     let segoe = collection.family(segoe_id).unwrap();
     let segoe_fonts = segoe
-        .get_matching_fonts(FontWeight::NORMAL, FontStretch::Normal, FontStyle::Normal)
+        .matching_fonts(FontWeight::NORMAL, FontStretch::Normal, FontStyle::Normal)
         .unwrap();
     for font in segoe_fonts.all_fonts() {
         println!("Font name: {:#?}", font.informational_strings(InformationalStringId::FullName));
-        println!("Face names: {:#?}", font.face_names());
+        println!("Face name: {:#?}", font.face_name());
     }
 }

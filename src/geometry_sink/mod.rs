@@ -8,6 +8,19 @@ use winapi::um::d2d1::{ID2D1SimplifiedGeometrySink, ID2D1SimplifiedGeometrySinkV
 
 mod vtbl;
 
+pub trait GeometrySink: Sized {
+    fn begin_figure(&mut self, start: Point2f, begin_flag: u32);
+    fn end_figure(&mut self, end_flag: u32);
+
+    fn set_fill_mode(&mut self, mode: u32);
+    fn set_segment_flags(&mut self, flags: u32);
+
+    fn add_beziers(&mut self, beziers: &[BezierSegment]);
+    fn add_lines(&mut self, points: &[Point2f]);
+
+    fn close(&mut self) -> DWResult<()>;
+}
+
 #[repr(C)]
 pub struct ComGeometrySink<T>
 where
@@ -42,19 +55,6 @@ where
     fn drop(&mut self) {
         assert_eq!(self.safety_refcount.load(Ordering::SeqCst), 1);
     }
-}
-
-pub trait GeometrySink {
-    fn begin_figure(&mut self, start: Point2f, begin_flag: u32);
-    fn end_figure(&mut self, end_flag: u32);
-
-    fn set_fill_mode(&mut self, mode: u32);
-    fn set_segment_flags(&mut self, flags: u32);
-
-    fn add_beziers(&mut self, beziers: &[BezierSegment]);
-    fn add_lines(&mut self, points: &[Point2f]);
-
-    fn close(&mut self) -> DWResult<()>;
 }
 
 impl<'a, T> GeometrySink for &'a mut T

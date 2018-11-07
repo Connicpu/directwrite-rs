@@ -1,6 +1,7 @@
 use error::DWResult;
 use factory::Factory;
 use font::Font;
+use font_collection_loader::FontKey;
 use font_face::FontFace;
 use font_family::FontFamily;
 
@@ -12,6 +13,12 @@ use winapi::um::dwrite::IDWriteFontCollection;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
+#[doc(inline)]
+pub use font_collection::builder::FontCollectionBuilder;
+
+#[doc(hidden)]
+mod builder;
+
 #[derive(ComWrapper)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
@@ -20,6 +27,13 @@ pub struct FontCollection {
 }
 
 impl FontCollection {
+    pub fn create<'a, K>(factory: &'a Factory) -> FontCollectionBuilder<'a, K>
+    where
+        K: FontKey,
+    {
+        FontCollectionBuilder::new(factory)
+    }
+
     /// Finds the font family with the specified family name and returns its index
     pub fn find_family_name(&self, family_name: &str) -> Option<u32> {
         unsafe {

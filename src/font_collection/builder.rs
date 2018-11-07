@@ -1,0 +1,72 @@
+use error::DWResult;
+use factory::Factory;
+use font_collection::FontCollection;
+use font_collection_loader::FontKey;
+use font_collection_loader::KeyPayload;
+use font_collection_loader::CollectionLoaderHandle;
+
+use std::mem;
+use std::ptr;
+
+use com_wrapper::ComWrapper;
+
+pub struct FontCollectionBuilder<'a, K>
+where
+    K: FontKey,
+{
+    factory: &'a Factory,
+    loader: Option<&'a CollectionLoaderHandle<K>>,
+    key: Option<K>,
+}
+
+impl<'a, K> FontCollectionBuilder<'a, K>
+where
+    K: FontKey,
+{
+    pub fn new(factory: &'a Factory) -> Self {
+        FontCollectionBuilder {
+            factory,
+            loader: None,
+            key: None,
+        }
+    }
+
+    pub fn build(self) -> DWResult<FontCollection> {
+        let loader = self.loader.expect("Font Loader must be specified");
+        let key = KeyPayload::new(self.key.expect("Key must be specified"));
+
+        unsafe {
+            let f = &*self.factory.get_raw();
+
+            let mut ptr = ptr::null_mut();
+            let hr = f.CreateCustomFontCollection(
+                loader.get_raw(),
+                &key as *const _ as *const _,
+                mem::size_of_val(&key) as u32,
+                &mut ptr,
+            );
+
+            Err(hr.into())
+        }
+    }
+
+    pub fn with_loader(mut self, loader: &'a CollectionLoaderHandle<K>) -> Self {
+        self.loader = Some(loader);
+        self
+    }
+
+    pub fn with_key(mut self, key: K) -> Self {
+        self.key = Some(key);
+        self
+    }
+}
+
+impl<'a, K> FontCollectionBuilder<'a, K>
+where
+    K: FontKey + Default,
+{
+    pub fn with_default_key(mut self) -> Self {
+        self.key = Some(Default::default());
+        self
+    }
+}

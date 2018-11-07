@@ -44,7 +44,7 @@ impl Font {
 
     /// It is unclear in what situations this method may fail to return a face
     /// names collection, and so is returned as an Option to be safe.
-    pub fn face_names(&self) -> Option<LocalizedStrings> {
+    pub fn face_name(&self) -> Option<LocalizedStrings> {
         unsafe {
             let mut ptr = ptr::null_mut();
             let hr = self.ptr.GetFaceNames(&mut ptr);

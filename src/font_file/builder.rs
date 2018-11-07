@@ -30,6 +30,7 @@ impl<'a> FontFileBuilder<'a> {
                 .file_path
                 .expect("`file_path` must be specified")
                 .to_wide_null();
+
             let last_write_time = match self.last_write_time {
                 Some(t) => &t,
                 None => ptr::null(),

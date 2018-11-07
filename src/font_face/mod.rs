@@ -300,7 +300,7 @@ impl FontFace {
                 &mut exists,
             );
 
-            if SUCCEEDED(hr) {
+            if SUCCEEDED(hr) && exists != 0 {
                 let data = std::slice::from_raw_parts(data as *const u8, size as usize);
 
                 Some(FontTable {
