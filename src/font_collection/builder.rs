@@ -1,13 +1,14 @@
 use error::DWResult;
 use factory::Factory;
-use font_collection::FontCollection;
 use font_collection::loader::CollectionLoaderHandle;
+use font_collection::FontCollection;
 use key::{FontKey, KeyPayload};
 
 use std::mem;
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use winapi::shared::winerror::SUCCEEDED;
 
 pub struct FontCollectionBuilder<'a, K>
 where
@@ -45,7 +46,11 @@ where
                 &mut ptr,
             );
 
-            Err(hr.into())
+            if SUCCEEDED(hr) {
+                Ok(FontCollection::from_raw(ptr))
+            } else {
+                Err(hr.into())
+            }
         }
     }
 
