@@ -123,6 +123,6 @@ fn load_custom_font() {
             .unwrap();
     }
 
-    test_layout(&factory, &opensans, "Lay this out in OpenSans ;3");
-    test_layout(&factory, &firacode, "Lay this out in Fira Code O:");
+    test_layout(&factory, &opensans, "Lay this out in Open Sans ;3");
+    test_layout(&factory, &firacode, "Lay this out in Fira Code >>=");
 }
