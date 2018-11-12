@@ -15,7 +15,7 @@ pub use self::builder::FontFileBuilder;
 pub mod builder;
 pub mod loader;
 
-#[derive(Clone, ComWrapper)]
+#[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 pub struct FontFile {

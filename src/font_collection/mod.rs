@@ -20,7 +20,7 @@ pub use font_collection::builder::FontCollectionBuilder;
 pub mod builder;
 pub mod loader;
 
-#[derive(ComWrapper)]
+#[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 pub struct FontCollection {

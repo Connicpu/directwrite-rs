@@ -7,20 +7,44 @@ use directwrite::font_file::loader::{FileLoaderHandle, FontFileLoader, StaticDat
 use directwrite::{Factory, FontCollection, FontFile, TextFormat, TextLayout};
 use winapi::shared::winerror::{ERROR_NOT_FOUND, HRESULT_FROM_WIN32};
 
+const OPENSANS_REGULAR: StaticDataStream = StaticDataStream {
+    // Sunday, November 11, 2018 18:30:45
+    last_modified: 636775578456076107,
+    data: include_bytes!("test_fonts/OpenSans-Regular.ttf"),
+};
+const FIRACODE_REGULAR: StaticDataStream = StaticDataStream {
+    // Sunday, November 11, 2018 18:30:45
+    last_modified: 636775578456076107,
+    data: include_bytes!("test_fonts/FiraCode-Regular.ttf"),
+};
+const FIRACODE_BOLD: StaticDataStream = StaticDataStream {
+    // Sunday, November 11, 2018 18:30:45
+    last_modified: 636775578456076107,
+    data: include_bytes!("test_fonts/FiraCode-Bold.ttf"),
+};
+const FIRACODE_LIGHT: StaticDataStream = StaticDataStream {
+    // Sunday, November 11, 2018 18:30:45
+    last_modified: 636775578456076107,
+    data: include_bytes!("test_fonts/FiraCode-Light.ttf"),
+};
+const FIRACODE_MEDIUM: StaticDataStream = StaticDataStream {
+    // Sunday, November 11, 2018 18:30:45
+    last_modified: 636775578456076107,
+    data: include_bytes!("test_fonts/FiraCode-Medium.ttf"),
+};
+
 pub struct DataFileLoader;
 impl FontFileLoader for DataFileLoader {
     type Key = str;
     type Stream = StaticDataStream;
 
     fn create_stream(&self, key: &str) -> DWResult<StaticDataStream> {
-        static OPENSANS_REGULAR: &[u8] = include_bytes!("test_fonts/OpenSans-Regular.ttf");
-
         match key {
-            "OpenSans-Regular" => Ok(StaticDataStream {
-                // Sunday, November 11, 2018 18:30:45
-                last_modified: 636775578456076107,
-                data: OPENSANS_REGULAR,
-            }),
+            "OpenSans-Regular" => Ok(OPENSANS_REGULAR),
+            "FiraCode-Regular" => Ok(FIRACODE_REGULAR),
+            "FiraCode-Bold" => Ok(FIRACODE_BOLD),
+            "FiraCode-Medium" => Ok(FIRACODE_MEDIUM),
+            "FiraCode-Light" => Ok(FIRACODE_LIGHT),
             _ => Err(HRESULT_FROM_WIN32(ERROR_NOT_FOUND).into()),
         }
     }
@@ -32,7 +56,14 @@ impl FontCollectionLoader for DataCollectionLoader {
     type Iter = Box<Iterator<Item = DWResult<FontFile>>>;
 
     fn get_iterator(&self, factory: &Factory, _key: &()) -> DWResult<Self::Iter> {
-        static FONTS: &[&str] = &["OpenSans-Regular"];
+        static FONTS: &[&str] = &[
+            "OpenSans-Regular",
+
+            "FiraCode-Regular",
+            "FiraCode-Bold",
+            "FiraCode-Medium",
+            "FiraCode-Light",
+        ];
 
         let factory = factory.clone();
         let loader = self.0.clone();
@@ -59,20 +90,39 @@ fn load_custom_font() {
         .build()
         .unwrap();
 
-    let format = TextFormat::create(&factory)
+    assert_eq!(collection.find_family_by_name("Open Sans"), Some(0));
+    assert_eq!(collection.find_family_by_name("Fira Code"), Some(1));
+
+    let opensans = TextFormat::create(&factory)
         .with_collection(&collection)
-        .with_family("OpenSans")
+        .with_family("Open Sans")
         .with_size(12.0)
         .build()
         .unwrap();
 
-    let layout = TextLayout::create(&factory)
-        .with_format(&format)
-        .with_str("It works! O:")
-        .with_size(1200.0, 500.0)
-        .with_centered(true)
+    assert_eq!(opensans.font_collection().as_ref(), Some(&collection));
+    assert_eq!(opensans.font_family_name().as_ref().map(|s| &s[..]), Some("Open Sans"));
+
+    let firacode = TextFormat::create(&factory)
+        .with_collection(&collection)
+        .with_family("Fira Code")
+        .with_size(12.0)
         .build()
         .unwrap();
 
-    let _clusters = layout.cluster_metrics();
+    assert_eq!(firacode.font_collection().as_ref(), Some(&collection));
+    assert_eq!(firacode.font_family_name().as_ref().map(|s| &s[..]), Some("Fira Code"));
+
+    fn test_layout(factory: &Factory, format: &TextFormat, text: &str) {
+        TextLayout::create(&factory)
+            .with_format(&format)
+            .with_str(text)
+            .with_size(1200.0, 500.0)
+            .with_centered(true)
+            .build()
+            .unwrap();
+    }
+
+    test_layout(&factory, &opensans, "Lay this out in OpenSans ;3");
+    test_layout(&factory, &firacode, "Lay this out in Fira Code O:");
 }

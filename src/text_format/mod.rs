@@ -17,7 +17,7 @@ pub use self::builder::TextFormatBuilder;
 
 pub mod builder;
 
-#[derive(ComWrapper)]
+#[derive(ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 pub struct TextFormat {
@@ -45,7 +45,7 @@ impl TextFormat {
         }
     }
 
-    pub fn font_family_name(&self) -> DWResult<String> {
+    pub fn font_family_name(&self) -> Option<String> {
         unsafe {
             let len = self.ptr.GetFontFamilyNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
@@ -54,9 +54,9 @@ impl TextFormat {
                 buf.set_len(len as usize);
                 let osstr = OsString::from_wide(&buf);
                 let ff_name = osstr.to_string_lossy().into_owned();
-                Ok(ff_name)
+                Some(ff_name)
             } else {
-                Err(hr.into())
+                None
             }
         }
     }

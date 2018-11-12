@@ -18,7 +18,7 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFont;
 use wio::com::ComPtr;
 
-#[derive(ComWrapper)]
+#[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 /// Represents a physical font in a font collection. This interface is used to

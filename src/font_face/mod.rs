@@ -27,7 +27,7 @@ pub mod builder;
 #[doc(hidden)]
 pub mod table;
 
-#[derive(ComWrapper)]
+#[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 pub struct FontFace {

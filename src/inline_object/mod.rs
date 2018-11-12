@@ -7,7 +7,7 @@ use inline_object::custom::CustomInlineObject;
 pub mod custom;
 
 #[repr(transparent)]
-#[derive(ComWrapper)]
+#[derive(Clone, ComWrapper)]
 #[com(send, sync)]
 pub struct InlineObject {
     ptr: ComPtr<IDWriteInlineObject>,

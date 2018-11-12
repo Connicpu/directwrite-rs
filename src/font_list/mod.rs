@@ -8,7 +8,7 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontList;
 use wio::com::ComPtr;
 
-#[derive(ComWrapper)]
+#[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
 pub struct FontList {
