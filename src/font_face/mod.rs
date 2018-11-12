@@ -3,7 +3,7 @@ use enums::{FontFaceType, FontSimulations, MeasuringMode, RenderingMode};
 use error::DWResult;
 use factory::Factory;
 use font_file::FontFile;
-use geometry_sink::{ComGeometrySink, GeometrySink};
+use geometry_sink::{self, GeometrySink};
 use glyphs::GlyphOffset;
 use metrics::{FontMetrics, GlyphMetrics};
 use rendering_params::RenderingParams;
@@ -131,7 +131,7 @@ impl FontFace {
         assert!(glyph_advances.map(|g| g.len() == gi.len()).unwrap_or(true));
         assert!(glyph_offsets.map(|g| g.len() == gi.len()).unwrap_or(true));
 
-        let mut geometry_sink = ComGeometrySink::new(geometry_sink);
+        let geometry_sink = geometry_sink::com_sink::ComGeometrySink::new(geometry_sink);
 
         unsafe {
             let hr = self.ptr.GetGlyphRunOutline(
@@ -146,9 +146,9 @@ impl FontFace {
                     None => ptr::null(),
                 },
                 glyph_indices.len() as u32,
-                if is_sideways { 1 } else { 0 },
-                if is_rtl { 1 } else { 0 },
-                geometry_sink.as_raw_sink(),
+                is_sideways as i32,
+                is_rtl as i32,
+                geometry_sink.as_raw(),
             );
             if SUCCEEDED(hr) {
                 Ok(())

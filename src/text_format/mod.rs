@@ -29,11 +29,11 @@ impl TextFormat {
         unsafe { TextFormatBuilder::new(&*factory.get_raw()) }
     }
 
-    pub fn get_flow_direction(&self) -> UncheckedEnum<FlowDirection> {
+    pub fn flow_direction(&self) -> UncheckedEnum<FlowDirection> {
         unsafe { self.ptr.GetFlowDirection().into() }
     }
 
-    pub fn get_font_collection(&self) -> Option<FontCollection> {
+    pub fn font_collection(&self) -> Option<FontCollection> {
         unsafe {
             let mut ptr = ptr::null_mut();
             let hr = self.ptr.GetFontCollection(&mut ptr);
@@ -45,7 +45,7 @@ impl TextFormat {
         }
     }
 
-    pub fn get_font_family_name(&self) -> DWResult<String> {
+    pub fn font_family_name(&self) -> DWResult<String> {
         unsafe {
             let len = self.ptr.GetFontFamilyNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
@@ -61,27 +61,27 @@ impl TextFormat {
         }
     }
 
-    pub fn get_font_size(&self) -> f32 {
+    pub fn font_size(&self) -> f32 {
         unsafe { self.ptr.GetFontSize() }
     }
 
-    pub fn get_font_stretch(&self) -> UncheckedEnum<FontStretch> {
+    pub fn font_stretch(&self) -> UncheckedEnum<FontStretch> {
         unsafe { self.ptr.GetFontStretch().into() }
     }
 
-    pub fn get_font_style(&self) -> UncheckedEnum<FontStyle> {
+    pub fn font_style(&self) -> UncheckedEnum<FontStyle> {
         unsafe { self.ptr.GetFontStyle().into() }
     }
 
-    pub fn get_font_weight(&self) -> FontWeight {
+    pub fn font_weight(&self) -> FontWeight {
         unsafe { FontWeight(self.ptr.GetFontWeight()) }
     }
 
-    pub fn get_incremental_tabstop(&self) -> f32 {
+    pub fn incremental_tabstop(&self) -> f32 {
         unsafe { self.ptr.GetIncrementalTabStop() }
     }
 
-    pub fn get_line_spacing(&self) -> DWResult<LineSpacing> {
+    pub fn line_spacing(&self) -> DWResult<LineSpacing> {
         unsafe {
             let mut method = 0;
             let mut spacing = 0.0;
@@ -102,7 +102,7 @@ impl TextFormat {
         }
     }
 
-    pub fn get_locale_name(&self) -> DWResult<String> {
+    pub fn locale_name(&self) -> DWResult<String> {
         unsafe {
             let len = self.ptr.GetLocaleNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
@@ -120,21 +120,21 @@ impl TextFormat {
         }
     }
 
-    pub fn get_paragraph_alignment(&self) -> UncheckedEnum<ParagraphAlignment> {
+    pub fn paragraph_alignment(&self) -> UncheckedEnum<ParagraphAlignment> {
         unsafe { self.ptr.GetParagraphAlignment().into() }
     }
 
-    pub fn get_reading_direction(&self) -> UncheckedEnum<ReadingDirection> {
+    pub fn reading_direction(&self) -> UncheckedEnum<ReadingDirection> {
         unsafe { self.ptr.GetReadingDirection().into() }
     }
 
-    pub fn get_text_alignment(&self) -> UncheckedEnum<TextAlignment> {
+    pub fn text_alignment(&self) -> UncheckedEnum<TextAlignment> {
         unsafe { self.ptr.GetTextAlignment().into() }
     }
 
-    // TODO: pub fn get_trimming
+    // TODO: pub fn trimming
 
-    pub fn get_word_wrapping(&self) -> UncheckedEnum<WordWrapping> {
+    pub fn word_wrapping(&self) -> UncheckedEnum<WordWrapping> {
         unsafe { self.ptr.GetWordWrapping().into() }
     }
 

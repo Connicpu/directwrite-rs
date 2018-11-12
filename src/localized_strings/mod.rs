@@ -1,5 +1,3 @@
-use error::DWResult;
-
 use std::ffi::{OsStr, OsString};
 use std::fmt;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
@@ -34,7 +32,7 @@ impl LocalizedStrings {
         }
     }
 
-    pub fn locale_by_name(&self, name: impl AsRef<OsStr>) -> DWResult<Option<LocalizedString>> {
+    pub fn locale_by_name(&self, name: impl AsRef<OsStr>) -> Option<LocalizedString> {
         let name: Vec<u16> = name.as_ref().encode_wide().chain(Some(0)).collect();
 
         let mut index = 0;
@@ -42,18 +40,12 @@ impl LocalizedStrings {
         unsafe {
             let name = name.as_ptr();
             let hr = self.ptr.FindLocaleName(name, &mut index, &mut exists);
-            if !SUCCEEDED(hr) {
-                return Err(hr.into());
+            if SUCCEEDED(hr) && exists != 0 {
+                Some(self.unchecked_locale(index))
+            } else {
+                None
             }
         }
-
-        let result = if exists != 0 {
-            Some(self.unchecked_locale(index))
-        } else {
-            None
-        };
-
-        Ok(result)
     }
 
     fn unchecked_locale(&self, index: u32) -> LocalizedString {

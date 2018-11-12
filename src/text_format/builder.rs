@@ -78,7 +78,7 @@ impl<'a> TextFormatBuilder<'a> {
         self
     }
 
-    pub fn with_font_collection(mut self, collection: &'a FontCollection) -> Self {
+    pub fn with_collection(mut self, collection: &'a FontCollection) -> Self {
         self.collection = Some(collection);
         self
     }

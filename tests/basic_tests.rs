@@ -33,8 +33,8 @@ fn create_layout() {
         .unwrap();
 
     TextLayout::create(&factory)
-        .with_text("This is some test text!")
-        .with_font(&font)
+        .with_str("This is some test text!")
+        .with_format(&font)
         .with_width(300.0)
         .with_height(200.0)
         .build()
@@ -54,18 +54,31 @@ fn set_attributes() {
     let text = "This is some test text!";
 
     let mut layout = TextLayout::create(&factory)
-        .with_text(text)
-        .with_font(&font)
+        .with_str(text)
+        .with_format(&font)
         .with_width(300.0)
         .with_height(200.0)
         .build()
         .unwrap();
 
     layout.set_underline(true, ..text.len() as u32).unwrap();
-    let (is_underlined, range) = layout.get_underline(0).unwrap();
+
+    let (is_underlined, range) = layout.underline(0).unwrap();
     assert!(is_underlined);
     assert_eq!(range.start, 0);
     assert_eq!(range.length as usize, text.len());
+
+    layout.set_underline(false, 0).unwrap();
+
+    let (is_underlined, range) = layout.underline(0).unwrap();
+    assert!(!is_underlined);
+    assert_eq!(range.start, 0);
+    assert_eq!(range.length, 1);
+    
+    let (is_underlined, range) = layout.underline(1).unwrap();
+    assert!(is_underlined);
+    assert_eq!(range.start, 1);
+    assert_eq!(range.length as usize, text.len() - 1);
 }
 
 #[test]
@@ -78,11 +91,13 @@ fn query_fonts() {
 
     for i in 0..count {
         let family = collection.family(i).unwrap();
-        let family_name = family.get_family_name().unwrap();
-        assert_eq!(
-            collection.find_family_name(&family_name).unwrap(),
-            i
-        );
+        let family_name = family
+            .family_name()
+            .unwrap()
+            .locale_by_name("en-US")
+            .unwrap()
+            .string();
+        assert_eq!(collection.find_family_by_name(&family_name).unwrap(), i);
     }
 
     let ffile = FontFile::create(&factory)

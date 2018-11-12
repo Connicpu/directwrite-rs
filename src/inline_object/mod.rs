@@ -1,108 +1,21 @@
-use enums::BreakCondition;
-use error::DWResult;
-
-use std::any::Any;
-use std::sync::Arc;
-
-use winapi::ctypes::c_void;
-use winapi::um::dwrite::{IDWriteInlineObject, IDWriteInlineObjectVtbl, IDWriteTextRenderer};
-use winapi::um::unknwnbase::IUnknown;
+use com_wrapper::ComWrapper;
+use winapi::um::dwrite::IDWriteInlineObject;
 use wio::com::ComPtr;
 
-mod vtbl;
+use inline_object::custom::CustomInlineObject;
 
-#[repr(C)]
-pub struct InlineObjectContainer {
-    com_vtbl: *const IDWriteInlineObjectVtbl,
-    obj: Box<InlineObject>,
+pub mod custom;
+
+#[repr(transparent)]
+#[derive(ComWrapper)]
+#[com(send, sync)]
+pub struct InlineObject {
+    ptr: ComPtr<IDWriteInlineObject>,
 }
 
-impl InlineObjectContainer {
-    pub fn new(obj: impl Into<Box<InlineObject>>) -> Arc<InlineObjectContainer> {
-        Arc::new(InlineObjectContainer {
-            com_vtbl: &vtbl::INLINE_OBJECT_VTBL,
-            obj: obj.into(),
-        })
-    }
-
-    pub unsafe fn try_from_ptr(
-        ptr: *mut IDWriteInlineObject,
-    ) -> Option<Arc<InlineObjectContainer>> {
-        let ptr = ptr as *const InlineObjectContainer;
-
-        if (*ptr).com_vtbl == &vtbl::INLINE_OBJECT_VTBL {
-            Some(Arc::from_raw(ptr))
-        } else {
-            None
-        }
-    }
-
-    pub unsafe fn into_raw(container: Arc<InlineObjectContainer>) -> *mut IDWriteInlineObject {
-        Arc::into_raw(container) as *mut _
+impl InlineObject {
+    pub fn create_custom(object: impl CustomInlineObject) -> InlineObject {
+        let ptr = custom::com_obj::ComInlineObject::new(object);
+        unsafe { InlineObject::from_ptr(ptr) }
     }
 }
-
-pub trait InlineObject: Any + Send + Sync {
-    fn draw(&self, context: &DrawingContext) -> DWResult<()>;
-    fn get_metrics(&self) -> DWResult<InlineObjectMetrics>;
-    fn get_overhang_metrics(&self) -> DWResult<InlineObjectOverhang>;
-    fn get_break_conditions(&self) -> DWResult<(BreakCondition, BreakCondition)>;
-}
-
-pub struct DrawingContext {
-    pub client_context: *mut c_void,
-    pub renderer: ComPtr<IDWriteTextRenderer>,
-    pub origin_x: f32,
-    pub origin_y: f32,
-    pub is_sideways: bool,
-    pub is_right_to_left: bool,
-    pub client_effect: Option<ComPtr<IUnknown>>,
-}
-
-pub struct InlineObjectMetrics {
-    pub width: f32,
-    pub height: f32,
-    pub baseline: f32,
-    pub supports_sideways: bool,
-}
-
-pub struct InlineObjectOverhang {
-    pub left: f32,
-    pub top: f32,
-    pub right: f32,
-    pub bottom: f32,
-}
-
-pub unsafe trait IntoInlineObject {
-    unsafe fn into_iobj(self) -> *mut IDWriteInlineObject;
-}
-
-#[derive(Copy, Clone, PartialEq, Eq)]
-pub struct RawInlineObject(*mut IDWriteInlineObject);
-
-impl RawInlineObject {
-    #[inline]
-    pub unsafe fn new(ptr: *mut IDWriteInlineObject) -> Self {
-        RawInlineObject(ptr)
-    }
-
-    #[inline]
-    pub unsafe fn into_raw(self) -> *mut IDWriteInlineObject {
-        self.0
-    }
-}
-
-unsafe impl IntoInlineObject for RawInlineObject {
-    unsafe fn into_iobj(self) -> *mut IDWriteInlineObject {
-        self.into_raw()
-    }
-}
-
-unsafe impl IntoInlineObject for Arc<InlineObjectContainer> {
-    unsafe fn into_iobj(self) -> *mut IDWriteInlineObject {
-        InlineObjectContainer::into_raw(self)
-    }
-}
-
-unsafe impl Send for InlineObjectContainer {}
-unsafe impl Sync for InlineObjectContainer {}

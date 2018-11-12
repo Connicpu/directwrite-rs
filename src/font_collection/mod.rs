@@ -1,9 +1,9 @@
 use error::DWResult;
 use factory::Factory;
 use font::Font;
-use font_collection_loader::FontKey;
 use font_face::FontFace;
 use font_family::FontFamily;
+use key::FontKey;
 
 use std::ptr;
 
@@ -17,7 +17,8 @@ use wio::wide::ToWide;
 pub use font_collection::builder::FontCollectionBuilder;
 
 #[doc(hidden)]
-mod builder;
+pub mod builder;
+pub mod loader;
 
 #[derive(ComWrapper)]
 #[com(send, sync, debug)]
@@ -35,7 +36,7 @@ impl FontCollection {
     }
 
     /// Finds the font family with the specified family name and returns its index
-    pub fn find_family_name(&self, family_name: &str) -> Option<u32> {
+    pub fn find_family_by_name(&self, family_name: &str) -> Option<u32> {
         unsafe {
             let family = family_name.to_wide_null();
             let family = family.as_ptr();

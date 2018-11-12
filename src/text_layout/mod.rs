@@ -3,15 +3,23 @@ use enums::{FontStretch, FontStyle, FontWeight};
 use error::DWResult;
 use factory::Factory;
 use font_collection::FontCollection;
-use helpers::InternalConstructor;
-use inline_object::IntoInlineObject;
+use helpers::{deref_com_wrapper, deref_com_wrapper_mut};
+use inline_object::InlineObject;
+use metrics::cluster::ClusterMetrics;
+use metrics::hit_test::HitTestMetrics;
+use metrics::line::LineMetrics;
+use metrics::overhang::OverhangMetrics;
+use metrics::text::TextMetrics;
 use text_format::TextFormat;
-use text_renderer::{Context, TextRenderer, TextRendererComRef};
+use text_range::TextRange;
+use text_renderer::TextRenderer;
 
-use std::{mem, ops, ptr, u32};
+use std::ops::{Deref, DerefMut};
+use std::{mem, ptr, u32};
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;
@@ -20,23 +28,34 @@ use wio::wide::ToWide;
 pub use self::builder::TextLayoutBuilder;
 
 pub mod builder;
-pub mod metrics;
+
+pub type RangeResult<T> = DWResult<(T, TextRange)>;
 
 #[derive(ComWrapper)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
-/// The TextLayout interface represents a block of text after it has been fully analyzed and formatted.
+/// The TextLayout interface represents a block of text after it has been fully
+/// analyzed and formatted.
 pub struct TextLayout {
     ptr: ComPtr<IDWriteTextLayout>,
+}
+
+impl Deref for TextLayout {
+    type Target = TextFormat;
+    fn deref(&self) -> &TextFormat {
+        unsafe { deref_com_wrapper(self) }
+    }
+}
+
+impl DerefMut for TextLayout {
+    fn deref_mut(&mut self) -> &mut TextFormat {
+        unsafe { deref_com_wrapper_mut(self) }
+    }
 }
 
 impl TextLayout {
     pub fn create<'a>(factory: &'a Factory) -> TextLayoutBuilder<'a> {
         unsafe { TextLayoutBuilder::new(&*factory.get_raw()) }
-    }
-
-    pub fn into_format(self) -> TextFormat {
-        unsafe { TextFormat::from_ptr(self.ptr.clone().up()) }
     }
 
     /// Determines the minimum possible width the layout can be set to without emergency breaking
@@ -54,14 +73,12 @@ impl TextLayout {
         renderer: &mut TextRenderer,
         origin_x: f32,
         origin_y: f32,
-        context: Context,
+        context: usize,
     ) -> DWResult<()> {
         unsafe {
-            let mut renderer = TextRendererComRef::new(renderer);
-
             let hr = self
                 .ptr
-                .Draw(context.0, renderer.as_raw(), origin_x, origin_y);
+                .Draw(context as *mut _, renderer.get_raw(), origin_x, origin_y);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -71,7 +88,7 @@ impl TextLayout {
     }
 
     /// Gets the number of ClusterMetrics objects which exist for this TextLayout
-    pub fn get_cluster_metrics_count(&self) -> usize {
+    pub fn cluster_metrics_count(&self) -> usize {
         unsafe {
             let mut count = 0;
             self.ptr.GetClusterMetrics(ptr::null_mut(), 0, &mut count);
@@ -83,10 +100,7 @@ impl TextLayout {
     /// slice is large enough to hold all of the metrics, which can be obtained by calling
     /// `get_cluster_metrics_count`. If the slice is not large enough, it will return
     /// Err(actual_count), otherwise returns Ok(actual_count).
-    pub fn get_cluster_metrics_slice(
-        &self,
-        buf: &mut [metrics::ClusterMetrics],
-    ) -> Result<usize, usize> {
+    pub fn cluster_metrics_slice(&self, buf: &mut [ClusterMetrics]) -> Result<usize, usize> {
         assert!(buf.len() <= u32::MAX as usize);
         unsafe {
             let mut actual_count = 0;
@@ -103,17 +117,18 @@ impl TextLayout {
         }
     }
 
-    /// Fill all of the Cluster metrics into a Vec. This function will resize the Vec to fit all
-    /// of the metrics structures exactly.
-    pub fn get_cluster_metrics(&self, buf: &mut Vec<metrics::ClusterMetrics>) {
-        let count = self.get_cluster_metrics_count();
-        buf.resize(count, Default::default());
-        assert_eq!(self.get_cluster_metrics_slice(buf), Ok(count));
+    /// Fill all of the Cluster metrics into a Vec.
+    pub fn cluster_metrics(&self) -> Vec<ClusterMetrics> {
+        let count = self.cluster_metrics_count();
+        let mut buf = Vec::with_capacity(count);
+        unsafe { buf.set_len(count) };
+        assert_eq!(self.cluster_metrics_slice(&mut buf), Ok(count));
+        buf
     }
 
     /// Gets the font collection of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_collection(&self, position: u32) -> DWResult<(FontCollection, TextRange)> {
+    pub fn font_collection(&self, position: u32) -> RangeResult<FontCollection> {
         unsafe {
             let mut collection = ptr::null_mut();
             let mut range = mem::uninitialized();
@@ -129,7 +144,7 @@ impl TextLayout {
 
     /// Gets the font em height of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_size(&self, position: u32) -> DWResult<(f32, TextRange)> {
+    pub fn font_size(&self, position: u32) -> RangeResult<f32> {
         unsafe {
             let mut font_size = 0.0;
             let mut range = mem::uninitialized();
@@ -143,10 +158,7 @@ impl TextLayout {
 
     /// Gets the font stretch of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_stretch(
-        &self,
-        position: u32,
-    ) -> DWResult<(UncheckedEnum<FontStretch>, TextRange)> {
+    pub fn font_stretch(&self, position: u32) -> RangeResult<UncheckedEnum<FontStretch>> {
         unsafe {
             let (mut stretch, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontStretch(position, &mut stretch, &mut range);
@@ -160,7 +172,7 @@ impl TextLayout {
 
     /// Gets the font style of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_style(&self, position: u32) -> DWResult<(UncheckedEnum<FontStyle>, TextRange)> {
+    pub fn font_style(&self, position: u32) -> RangeResult<UncheckedEnum<FontStyle>> {
         unsafe {
             let (mut style, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontStyle(position, &mut style, &mut range);
@@ -174,7 +186,7 @@ impl TextLayout {
 
     /// Gets the font weight of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
-    pub fn get_font_weight(&self, position: u32) -> DWResult<(FontWeight, TextRange)> {
+    pub fn font_weight(&self, position: u32) -> RangeResult<FontWeight> {
         unsafe {
             let (mut weight, mut range) = mem::uninitialized();
             let res = self.ptr.GetFontWeight(position, &mut weight, &mut range);
@@ -187,16 +199,13 @@ impl TextLayout {
     }
 
     /// Gets the inline object at the position as-is. May return ptr::null_mut()
-    pub fn get_inline_object(
-        &self,
-        position: u32,
-    ) -> DWResult<(*mut IDWriteInlineObject, TextRange)> {
+    pub fn inline_object(&self, position: u32) -> RangeResult<InlineObject> {
         unsafe {
             let mut range = mem::uninitialized();
             let mut ptr = ptr::null_mut();
             let hr = self.ptr.GetInlineObject(position, &mut ptr, &mut range);
             if SUCCEEDED(hr) {
-                Ok((ptr, range.into()))
+                Ok((InlineObject::from_raw(ptr), range.into()))
             } else {
                 Err(hr.into())
             }
@@ -205,7 +214,7 @@ impl TextLayout {
 
     /// Get the number of LineMetrics objects that you need room for when calling
     /// `get_line_metrics_slice`
-    pub fn get_line_metrics_count(&self) -> usize {
+    pub fn line_metrics_count(&self) -> usize {
         unsafe {
             let mut count = 0;
             self.ptr.GetLineMetrics(ptr::null_mut(), 0, &mut count);
@@ -219,7 +228,7 @@ impl TextLayout {
     /// layout, but the official documentation does *not* specify whether the array will be filled
     /// with any values in the Err case, so that behavior is not guaranteed between windows
     /// versions.
-    pub fn get_line_metrics_slice(&self, buf: &mut [metrics::LineMetrics]) -> Result<usize, usize> {
+    pub fn line_metrics_slice(&self, buf: &mut [LineMetrics]) -> Result<usize, usize> {
         assert!(buf.len() <= u32::MAX as usize);
         unsafe {
             let mut actual_count = 0;
@@ -236,50 +245,45 @@ impl TextLayout {
         }
     }
 
-    /// Retrieves the information about each individual text line of the text string. Resizes `buf`
-    /// to fit all of the elements.
-    pub fn get_line_metrics(&self, buf: &mut Vec<metrics::LineMetrics>) {
-        let count = self.get_line_metrics_count();
-        unsafe {
-            buf.clear();
-            buf.reserve(count);
-            buf.set_len(count);
-        }
-        assert_eq!(self.get_line_metrics_slice(buf), Ok(count));
+    /// Retrieves the information about each individual text line of the text string.
+    pub fn line_metrics(&self) -> Vec<LineMetrics> {
+        let count = self.line_metrics_count();
+        let mut buf = Vec::with_capacity(count);
+        unsafe { buf.set_len(count) };
+        assert_eq!(self.line_metrics_slice(&mut buf), Ok(count));
+        buf
     }
 
     /// Gets the layout maximum height.
-    pub fn get_max_height(&self) -> f32 {
+    pub fn max_height(&self) -> f32 {
         unsafe { self.ptr.GetMaxHeight() }
     }
 
     /// Gets the layout maximum width.
-    pub fn get_max_width(&self) -> f32 {
+    pub fn max_width(&self) -> f32 {
         unsafe { self.ptr.GetMaxWidth() }
     }
 
     /// Retrieves overall metrics for the formatted string.
-    pub fn get_metrics(&self) -> metrics::Metrics {
+    pub fn metrics(&self) -> TextMetrics {
         unsafe {
             let mut metrics = mem::zeroed();
             self.ptr.GetMetrics(&mut metrics);
-
-            metrics::Metrics::build(metrics)
+            metrics.into()
         }
     }
 
     /// Returns the overhangs (in DIPs) of the layout and all objects contained in it, including
     /// text glyphs and inline objects.
-    pub fn get_overhang_metrics(&self) -> metrics::OverhangMetrics {
+    pub fn overhang_metrics(&self) -> OverhangMetrics {
         unsafe {
             let mut metrics = mem::zeroed();
             self.ptr.GetOverhangMetrics(&mut metrics);
-
-            metrics::OverhangMetrics::build(metrics)
+            metrics.into()
         }
     }
 
-    pub fn get_strikethrough(&self, position: u32) -> DWResult<(bool, TextRange)> {
+    pub fn strikethrough(&self, position: u32) -> RangeResult<bool> {
         unsafe {
             let (mut strikethrough, mut range) = mem::uninitialized();
             let res = self
@@ -295,7 +299,7 @@ impl TextLayout {
 
     // TODO: Typography
 
-    pub fn get_underline(&self, position: u32) -> DWResult<(bool, TextRange)> {
+    pub fn underline(&self, position: u32) -> RangeResult<bool> {
         unsafe {
             let (mut underline, mut range) = mem::uninitialized();
             let res = self.ptr.GetUnderline(position, &mut underline, &mut range);
@@ -320,7 +324,7 @@ impl TextLayout {
                 .HitTestPoint(point_x, point_y, &mut trail, &mut inside, &mut metrics);
 
             HitTestPoint {
-                metrics: InternalConstructor::build(metrics),
+                metrics: metrics.into(),
                 is_inside: inside != 0,
                 is_trailing_hit: trail != 0,
             }
@@ -349,7 +353,7 @@ impl TextLayout {
             }
 
             Some(HitTestTextPosition {
-                metrics: InternalConstructor::build(metrics),
+                metrics: metrics.into(),
                 point_x: x,
                 point_y: y,
             })
@@ -365,7 +369,7 @@ impl TextLayout {
         length: u32,
         origin_x: f32,
         origin_y: f32,
-        metrics: &mut Vec<metrics::HitTestMetrics>,
+        metrics: &mut Vec<HitTestMetrics>,
     ) -> bool {
         unsafe {
             // Calculate the total number of items we need
@@ -495,7 +499,7 @@ impl TextLayout {
 
     pub fn set_inline_object(
         &mut self,
-        iobj: impl IntoInlineObject,
+        obj: &InlineObject,
         range: impl Into<TextRange>,
     ) -> DWResult<()> {
         let range = range.into();
@@ -505,8 +509,7 @@ impl TextLayout {
         };
 
         unsafe {
-            let iobj = iobj.into_iobj();
-            let hr = self.ptr.SetInlineObject(iobj, range);
+            let hr = self.ptr.SetInlineObject(obj.get_raw(), range);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -584,16 +587,10 @@ impl TextLayout {
 
     /// Sets underlining for text within a specified text range.
     pub fn set_underline(&mut self, underline: bool, range: impl Into<TextRange>) -> DWResult<()> {
-        let range = range.into();
-
-        let underline = if underline { 1 } else { 0 };
-        let range = DWRITE_TEXT_RANGE {
-            startPosition: range.start,
-            length: range.length,
-        };
+        let range = range.into().into();
 
         unsafe {
-            let hr = self.ptr.SetUnderline(underline, range);
+            let hr = self.ptr.SetUnderline(underline as BOOL, range);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -604,78 +601,10 @@ impl TextLayout {
 }
 
 #[derive(Copy, Clone)]
-pub struct TextRange {
-    pub start: u32,
-    pub length: u32,
-}
-
-impl From<DWRITE_TEXT_RANGE> for TextRange {
-    fn from(range: DWRITE_TEXT_RANGE) -> Self {
-        TextRange {
-            start: range.startPosition,
-            length: range.length,
-        }
-    }
-}
-
-impl From<ops::Range<u32>> for TextRange {
-    fn from(range: ops::Range<u32>) -> Self {
-        assert!(
-            range.end > range.start,
-            "Range end cannot come before range start"
-        );
-        TextRange {
-            start: range.start,
-            length: range.end - range.start,
-        }
-    }
-}
-
-impl From<ops::RangeTo<u32>> for TextRange {
-    fn from(range: ops::RangeTo<u32>) -> Self {
-        TextRange {
-            start: 0,
-            length: range.end,
-        }
-    }
-}
-
-impl From<ops::RangeFrom<u32>> for TextRange {
-    fn from(range: ops::RangeFrom<u32>) -> Self {
-        TextRange {
-            start: range.start,
-            length: u32::MAX,
-        }
-    }
-}
-
-impl From<ops::RangeFull> for TextRange {
-    fn from(_range: ops::RangeFull) -> Self {
-        TextRange {
-            start: 0,
-            length: u32::MAX,
-        }
-    }
-}
-
-impl From<ops::RangeInclusive<u32>> for TextRange {
-    fn from(range: ops::RangeInclusive<u32>) -> Self {
-        assert!(
-            *range.end() >= *range.start(),
-            "Range end cannot come before range start"
-        );
-        TextRange {
-            start: *range.start(),
-            length: (*range.end() + 1) - *range.start(),
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
 pub struct HitTestPoint {
     /// The output geometry fully enclosing the hit-test location. When is_inside is set to false,
     /// this structure represents the geometry enclosing the edge closest to the hit-test location.
-    pub metrics: metrics::HitTestMetrics,
+    pub metrics: HitTestMetrics,
     /// An output flag that indicates whether the hit-test location is inside the text string. When
     /// false, the position nearest the text's edge is returned.
     pub is_inside: bool,
@@ -694,5 +623,5 @@ pub struct HitTestTextPosition {
     pub point_y: f32,
 
     /// The output geometry fully enclosing the specified text position.
-    pub metrics: metrics::HitTestMetrics,
+    pub metrics: HitTestMetrics,
 }

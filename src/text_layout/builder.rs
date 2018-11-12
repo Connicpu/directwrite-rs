@@ -1,6 +1,7 @@
 use error::DWriteError;
 use {TextFormat, TextLayout};
 
+use std::borrow::Cow;
 use std::ptr;
 
 use com_wrapper::ComWrapper;
@@ -11,7 +12,7 @@ use wio::wide::ToWide;
 
 pub struct TextLayoutBuilder<'a> {
     factory: &'a IDWriteFactory,
-    text: Option<&'a str>,
+    text: Option<Cow<'a, [u16]>>,
     format: Option<&'a TextFormat>,
     width: Option<f32>,
     height: Option<f32>,
@@ -32,7 +33,7 @@ impl<'a> TextLayoutBuilder<'a> {
 
     pub fn build(self) -> Result<TextLayout, DWriteError> {
         unsafe {
-            let text = self.text.expect("`text` must be specified").to_wide_null();
+            let text = self.text.expect("`text` must be specified");
             let format = self.format.expect("`format` must be specified");
             let width = self.width.expect("`width` or `size` must be specified");
             let height = self.height.expect("`height` or `size` must be specified");
@@ -60,30 +61,45 @@ impl<'a> TextLayoutBuilder<'a> {
         }
     }
 
-    pub fn with_text(mut self, text: &'a str) -> Self {
-        self.text = Some(text);
+    /// Specify the text from a UTF-8 string.
+    /// 
+    /// Be aware that all of the text positions returned from the directwrite APIs will use text
+    /// positions as if this text was converted to UTF-16.
+    pub fn with_str(mut self, text: &str) -> Self {
+        self.text = Some(text.to_wide().into());
         self
     }
 
-    pub fn with_font(mut self, font: &'a TextFormat) -> Self {
-        self.format = Some(font);
+    /// Specify the text from a UTF-16 string.
+    pub fn with_text(mut self, text: &'a [u16]) -> Self {
+        self.text = Some(Cow::Borrowed(text));
         self
     }
 
+    /// Specify the text format (Font) used with this text.
+    pub fn with_format(mut self, format: &'a TextFormat) -> Self {
+        self.format = Some(format);
+        self
+    }
+
+    /// Specify the maximum layout width in DIPs
     pub fn with_width(mut self, width: f32) -> Self {
         self.width = Some(width);
         self
     }
 
+    /// Specify the maximum layout height in DIPs
     pub fn with_height(mut self, height: f32) -> Self {
         self.height = Some(height);
         self
     }
 
+    /// Specify the maximum layout width and height in DIPs
     pub fn with_size(self, width: f32, height: f32) -> Self {
         self.with_width(width).with_height(height)
     }
 
+    /// Specify whether the text will be centered within the layout
     pub fn with_centered(mut self, centered: bool) -> Self {
         self.centered = centered;
         self

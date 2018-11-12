@@ -2,6 +2,7 @@ use enums::FontFaceType;
 use enums::FontFileType;
 use error::DWResult;
 use factory::Factory;
+use key::FontKey;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
@@ -12,6 +13,7 @@ use wio::com::ComPtr;
 pub use self::builder::FontFileBuilder;
 
 pub mod builder;
+pub mod loader;
 
 #[derive(Clone, ComWrapper)]
 #[com(send, sync, debug)]
@@ -21,7 +23,7 @@ pub struct FontFile {
 }
 
 impl FontFile {
-    pub fn create(factory: &Factory) -> FontFileBuilder {
+    pub fn create<K: FontKey + ?Sized>(factory: &Factory) -> FontFileBuilder<K> {
         unsafe { FontFileBuilder::new(&*factory.get_raw()) }
     }
 

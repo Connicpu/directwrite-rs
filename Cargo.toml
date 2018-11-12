@@ -18,6 +18,9 @@ com-wrapper = "0.1.0-alpha2"
 derive-com-wrapper = "0.1.0-alpha4"
 math2d = { version = "0.1.3", features = ["d2d"] }
 
+com-impl = "0.1.0-alpha2"
+derive-com-impl = "0.1.0-alpha3"
+
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3.6"
 features = ["dwrite", "winbase", "winnls"]

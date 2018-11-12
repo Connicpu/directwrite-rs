@@ -1,9 +1,8 @@
 use error::DWResult;
 use factory::Factory;
 use font_collection::FontCollection;
-use font_collection_loader::FontKey;
-use font_collection_loader::KeyPayload;
-use font_collection_loader::CollectionLoaderHandle;
+use font_collection::loader::CollectionLoaderHandle;
+use key::{FontKey, KeyPayload};
 
 use std::mem;
 use std::ptr;
@@ -12,16 +11,16 @@ use com_wrapper::ComWrapper;
 
 pub struct FontCollectionBuilder<'a, K>
 where
-    K: FontKey,
+    K: FontKey + ?Sized,
 {
     factory: &'a Factory,
     loader: Option<&'a CollectionLoaderHandle<K>>,
-    key: Option<K>,
+    key: Option<&'a K>,
 }
 
 impl<'a, K> FontCollectionBuilder<'a, K>
 where
-    K: FontKey,
+    K: FontKey + ?Sized,
 {
     pub fn new(factory: &'a Factory) -> Self {
         FontCollectionBuilder {
@@ -55,18 +54,8 @@ where
         self
     }
 
-    pub fn with_key(mut self, key: K) -> Self {
+    pub fn with_key(mut self, key: &'a K) -> Self {
         self.key = Some(key);
-        self
-    }
-}
-
-impl<'a, K> FontCollectionBuilder<'a, K>
-where
-    K: FontKey + Default,
-{
-    pub fn with_default_key(mut self) -> Self {
-        self.key = Some(Default::default());
         self
     }
 }
