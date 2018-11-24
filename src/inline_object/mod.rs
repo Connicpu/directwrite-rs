@@ -84,7 +84,7 @@ impl InlineObject {
     }
 
     /// Requests the inline object to draw itself.
-    pub fn draw(&self, context: DrawingContext) -> DWResult<()> {
+    pub fn draw(&self, context: &DrawingContext) -> DWResult<()> {
         unsafe {
             let hr = self.ptr.Draw(
                 context.client_context.ptr(),
@@ -135,6 +135,6 @@ pub struct DrawingContext<'a> {
     /// The drawing effect set in [`TextLayout::set_drawing_effect`][1]. Usually this effect is
     /// a foreground brush that is used in glyph drawing.
     ///
-    /// [1]: ../../struct.TextLayout.html#method.set_drawing_effect
+    /// [1]: ../struct.TextLayout.html#method.set_drawing_effect
     pub client_effect: Option<&'a ClientEffect>,
 }
