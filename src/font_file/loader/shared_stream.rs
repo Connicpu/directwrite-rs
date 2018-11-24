@@ -1,26 +1,30 @@
-use winapi::shared::winerror::E_FAIL;
 use error::DWResult;
 use font_file::loader::{FontFileStream, Fragment};
 
+use winapi::shared::winerror::E_FAIL;
+
+use std::sync::Arc;
+
+#[derive(Clone)]
 /// A simple FontFileStream implementation for when you want to just read the file
-/// into memory completely.
-pub struct OwnedDataStream {
+/// into memory completely and clone the data.
+pub struct SharedDataStream {
     /// The last time the file was modified in 100-nanosecond intervals since
     /// January 1, 1601 (UTC).
     pub last_write: u64,
 
     /// The contents of the file
-    pub data: Box<[u8]>,
+    pub data: Arc<[u8]>,
 }
 
-impl OwnedDataStream {
-    pub fn new(data: impl Into<Box<[u8]>>, last_write: u64) -> Self {
+impl SharedDataStream {
+    pub fn new(data: impl Into<Arc<[u8]>>, last_write: u64) -> Self {
         let data = data.into();
-        OwnedDataStream { data, last_write }
+        SharedDataStream { data, last_write }
     }
 }
 
-impl FontFileStream for OwnedDataStream {
+impl FontFileStream for SharedDataStream {
     fn file_size(&self) -> u64 {
         self.data.len() as u64
     }

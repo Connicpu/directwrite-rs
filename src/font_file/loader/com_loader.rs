@@ -7,9 +7,9 @@ use std::mem;
 use com_impl::Refcount;
 use com_impl::VTable;
 use winapi::ctypes::c_void;
-use winapi::shared::winerror::E_INVALIDARG;
 use winapi::shared::winerror::HRESULT;
 use winapi::shared::winerror::S_OK;
+use winapi::shared::winerror::{E_FAIL, E_INVALIDARG};
 use winapi::um::dwrite::IDWriteFontFileStream;
 use winapi::um::dwrite::{IDWriteFontFileLoader, IDWriteFontFileLoaderVtbl};
 use wio::com::ComPtr;
@@ -41,6 +41,7 @@ unsafe impl<T> IDWriteFontFileLoader for ComFontFileLoader<T>
 where
     T: FontFileLoader,
 {
+    #[panic(result = "E_FAIL")]
     unsafe fn create_stream_from_key(
         &self,
         key: *const c_void,

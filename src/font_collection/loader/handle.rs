@@ -12,7 +12,8 @@ use winapi::um::dwrite::IDWriteFontCollectionLoader;
 use wio::com::ComPtr;
 
 #[repr(C)]
-///
+/// A handle to a registered FontCollection. Use this for constructing
+/// a new FontCollection.
 pub struct CollectionLoaderHandle<K: FontKey + ?Sized> {
     pub(crate) ptr: ComPtr<IDWriteFontCollectionLoader>,
     _marker: PhantomData<K>,

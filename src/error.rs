@@ -1,5 +1,3 @@
-
-
 use helpers::hresult_to_string;
 
 use std::borrow::Cow;
@@ -8,6 +6,7 @@ use std::fmt;
 use std::result;
 
 use winapi::shared::ntdef::HRESULT;
+use winapi::shared::winerror::{E_FAIL, HRESULT_FROM_WIN32};
 
 /// Result type that could contain a DWriteError.
 pub type DWResult<T> = result::Result<T, DWriteError>;
@@ -27,6 +26,16 @@ impl DWriteError {
 impl From<HRESULT> for DWriteError {
     fn from(hr: HRESULT) -> DWriteError {
         DWriteError(hr)
+    }
+}
+
+impl From<std::io::Error> for DWriteError {
+    fn from(err: std::io::Error) -> DWriteError {
+        err.raw_os_error()
+            .map(|i| i as u32)
+            .map(HRESULT_FROM_WIN32)
+            .map(DWriteError)
+            .unwrap_or(E_FAIL.into())
     }
 }
 

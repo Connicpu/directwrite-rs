@@ -7,9 +7,13 @@ use font_file::FontFile;
 
 #[doc(inline)]
 pub use font_collection::loader::handle::CollectionLoaderHandle;
+#[doc(inline)]
+pub use font_collection::loader::key_loader::KeyLoader;
 
 #[doc(hidden)]
 pub mod handle;
+#[doc(hidden)]
+pub mod key_loader;
 
 pub(crate) mod com_enumerator;
 pub(crate) mod com_loader;

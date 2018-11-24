@@ -1,4 +1,5 @@
-//!
+//! Safe bindings for DirectWrite in Rust. Allows for the loading of fonts, laying out of text,
+//! and rendering text and glyphs to TextRenderers.
 
 #![cfg(windows)]
 #![warn(missing_docs)]
@@ -16,6 +17,7 @@ extern crate checked_enum;
 extern crate com_impl;
 extern crate com_wrapper;
 extern crate math2d;
+extern crate memmap;
 extern crate winapi;
 extern crate wio;
 

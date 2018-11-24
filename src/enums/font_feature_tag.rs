@@ -66,7 +66,7 @@ impl std::fmt::Debug for FontFeatureTag {
             } else {
                 let n1 = b & 0xF;
                 let n2 = b >> 4;
-                write!(fmt, "\\x{:x}{:x}", n2, n1);
+                write!(fmt, "\\x{:x}{:x}", n2, n1)?;
             }
         }
         fmt.write_char('"')?;

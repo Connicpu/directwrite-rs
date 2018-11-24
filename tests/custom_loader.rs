@@ -9,27 +9,27 @@ use winapi::shared::winerror::{ERROR_NOT_FOUND, HRESULT_FROM_WIN32};
 
 const OPENSANS_REGULAR: StaticDataStream = StaticDataStream {
     // Sunday, November 11, 2018 18:30:45
-    last_modified: 636775578456076107,
+    last_write: 636775578456076107,
     data: include_bytes!("test_fonts/OpenSans-Regular.ttf"),
 };
 const FIRACODE_REGULAR: StaticDataStream = StaticDataStream {
     // Sunday, November 11, 2018 18:30:45
-    last_modified: 636775578456076107,
+    last_write: 636775578456076107,
     data: include_bytes!("test_fonts/FiraCode-Regular.ttf"),
 };
 const FIRACODE_BOLD: StaticDataStream = StaticDataStream {
     // Sunday, November 11, 2018 18:30:45
-    last_modified: 636775578456076107,
+    last_write: 636775578456076107,
     data: include_bytes!("test_fonts/FiraCode-Bold.ttf"),
 };
 const FIRACODE_LIGHT: StaticDataStream = StaticDataStream {
     // Sunday, November 11, 2018 18:30:45
-    last_modified: 636775578456076107,
+    last_write: 636775578456076107,
     data: include_bytes!("test_fonts/FiraCode-Light.ttf"),
 };
 const FIRACODE_MEDIUM: StaticDataStream = StaticDataStream {
     // Sunday, November 11, 2018 18:30:45
-    last_modified: 636775578456076107,
+    last_write: 636775578456076107,
     data: include_bytes!("test_fonts/FiraCode-Medium.ttf"),
 };
 

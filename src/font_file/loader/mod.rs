@@ -47,10 +47,21 @@ use descriptions::FontKey;
 use error::DWResult;
 use factory::Factory;
 
+use std::fs::Metadata;
+use std::time::UNIX_EPOCH;
+
+#[doc(inline)]
+pub use font_file::loader::file_stream::FileStream;
 #[doc(inline)]
 pub use font_file::loader::handle::FileLoaderHandle;
 #[doc(inline)]
+pub use font_file::loader::mmap_stream::MmapStream;
+#[doc(inline)]
 pub use font_file::loader::owned_stream::OwnedDataStream;
+#[doc(inline)]
+pub use font_file::loader::set_loader::SetLoader;
+#[doc(inline)]
+pub use font_file::loader::shared_stream::SharedDataStream;
 #[doc(inline)]
 pub use font_file::loader::static_stream::StaticDataStream;
 
@@ -58,9 +69,19 @@ pub(crate) mod com_loader;
 pub(crate) mod com_stream;
 
 #[doc(hidden)]
+pub mod file_loader;
+#[doc(hidden)]
+pub mod file_stream;
+#[doc(hidden)]
 pub mod handle;
 #[doc(hidden)]
+pub mod mmap_stream;
+#[doc(hidden)]
 pub mod owned_stream;
+#[doc(hidden)]
+pub mod set_loader;
+#[doc(hidden)]
+pub mod shared_stream;
 #[doc(hidden)]
 pub mod static_stream;
 
@@ -86,9 +107,13 @@ pub trait FontFileLoader: Sized + Send + Sync + 'static {
     }
 }
 
+/// Describes the value that should be returned from `last_write_time` if the file was
+/// last written on the unix epoch.
+pub const UNIX_EPOCH_IN_WRITE_TIME: u64 = 621355968000000000;
+
 /// Represents a class for loading the data of a font file so that
 /// the runtime can construct a FontFile from it.
-pub trait FontFileStream: Send + Sync + 'static {
+pub trait FontFileStream: Sized + Send + Sync + 'static {
     /// The number of bytes in the file.
     fn file_size(&self) -> u64;
 
@@ -171,4 +196,24 @@ impl Fragment {
     pub unsafe fn new(key: usize, data: *const u8) -> Self {
         Fragment { key, data }
     }
+}
+
+/// Given a std::fs::Metadata, compute the appropriate timestamp in 100-nanosecond ticks.
+pub fn file_timestamp(meta: &Metadata) -> DWResult<u64> {
+    let modified = meta.modified()?;
+    let (neg, unix_modified) = match modified.duration_since(UNIX_EPOCH) {
+        Ok(dur) => (false, dur),
+        Err(e) => (true, e.duration()),
+    };
+    let unix_sec_ticks = unix_modified.as_secs() * 10_000_000;
+    let unix_subsec_ticks = unix_modified.subsec_nanos() as u64 / 100;
+    let unix_ticks = unix_sec_ticks + unix_subsec_ticks;
+
+    let ticks = if neg {
+        UNIX_EPOCH_IN_WRITE_TIME - unix_ticks
+    } else {
+        UNIX_EPOCH_IN_WRITE_TIME + unix_ticks
+    };
+
+    Ok(ticks)
 }
