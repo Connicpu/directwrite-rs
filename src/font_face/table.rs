@@ -1,6 +1,7 @@
 use winapi::ctypes::c_void;
 use winapi::um::dwrite::IDWriteFontFace;
 
+/// A reference to the feature tag data in a font file.
 pub struct FontTable<'a> {
     pub(super) face: &'a IDWriteFontFace,
     pub(super) context: *mut c_void,
@@ -9,6 +10,7 @@ pub struct FontTable<'a> {
 
 impl<'a> FontTable<'a> {
     #[inline]
+    /// Gets the data for the font data of the requested feature tag.
     pub fn data(&self) -> &[u8] {
         self.data
     }

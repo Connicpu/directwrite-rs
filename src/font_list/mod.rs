@@ -11,15 +11,18 @@ use wio::com::ComPtr;
 #[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
+/// Represents a list of fonts.
 pub struct FontList {
     ptr: ComPtr<IDWriteFontList>,
 }
 
 impl FontList {
+    /// The number of fonts in the list
     pub fn count(&self) -> u32 {
         unsafe { self.ptr.GetFontCount() }
     }
 
+    /// The collection that owns these fonts
     pub fn collection(&self) -> Option<FontCollection> {
         unsafe {
             let mut ptr = ptr::null_mut();
@@ -32,6 +35,7 @@ impl FontList {
         }
     }
 
+    /// Get a specific font in the list at the given index.
     pub fn get(&self, i: u32) -> Option<Font> {
         unsafe {
             let mut ptr = ptr::null_mut();
@@ -44,7 +48,8 @@ impl FontList {
         }
     }
 
-    pub fn all_fonts<'a>(&'a self) -> impl Iterator<Item = Font> + 'a {
+    /// Get an iterator over all fonts in the list.
+    pub fn all_fonts<'a>(&'a self) -> impl Iterator<Item = Font> + Clone + 'a {
         (0..self.count()).filter_map(move |i| self.get(i))
     }
 }

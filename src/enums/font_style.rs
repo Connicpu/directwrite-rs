@@ -39,7 +39,12 @@
 /// 
 /// </div>
 pub enum FontStyle {
+    /// The characters in a normal, or roman, font are upright. 
     Normal,
+
+    /// The characters in an oblique font are artificially slanted.
     Oblique,
+
+    /// The characters in an italic font are truly slanted and appear as they were designed.
     Italic,
 }

@@ -1,10 +1,22 @@
 use winapi::um::dwrite::DWRITE_TEXT_RANGE;
 
-#[derive(Copy, Clone)]
+#[repr(C)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 /// A text range, represented in UTF-16 code units.
 pub struct TextRange {
+    /// The first text position in the range
     pub start: u32,
+    /// The number of u16 code units that this range covers
     pub length: u32,
+}
+
+#[cfg(test)]
+member_compat_test! {
+    test_range_compat:
+    TextRange <=> DWRITE_TEXT_RANGE {
+        start <=> startPosition,
+        length <=> length,
+    }
 }
 
 impl From<TextRange> for DWRITE_TEXT_RANGE {

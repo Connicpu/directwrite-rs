@@ -1,8 +1,8 @@
+use descriptions::FontKey;
 use error::DWResult;
 use factory::Factory;
 use font_collection::loader::com_loader::ComFontCollectionLoader;
 use font_collection::loader::FontCollectionLoader;
-use key::FontKey;
 
 use std::marker::PhantomData;
 
@@ -12,12 +12,14 @@ use winapi::um::dwrite::IDWriteFontCollectionLoader;
 use wio::com::ComPtr;
 
 #[repr(C)]
+///
 pub struct CollectionLoaderHandle<K: FontKey + ?Sized> {
     pub(crate) ptr: ComPtr<IDWriteFontCollectionLoader>,
     _marker: PhantomData<K>,
 }
 
 impl<K: FontKey + ?Sized> CollectionLoaderHandle<K> {
+    /// Register the loader with the Factory so that its collections can be loaded.
     pub fn register<T>(factory: &Factory, loader: T) -> DWResult<Self>
     where
         T: FontCollectionLoader<Key = K>,
@@ -33,6 +35,7 @@ impl<K: FontKey + ?Sized> CollectionLoaderHandle<K> {
         }
     }
 
+    /// Unregister the loader from the factory so that it can be deallocated.
     pub fn unregister(self, factory: &Factory) {
         unsafe {
             (*factory.get_raw()).UnregisterFontCollectionLoader(self.ptr.as_raw());

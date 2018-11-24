@@ -1,3 +1,5 @@
+//! Enumerations and bit-combining flag structures for DirectWrite.
+
 #[doc(inline)]
 pub use enums::break_condition::BreakCondition;
 #[doc(inline)]
@@ -25,11 +27,15 @@ pub use enums::measuring_mode::MeasuringMode;
 #[doc(inline)]
 pub use enums::paragraph_alignment::ParagraphAlignment;
 #[doc(inline)]
+pub use enums::pixel_geometry::PixelGeometry;
+#[doc(inline)]
 pub use enums::reading_direction::ReadingDirection;
 #[doc(inline)]
 pub use enums::rendering_mode::RenderingMode;
 #[doc(inline)]
 pub use enums::text_alignment::TextAlignment;
+#[doc(inline)]
+pub use enums::trimming_granularity::TrimmingGranularity;
 #[doc(inline)]
 pub use enums::word_wrapping::WordWrapping;
 
@@ -60,10 +66,14 @@ pub mod measuring_mode;
 #[doc(hidden)]
 pub mod paragraph_alignment;
 #[doc(hidden)]
+pub mod pixel_geometry;
+#[doc(hidden)]
 pub mod reading_direction;
 #[doc(hidden)]
 pub mod rendering_mode;
 #[doc(hidden)]
 pub mod text_alignment;
+#[doc(hidden)]
+pub mod trimming_granularity;
 #[doc(hidden)]
 pub mod word_wrapping;

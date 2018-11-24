@@ -1,7 +1,7 @@
-use error::DWriteError;
+use descriptions::{FontKey, KeyPayload};
+use error::DWResult;
 use font_file::loader::handle::FileLoaderHandle;
 use font_file::FontFile;
-use key::{FontKey, KeyPayload};
 
 use std::ptr;
 
@@ -11,6 +11,17 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFactory;
 use wio::wide::ToWide;
 
+#[must_use]
+/// Facilitates construction of FontFiles.
+///
+/// You can construct a FontFile from either a custom font loader or a file path.
+///
+/// If you specify `file_path` you may optionally also specify `last_write_time` to let
+/// DirectWrite know what you believe the last-modified time of the file to be.
+///
+/// If you specify `loader` you must also specify a `key` to pass to the custom font loader.
+///
+/// `file_path` and `last_write_time` are mutually exclusive with `loader` and `key`.
 pub struct FontFileBuilder<'a, K: FontKey + ?Sized> {
     factory: &'a IDWriteFactory,
     source: Source<'a, K>,
@@ -29,6 +40,7 @@ enum Source<'a, K: FontKey + ?Sized> {
 }
 
 impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
+    /// Initializes a builder for a FontFile.
     pub fn new(factory: &'a IDWriteFactory) -> Self {
         FontFileBuilder {
             factory,
@@ -36,7 +48,8 @@ impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
         }
     }
 
-    pub fn build(self) -> Result<FontFile, DWriteError> {
+    /// Finalizes the builder and constructs the FontFile.
+    pub fn build(self) -> DWResult<FontFile> {
         unsafe {
             match self.source {
                 Source::Unspecified => {
@@ -88,6 +101,9 @@ impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
 }
 
 impl<'a> FontFileBuilder<'a, ()> {
+    /// Specify the font file path used to construct the font.
+    ///
+    /// Once this method has been called it is an error to call `with_loader` or `with_key`.
     pub fn with_file_path(mut self, file_path: &'a str) -> Self {
         self.source = match self.source {
             Source::Unspecified => Source::File {
@@ -103,6 +119,14 @@ impl<'a> FontFileBuilder<'a, ()> {
         self
     }
 
+    /// Specify the last-modified time the application believes the file should have. This is
+    /// entirely optional and if omitted the runtime will read the last-write time at the time
+    /// of construction.
+    ///
+    /// If you do specify this value, it should be the number of 100-nanosecond ticks elapsed
+    /// since `January 1, 1601 00:00:00 UTC`
+    ///
+    /// Once this method has been called it is an error to call `with_loader` or `with_key`.
     pub fn with_last_write_time(mut self, last_write: u64) -> Self {
         let last_write = FILETIME {
             dwLowDateTime: last_write as u32,
@@ -124,6 +148,7 @@ impl<'a> FontFileBuilder<'a, ()> {
 }
 
 impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
+    /// Specify the custom file loader that this file should be loaded from.
     pub fn with_loader(mut self, loader: &'a FileLoaderHandle<K>) -> Self {
         self.source = match self.source {
             Source::Unspecified => Source::Custom {
@@ -139,6 +164,7 @@ impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
         self
     }
 
+    /// Specify the key value to be passed to the custom font file loader.
     pub fn with_key(mut self, key: &'a K) -> Self {
         self.source = match self.source {
             Source::Unspecified => Source::Custom {

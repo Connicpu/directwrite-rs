@@ -1,8 +1,8 @@
+use descriptions::FontKey;
 use error::DWResult;
 use factory::Factory;
 use font_file::loader::com_loader::ComFontFileLoader;
 use font_file::loader::FontFileLoader;
-use key::FontKey;
 
 use com_wrapper::ComWrapper;
 use std::marker::PhantomData;
@@ -11,12 +11,15 @@ use winapi::um::dwrite::IDWriteFontFileLoader;
 use wio::com::ComPtr;
 
 #[repr(C)]
+/// A handle to a registered file loader. You can use this to load custom font files.
 pub struct FileLoaderHandle<K: FontKey + ?Sized> {
     pub(crate) ptr: ComPtr<IDWriteFontFileLoader>,
     _marker: PhantomData<K>,
 }
 
 impl<K: FontKey + ?Sized> FileLoaderHandle<K> {
+    /// Register a new file loader into the factory and get a handle
+    /// that you can use to load custom font files.
     pub fn register<T>(factory: &Factory, loader: T) -> DWResult<Self>
     where
         T: FontFileLoader<Key = K>,
@@ -32,6 +35,7 @@ impl<K: FontKey + ?Sized> FileLoaderHandle<K> {
         }
     }
 
+    /// Unregister the loader. This will invalidate all handles to this loader.
     pub fn unregister(self, factory: &Factory) {
         unsafe {
             (*factory.get_raw()).UnregisterFontFileLoader(self.ptr.as_raw());

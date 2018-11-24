@@ -1,3 +1,6 @@
+/// Marker supertrait for types which may be used as font keys. Note that although
+/// the data itself must be static, `str` is a valid FontKey as the key will always
+/// be taken by pointer.
 pub trait FontKey: Send + Sync + 'static {}
 impl<T> FontKey for T where T: Send + Sync + ?Sized + 'static {}
 

@@ -1,4 +1,4 @@
-use error::DWriteError;
+use error::DWResult;
 use {TextFormat, TextLayout};
 
 use std::borrow::Cow;
@@ -10,6 +10,12 @@ use winapi::um::dwrite::*;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
+#[must_use]
+/// Builder for a TextLayout.
+/// 
+/// `text`, `format`, `width`, and `height` are not optional.
+/// 
+/// `centered` defaults to false.
 pub struct TextLayoutBuilder<'a> {
     factory: &'a IDWriteFactory,
     text: Option<Cow<'a, [u16]>>,
@@ -20,6 +26,7 @@ pub struct TextLayoutBuilder<'a> {
 }
 
 impl<'a> TextLayoutBuilder<'a> {
+    /// Initialize a new builder
     pub fn new(factory: &'a IDWriteFactory) -> TextLayoutBuilder<'a> {
         TextLayoutBuilder {
             factory,
@@ -31,7 +38,8 @@ impl<'a> TextLayoutBuilder<'a> {
         }
     }
 
-    pub fn build(self) -> Result<TextLayout, DWriteError> {
+    /// Build the TextLayout from the passed parameters.
+    pub fn build(self) -> DWResult<TextLayout> {
         unsafe {
             let text = self.text.expect("`text` must be specified");
             let format = self.format.expect("`format` must be specified");
@@ -39,7 +47,7 @@ impl<'a> TextLayoutBuilder<'a> {
             let height = self.height.expect("`height` or `size` must be specified");
 
             let mut ptr: *mut IDWriteTextLayout = ptr::null_mut();
-            let result = self.factory.CreateTextLayout(
+            let hr = self.factory.CreateTextLayout(
                 text.as_ptr(),
                 text.len() as u32,
                 format.get_raw(),
@@ -48,15 +56,15 @@ impl<'a> TextLayoutBuilder<'a> {
                 &mut ptr,
             );
 
-            if SUCCEEDED(result) {
+            if SUCCEEDED(hr) {
                 let ptr = ComPtr::from_raw(ptr);
                 if self.centered {
                     ptr.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
                 }
 
-                Ok(TextLayout { ptr: ptr })
+                Ok(TextLayout::from_ptr(ptr))
             } else {
-                Err(From::from(result))
+                Err(hr.into())
             }
         }
     }

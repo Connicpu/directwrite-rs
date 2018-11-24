@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 #[repr(transparent)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FontFeatureTag(pub u32);
 
 #[cfg(target_endian = "little")]
@@ -20,47 +22,120 @@ macro_rules! feature_tag {
 }
 
 impl FontFeatureTag {
+    pub fn as_bytes(&self) -> &[u8; 4] {
+        unsafe { std::mem::transmute(self) }
+    }
+
+    pub fn to_string_lossy(&self) -> Cow<str> {
+        String::from_utf8_lossy(self.as_bytes())
+    }
+
     #[inline]
+    /// Construct a feature tag from an array of 4 ascii characters.
     pub fn from_array(values: [u8; 4]) -> FontFeatureTag {
         feature_tag!(values[0], values[1], values[2], values[3])
     }
 
     #[inline]
+    /// Construct a feature tag from a slice of 4 ascii characters.
+    ///
+    /// **Note** Will panic if `b.len() != 4`.
     pub fn from_slice(b: &[u8]) -> FontFeatureTag {
         assert_eq!(b.len(), 4);
         FontFeatureTag::from_array([b[0], b[1], b[2], b[3]])
     }
 
     #[inline]
+    /// Construct a feature tag from a slice of 4 characters.
+    ///
+    /// **Note** Will panic if `s.len() != 4` (in bytes).
     pub fn from_str(s: &str) -> FontFeatureTag {
         FontFeatureTag::from_slice(s.as_bytes())
     }
 }
 
+impl std::fmt::Debug for FontFeatureTag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use std::fmt::Write;
+        fmt.write_char('"')?;
+        for &b in self.as_bytes() {
+            if b <= 0x7F {
+                for c in (b as char).escape_default() {
+                    fmt.write_char(c)?;
+                }
+            } else {
+                let n1 = b & 0xF;
+                let n2 = b >> 4;
+                write!(fmt, "\\x{:x}{:x}", n2, n1);
+            }
+        }
+        fmt.write_char('"')?;
+        Ok(())
+    }
+}
+
 impl From<u32> for FontFeatureTag {
+    #[inline]
     fn from(u: u32) -> FontFeatureTag {
         FontFeatureTag(u)
     }
 }
 
 impl From<[u8; 4]> for FontFeatureTag {
+    #[inline]
     fn from(a: [u8; 4]) -> FontFeatureTag {
         FontFeatureTag::from_array(a)
     }
 }
 
 impl<'a> From<&'a [u8]> for FontFeatureTag {
+    #[inline]
     fn from(b: &'a [u8]) -> FontFeatureTag {
         FontFeatureTag::from_slice(b)
     }
 }
 
 impl<'a> From<&'a str> for FontFeatureTag {
+    #[inline]
     fn from(s: &'a str) -> FontFeatureTag {
         FontFeatureTag::from_str(s)
     }
 }
 
+impl PartialEq<str> for FontFeatureTag {
+    #[inline]
+    fn eq(&self, rhs: &str) -> bool {
+        self.as_bytes() == rhs.as_bytes()
+    }
+}
+
+impl PartialEq<FontFeatureTag> for str {
+    #[inline]
+    fn eq(&self, rhs: &FontFeatureTag) -> bool {
+        self.as_bytes() == rhs.as_bytes()
+    }
+}
+
+impl From<FontFeatureTag> for [u8; 4] {
+    #[inline]
+    fn from(tag: FontFeatureTag) -> [u8; 4] {
+        *tag.as_bytes()
+    }
+}
+
+impl<'a> From<&'a FontFeatureTag> for &'a [u8; 4] {
+    #[inline]
+    fn from(tag: &'a FontFeatureTag) -> &'a [u8; 4] {
+        tag.as_bytes()
+    }
+}
+
+impl<'a> From<&'a FontFeatureTag> for &'a [u8] {
+    #[inline]
+    fn from(tag: &'a FontFeatureTag) -> &'a [u8] {
+        tag.as_bytes()
+    }
+}
 
 impl FontFeatureTag {
     /// Replaces figures separated by a slash with an alternative form.

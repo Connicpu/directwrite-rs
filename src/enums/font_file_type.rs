@@ -1,4 +1,6 @@
 #[auto_enum(u32, checked)]
+/// The type of a font represented by a single font file. Font formats that consist of multiple
+/// files, for example Type 1 .PFM and .PFB, have separate enum values for each of the file types.
 pub enum FontFileType {
     /// Font type is not recognized by the DirectWrite font system.
     Unknown,

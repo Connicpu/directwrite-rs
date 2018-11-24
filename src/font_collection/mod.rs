@@ -1,9 +1,11 @@
+//! Font collections and types for building application-defined collections.
+
+use descriptions::FontKey;
 use error::DWResult;
 use factory::Factory;
 use font::Font;
 use font_face::FontFace;
 use font_family::FontFamily;
-use key::FontKey;
 
 use std::ptr;
 
@@ -23,16 +25,40 @@ pub mod loader;
 #[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
 #[repr(transparent)]
+/// An object that encapsulates a set of fonts, such as the set of fonts installed on the system,
+/// or the set of fonts in a particular directory. The font collection API can be used to discover
+/// what font families and fonts are available, and to obtain some metadata about the fonts.
 pub struct FontCollection {
     ptr: ComPtr<IDWriteFontCollection>,
 }
 
 impl FontCollection {
+    /// Construct a builder for a FontCollection. You'll need a CollectionLoaderHandle
+    /// and its associated Key type.
     pub fn create<'a, K>(factory: &'a Factory) -> FontCollectionBuilder<'a, K>
     where
         K: FontKey,
     {
         FontCollectionBuilder::new(factory)
+    }
+
+    /// Gets the FontCollection for System-installed fonts. This represents all of the fonts
+    /// installed on the user's system.
+    pub fn system_font_collection(
+        factory: &Factory,
+        check_for_updates: bool,
+    ) -> DWResult<FontCollection> {
+        unsafe {
+            let mut fc = ptr::null_mut();
+            let check = if check_for_updates { 1 } else { 0 };
+            let factory_ptr = &*(factory.get_raw());
+            let hr = factory_ptr.GetSystemFontCollection(&mut fc, check);
+            if SUCCEEDED(hr) {
+                Ok(FontCollection::from_raw(fc))
+            } else {
+                Err(hr.into())
+            }
+        }
     }
 
     /// Finds the font family with the specified family name and returns its index
@@ -84,24 +110,6 @@ impl FontCollection {
                 Some(Font::from_raw(f))
             } else {
                 None
-            }
-        }
-    }
-
-    /// Gets a FontCollection object which represents the set of installed fonts.
-    pub fn system_font_collection(
-        factory: &Factory,
-        check_for_updates: bool,
-    ) -> DWResult<FontCollection> {
-        unsafe {
-            let mut fc = ptr::null_mut();
-            let check = if check_for_updates { 1 } else { 0 };
-            let factory_ptr = &*(factory.get_raw());
-            let hr = factory_ptr.GetSystemFontCollection(&mut fc, check);
-            if SUCCEEDED(hr) {
-                Ok(FontCollection::from_raw(fc))
-            } else {
-                Err(hr.into())
             }
         }
     }

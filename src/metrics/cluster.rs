@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use winapi::um::dwrite::DWRITE_CLUSTER_METRICS;
 
 #[repr(C)]

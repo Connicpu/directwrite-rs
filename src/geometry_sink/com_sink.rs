@@ -6,6 +6,7 @@ use winapi::shared::winerror::{HRESULT, S_OK};
 use winapi::um::d2d1::D2D1_BEZIER_SEGMENT;
 use winapi::um::d2d1::D2D1_POINT_2F;
 use winapi::um::d2d1::{ID2D1SimplifiedGeometrySink, ID2D1SimplifiedGeometrySinkVtbl};
+use winapi::um::dwrite::IDWriteGeometrySink;
 use wio::com::ComPtr;
 
 #[repr(C)]
@@ -23,9 +24,9 @@ impl<T> ComGeometrySink<T>
 where
     T: GeometrySink,
 {
-    pub fn new(sink: T) -> ComPtr<ID2D1SimplifiedGeometrySink> {
+    pub fn new(sink: T) -> ComPtr<IDWriteGeometrySink> {
         let ptr = Self::create_raw(sink);
-        let ptr = ptr as *mut ID2D1SimplifiedGeometrySink;
+        let ptr = ptr as *mut IDWriteGeometrySink;
         unsafe { ComPtr::from_raw(ptr) }
     }
 }

@@ -1,3 +1,5 @@
+use descriptions::DBool;
+
 use math2d::{Point2f, Sizef};
 use winapi::um::dwrite::DWRITE_HIT_TEST_METRICS;
 
@@ -16,9 +18,9 @@ pub struct HitTestMetrics {
     /// The BIDI level of the text positions within the hit region.
     pub bidi_level: u32,
     /// Non-zero if the hit region contains text; otherwise, `0`.
-    pub is_text: i32,
+    pub is_text: DBool,
     /// Non-zero if the text range is trimmed; otherwise, `0`.
-    pub is_trimmed: i32,
+    pub is_trimmed: DBool,
 }
 
 impl From<DWRITE_HIT_TEST_METRICS> for HitTestMetrics {

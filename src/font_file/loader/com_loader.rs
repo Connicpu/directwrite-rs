@@ -1,6 +1,6 @@
+use descriptions::KeyPayload;
 use font_file::loader::com_stream::ComFontFileStream;
 use font_file::loader::FontFileLoader;
-use key::KeyPayload;
 
 use std::mem;
 

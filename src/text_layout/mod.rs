@@ -1,4 +1,7 @@
-use drawing_effect::DrawingEffect;
+//! TextLayout and types for building new ones.
+
+use descriptions::TextRange;
+use effects::DrawingEffect;
 use enums::{FontStretch, FontStyle, FontWeight};
 use error::DWResult;
 use factory::Factory;
@@ -11,8 +14,9 @@ use metrics::line::LineMetrics;
 use metrics::overhang::OverhangMetrics;
 use metrics::text::TextMetrics;
 use text_format::TextFormat;
-use text_range::TextRange;
+use text_renderer::DrawContext;
 use text_renderer::TextRenderer;
+use typography::Typography;
 
 use std::ops::{Deref, DerefMut};
 use std::{mem, ptr, u32};
@@ -25,11 +29,45 @@ use winapi::um::dwrite::*;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
 
+#[doc(inline)]
 pub use self::builder::TextLayoutBuilder;
 
+#[doc(hidden)]
 pub mod builder;
 
-pub type RangeResult<T> = DWResult<(T, TextRange)>;
+#[derive(Copy, Clone, Debug)]
+/// Represents a value that has an associated range for which the text has the
+/// same formatting applied to it.
+pub struct RangeValue<T> {
+    /// The range of text that has the same formatting as the text at the position specified by
+    /// position.
+    pub range: TextRange,
+
+    /// The value that was found at the requested position.
+    pub value: T,
+}
+
+impl<T> From<(T, TextRange)> for RangeValue<T> {
+    fn from((value, range): (T, TextRange)) -> Self {
+        RangeValue { value, range }
+    }
+}
+
+impl<T> Into<(T, TextRange)> for RangeValue<T> {
+    fn into(self) -> (T, TextRange) {
+        (self.value, self.range)
+    }
+}
+
+impl<T> std::ops::Deref for RangeValue<T> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        &self.value
+    }
+}
+
+/// A function result that is either a pair of T and an associated text range, or a DWriteError.
+pub type RangeResult<T> = DWResult<RangeValue<T>>;
 
 #[derive(ComWrapper)]
 #[com(send, sync, debug)]
@@ -54,6 +92,7 @@ impl DerefMut for TextLayout {
 }
 
 impl TextLayout {
+    /// Initialize a builder for a new TextLayout.
     pub fn create<'a>(factory: &'a Factory) -> TextLayoutBuilder<'a> {
         unsafe { TextLayoutBuilder::new(&*factory.get_raw()) }
     }
@@ -68,17 +107,18 @@ impl TextLayout {
         }
     }
 
+    /// Draws text using the specified client drawing context.
     pub fn draw(
         &self,
         renderer: &mut TextRenderer,
         origin_x: f32,
         origin_y: f32,
-        context: usize,
+        context: &DrawContext,
     ) -> DWResult<()> {
         unsafe {
             let hr = self
                 .ptr
-                .Draw(context as *mut _, renderer.get_raw(), origin_x, origin_y);
+                .Draw(context.ptr(), renderer.get_raw(), origin_x, origin_y);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -138,7 +178,7 @@ impl TextLayout {
             if res < 0 {
                 return Err(res.into());
             }
-            Ok((FontCollection::from_raw(collection), range.into()))
+            Ok((FontCollection::from_raw(collection), range.into()).into())
         }
     }
 
@@ -152,7 +192,7 @@ impl TextLayout {
             if res < 0 {
                 return Err(res.into());
             }
-            Ok((font_size, range.into()))
+            Ok((font_size, range.into()).into())
         }
     }
 
@@ -166,7 +206,7 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((stretch.into(), range.into()))
+            Ok((stretch.into(), range.into()).into())
         }
     }
 
@@ -180,7 +220,7 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((style.into(), range.into()))
+            Ok((style.into(), range.into()).into())
         }
     }
 
@@ -194,18 +234,23 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((FontWeight(weight), range.into()))
+            Ok((FontWeight(weight), range.into()).into())
         }
     }
 
     /// Gets the inline object at the position as-is. May return ptr::null_mut()
-    pub fn inline_object(&self, position: u32) -> RangeResult<InlineObject> {
+    pub fn inline_object(&self, position: u32) -> RangeResult<Option<InlineObject>> {
         unsafe {
-            let mut range = mem::uninitialized();
+            let mut range = mem::zeroed();
             let mut ptr = ptr::null_mut();
             let hr = self.ptr.GetInlineObject(position, &mut ptr, &mut range);
             if SUCCEEDED(hr) {
-                Ok((InlineObject::from_raw(ptr), range.into()))
+                let obj = if !ptr.is_null() {
+                    Some(InlineObject::from_raw(ptr))
+                } else {
+                    None
+                };
+                Ok((obj, range.into()).into())
             } else {
                 Err(hr.into())
             }
@@ -283,9 +328,10 @@ impl TextLayout {
         }
     }
 
+    /// Returns whether the text at the specified position has strikethrough applied.
     pub fn strikethrough(&self, position: u32) -> RangeResult<bool> {
         unsafe {
-            let (mut strikethrough, mut range) = mem::uninitialized();
+            let (mut strikethrough, mut range) = mem::zeroed();
             let res = self
                 .ptr
                 .GetStrikethrough(position, &mut strikethrough, &mut range);
@@ -293,12 +339,11 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((strikethrough != 0, range.into()))
+            Ok((strikethrough != 0, range.into()).into())
         }
     }
 
-    // TODO: Typography
-
+    /// Returns whether the text at the specified position has underline applied.
     pub fn underline(&self, position: u32) -> RangeResult<bool> {
         unsafe {
             let (mut underline, mut range) = mem::uninitialized();
@@ -307,7 +352,20 @@ impl TextLayout {
                 return Err(res.into());
             }
 
-            Ok((underline != 0, range.into()))
+            Ok((underline != 0, range.into()).into())
+        }
+    }
+
+    ///
+    pub fn typography(&self, position: u32) -> RangeResult<Typography> {
+        unsafe {
+            let (mut ptr, mut range) = mem::zeroed();
+            let hr = self.ptr.GetTypography(position, &mut ptr, &mut range);
+            if SUCCEEDED(hr) {
+                Ok((Typography::from_raw(ptr), range.into()).into())
+            } else {
+                Err(hr.into())
+            }
         }
     }
 
@@ -497,6 +555,7 @@ impl TextLayout {
         }
     }
 
+    /// Set the inline object used for a range of text.
     pub fn set_inline_object(
         &mut self,
         obj: &InlineObject,
@@ -518,6 +577,7 @@ impl TextLayout {
         }
     }
 
+    /// Set the locale used for a range of text.
     pub fn set_locale_name(&mut self, locale: &str, range: impl Into<TextRange>) -> DWResult<()> {
         let range = range.into();
 
@@ -537,6 +597,7 @@ impl TextLayout {
         }
     }
 
+    /// Set the max height in DIPs for this text layout.
     pub fn set_max_height(&mut self, maxh: f32) -> DWResult<()> {
         unsafe {
             let hr = self.ptr.SetMaxHeight(maxh);
@@ -548,6 +609,7 @@ impl TextLayout {
         }
     }
 
+    /// Set the max width in DIPs for this text layout.
     pub fn set_max_width(&mut self, maxw: f32) -> DWResult<()> {
         unsafe {
             let hr = self.ptr.SetMaxWidth(maxw);
@@ -583,8 +645,6 @@ impl TextLayout {
         }
     }
 
-    // TODO: Typography
-
     /// Sets underlining for text within a specified text range.
     pub fn set_underline(&mut self, underline: bool, range: impl Into<TextRange>) -> DWResult<()> {
         let range = range.into().into();
@@ -598,9 +658,28 @@ impl TextLayout {
             }
         }
     }
+
+    /// Sets the typography object controlling the font face settings for a range of text.
+    pub fn set_typography(
+        &mut self,
+        typography: &Typography,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        let range = range.into().into();
+
+        unsafe {
+            let hr = self.ptr.SetTypography(typography.get_raw(), range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
+/// Results from calling `hit_test_point` on a TextLayout.
 pub struct HitTestPoint {
     /// The output geometry fully enclosing the hit-test location. When is_inside is set to false,
     /// this structure represents the geometry enclosing the edge closest to the hit-test location.
@@ -616,6 +695,7 @@ pub struct HitTestPoint {
 }
 
 #[derive(Copy, Clone)]
+/// Results from calling `hit_test_text_position` on a TextLayout.
 pub struct HitTestTextPosition {
     /// The output pixel location X, relative to the top-left location of the layout box.
     pub point_x: f32,

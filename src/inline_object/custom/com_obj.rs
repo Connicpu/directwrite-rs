@@ -1,6 +1,7 @@
-use helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_com};
+use helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_mut_com};
 use inline_object::custom::CustomInlineObject;
-use inline_object::custom::DrawingContext;
+use inline_object::DrawingContext;
+use text_renderer::DrawContext;
 
 use com_impl::Refcount;
 use com_impl::VTable;
@@ -35,7 +36,7 @@ unsafe impl<T: CustomInlineObject> IDWriteInlineObject for ComInlineObject<T> {
     unsafe fn draw(
         &self,
         context: *mut c_void,
-        renderer: *mut IDWriteTextRenderer,
+        mut renderer: *mut IDWriteTextRenderer,
         origin_x: f32,
         origin_y: f32,
         is_sideways: BOOL,
@@ -43,10 +44,9 @@ unsafe impl<T: CustomInlineObject> IDWriteInlineObject for ComInlineObject<T> {
         client_effect: *mut IUnknown,
     ) -> HRESULT {
         let context = DrawingContext {
-            client_context: context as usize,
-            renderer: wrap_ref_to_raw_com(&renderer),
-            origin_x,
-            origin_y,
+            client_context: DrawContext::from_ptr(context),
+            renderer: wrap_ref_to_raw_mut_com(&mut renderer),
+            origin: (origin_x, origin_y).into(),
             is_sideways: is_sideways != 0,
             is_right_to_left: is_rtl != 0,
             client_effect: wrap_opt_ref_to_raw_com(&client_effect),
@@ -62,10 +62,10 @@ unsafe impl<T: CustomInlineObject> IDWriteInlineObject for ComInlineObject<T> {
     unsafe fn get_metrics(&self, metrics: *mut DWRITE_INLINE_OBJECT_METRICS) -> HRESULT {
         let result = self.object.metrics();
         let metrics = &mut *metrics;
-        metrics.width = result.width;
-        metrics.height = result.height;
+        metrics.width = result.size.width;
+        metrics.height = result.size.height;
         metrics.baseline = result.baseline;
-        metrics.supportsSideways = result.supports_sideways as BOOL;
+        metrics.supportsSideways = result.supports_sideways.into();
         S_OK
     }
 
@@ -83,8 +83,8 @@ unsafe impl<T: CustomInlineObject> IDWriteInlineObject for ComInlineObject<T> {
     #[panic(result = "E_FAIL")]
     unsafe fn get_break_conditions(&self, preceding: *mut u32, following: *mut u32) -> HRESULT {
         let result = self.object.break_conditions();
-        *preceding = result.preceding as u32;
-        *following = result.following as u32;
+        *preceding = result.preceding.value;
+        *following = result.following.value;
         S_OK
     }
 }

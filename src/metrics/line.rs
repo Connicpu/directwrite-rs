@@ -2,6 +2,7 @@ use winapi::um::dwrite::DWRITE_LINE_METRICS;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Default)]
+/// Contains information about a formatted line of text.
 pub struct LineMetrics {
     /// The number of text positions in the text line. This includes any trailing whitespace and
     /// newline characters.

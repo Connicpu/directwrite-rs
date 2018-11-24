@@ -1,10 +1,12 @@
+//! FontFace and types for examining its contents and building new ones.
+
+use descriptions::GlyphOffset;
 use enums::font_feature_tag::FontFeatureTag;
 use enums::{FontFaceType, FontSimulations, MeasuringMode, RenderingMode};
 use error::DWResult;
 use factory::Factory;
 use font_file::FontFile;
 use geometry_sink::{self, GeometrySink};
-use glyphs::GlyphOffset;
 use metrics::{FontMetrics, GlyphMetrics};
 use rendering_params::RenderingParams;
 
@@ -27,14 +29,18 @@ pub mod builder;
 #[doc(hidden)]
 pub mod table;
 
+#[repr(transparent)]
 #[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
-#[repr(transparent)]
+/// Represents an absolute reference to a font face which contains font face type, appropriate
+/// file references, face identification data and various font data such as metrics, names and
+/// glyph outlines.
 pub struct FontFace {
     ptr: ComPtr<IDWriteFontFace>,
 }
 
 impl FontFace {
+    /// Initializes a builder for creating a FontFace
     pub fn create<'a, 'b>(factory: &'a Factory) -> FontFaceBuilder<'a, 'b> {
         unsafe { FontFaceBuilder::new(&*factory.get_raw()) }
     }
@@ -174,6 +180,8 @@ impl FontFace {
         }
     }
 
+    /// Attempt to determine the recommended rendering mode for this font face
+    /// with the given parameters.
     pub fn recommended_rendering_mode(
         &self,
         em_size: f32,

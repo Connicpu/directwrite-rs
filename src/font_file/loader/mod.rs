@@ -1,6 +1,51 @@
+//! Types and traits used for implementing the loading of custom FontFiles.
+//!
+//! # Example
+//!
+//! ```
+//! # extern crate directwrite; extern crate winapi;
+//! # fn main() {
+//! # use directwrite::font_file::loader::{StaticDataStream, FontFileLoader};
+//! # use directwrite::error::DWResult;
+//! # use directwrite::{Factory, FontFile};
+//! # use winapi::shared::winerror::{HRESULT_FROM_WIN32, ERROR_NOT_FOUND};
+//! const OPENSANS_REGULAR: StaticDataStream = StaticDataStream {
+//!     // Sunday, November 11, 2018 18:30:45
+//!     last_modified: 636775578456076107,
+//! # /*
+//!     data: include_bytes!("OpenSans-Regular.ttf"),
+//! # */
+//! #   data: include_bytes!("../../../tests/test_fonts/OpenSans-Regular.ttf"),
+//! };
+//!
+//! pub struct DataFileLoader;
+//! impl FontFileLoader for DataFileLoader {
+//!     type Key = str;
+//!     type Stream = StaticDataStream;
+//!
+//!     fn create_stream(&self, key: &str) -> DWResult<StaticDataStream> {
+//!         match key {
+//!             "OpenSans-Regular" => Ok(OPENSANS_REGULAR),
+//!             _ => Err(HRESULT_FROM_WIN32(ERROR_NOT_FOUND).into()),
+//!         }
+//!     }
+//! }
+//!
+//! let factory = Factory::new().unwrap();
+//! let file_loader = DataFileLoader.register(&factory).unwrap();
+//!
+//! let file = FontFile::create(&factory)
+//!     .with_loader(&file_loader)
+//!     .with_key("OpenSans-Regular")
+//!     .build()
+//!     .unwrap();
+//! # let _ = file;
+//! # }
+//! ```
+
+use descriptions::FontKey;
 use error::DWResult;
 use factory::Factory;
-use key::FontKey;
 
 #[doc(inline)]
 pub use font_file::loader::handle::FileLoaderHandle;

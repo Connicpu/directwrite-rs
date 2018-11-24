@@ -1,4 +1,5 @@
 #[auto_enum(u32, checked)]
+/// Represents a method of rendering glyphs.
 pub enum RenderingMode {
     /// Specifies that the rendering mode is determined automatically, based on the font and size.
     Default,
@@ -8,13 +9,13 @@ pub enum RenderingMode {
     Aliased,
 
     /// Specifies that antialiasing is performed in the horizontal direction and the appearance of
-    /// glyphs is layout-compatible with GDI using CLEARTYPE_QUALITY. Use `GdiClassic` to get glyph
-    /// advances. The antialiasing may be either ClearType or grayscale depending on the text
+    /// glyphs is layout-compatible with GDI using `CLEARTYPE_QUALITY`. Use `GdiClassic` to get
+    /// glyph advances. The antialiasing may be either ClearType or grayscale depending on the text
     /// antialiasing mode.
     GdiClassic,
 
     /// Specifies that antialiasing is performed in the horizontal direction and the appearance of
-    /// glyphs is layout-compatible with GDI using CLEARTYPE_NATURAL_QUALITY. Glyph advances are
+    /// glyphs is layout-compatible with GDI using `CLEARTYPE_NATURAL_QUALITY`. Glyph advances are
     /// close to the font design advances, but are still rounded to whole pixels. Use `GDI_NATURAL`
     /// to get glyph advances. The antialiasing may be either ClearType or grayscale depending on
     /// the text antialiasing mode.

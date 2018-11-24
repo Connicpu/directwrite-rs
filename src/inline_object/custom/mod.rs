@@ -1,43 +1,28 @@
-use client_effect::ClientEffect;
-use enums::BreakCondition;
+//! Traits and Structs for implementing custom inline text objects that can be layed
+//! out inline with text.
+
 use error::DWResult;
-use text_renderer::TextRenderer;
+use inline_object::BreakConditions;
+use inline_object::DrawingContext;
+use metrics::InlineObjectMetrics;
+use metrics::OverhangMetrics;
+
 
 pub(crate) mod com_obj;
 
+/// Custom implementation of an inline text object in Rust.
 pub trait CustomInlineObject: Send + Sync + 'static {
+    /// Report metrics about your inline object to the runtime.
     fn metrics(&self) -> InlineObjectMetrics;
-    fn overhang_metrics(&self) -> InlineObjectOverhang;
+
+    /// Report your object's overhang values to the runtime. See the documentation on
+    /// `OverhangMetrics` for more information.
+    fn overhang_metrics(&self) -> OverhangMetrics;
+
+    /// Layout uses this to determine the line-breaking behavior of the inline
+    /// object among the text.
     fn break_conditions(&self) -> BreakConditions;
 
+    /// Called by the text renderer to render your object within the text.
     fn draw(&self, context: &DrawingContext) -> DWResult<()>;
-}
-
-pub struct DrawingContext<'a> {
-    pub client_context: usize,
-    pub renderer: &'a TextRenderer,
-    pub origin_x: f32,
-    pub origin_y: f32,
-    pub is_sideways: bool,
-    pub is_right_to_left: bool,
-    pub client_effect: Option<&'a ClientEffect>,
-}
-
-pub struct InlineObjectMetrics {
-    pub width: f32,
-    pub height: f32,
-    pub baseline: f32,
-    pub supports_sideways: bool,
-}
-
-pub struct InlineObjectOverhang {
-    pub left: f32,
-    pub top: f32,
-    pub right: f32,
-    pub bottom: f32,
-}
-
-pub struct BreakConditions {
-    pub preceding: BreakCondition,
-    pub following: BreakCondition,
 }

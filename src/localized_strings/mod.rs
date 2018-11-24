@@ -1,3 +1,5 @@
+//! Representation of a string that may have multiple separate representations in different locales.
+
 use std::ffi::{OsStr, OsString};
 use std::fmt;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
@@ -9,22 +11,24 @@ use wio::com::ComPtr;
 #[derive(Clone, ComWrapper)]
 #[com(send, sync)]
 #[repr(transparent)]
+/// Represents a collection of strings indexed by locale name.
 pub struct LocalizedStrings {
     ptr: ComPtr<IDWriteLocalizedStrings>,
 }
 
 impl LocalizedStrings {
+    /// Gets the number of locales which have values for this string.
     pub fn count(&self) -> u32 {
         unsafe { self.ptr.GetCount() }
     }
 
-    pub fn all_strings<'a>(&'a self) -> impl Iterator<Item = (String, String)> + 'a {
-        (0..self.count())
-            .map(move |i| self.unchecked_locale(i))
-            .map(|l| (l.locale(), l.string()))
+    /// Gets all localized strings in this collection.
+    pub fn all_strings<'a>(&'a self) -> impl Iterator<Item = LocalizedString<'a>> + 'a {
+        (0..self.count()).map(move |i| self.unchecked_locale(i))
     }
 
-    pub fn locale(&self, index: u32) -> Option<LocalizedString> {
+    /// Get the localized string value at the specified index.
+    pub fn get(&self, index: u32) -> Option<LocalizedString> {
         if index < self.count() {
             Some(self.unchecked_locale(index))
         } else {
@@ -32,7 +36,8 @@ impl LocalizedStrings {
         }
     }
 
-    pub fn locale_by_name(&self, name: impl AsRef<OsStr>) -> Option<LocalizedString> {
+    /// Get the localized string value with the specified locale name.
+    pub fn get_by_name(&self, name: impl AsRef<OsStr>) -> Option<LocalizedString> {
         let name: Vec<u16> = name.as_ref().encode_wide().chain(Some(0)).collect();
 
         let mut index = 0;
@@ -61,9 +66,7 @@ impl fmt::Debug for LocalizedStrings {
         struct LocalizedStringsMap<'a>(&'a LocalizedStrings);
         impl<'a> fmt::Debug for LocalizedStringsMap<'a> {
             fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-                fmt.debug_map()
-                    .entries(self.0.all_strings())
-                    .finish()
+                fmt.debug_map().entries(self.0.all_strings().map(|s| (s.locale(), s.string()))).finish()
             }
         }
 
@@ -74,12 +77,14 @@ impl fmt::Debug for LocalizedStrings {
 }
 
 #[derive(Copy, Clone)]
+/// Represents an untranslated string
 pub struct LocalizedString<'a> {
     ptr: &'a IDWriteLocalizedStrings,
     idx: u32,
 }
 
 impl<'a> LocalizedString<'a> {
+    /// Get the name of the locale associated with this string.
     pub fn locale(&self) -> String {
         unsafe {
             let mut length = 0;
@@ -105,6 +110,7 @@ impl<'a> LocalizedString<'a> {
         }
     }
 
+    /// Get the string value associated with this locale.
     pub fn string(&self) -> String {
         unsafe {
             let mut length = 0;
@@ -136,5 +142,11 @@ impl<'a> fmt::Debug for LocalizedString<'a> {
             .field("locale", &self.locale())
             .field("string", &self.string())
             .finish()
+    }
+}
+
+impl<'a> From<LocalizedString<'a>> for String {
+    fn from(ls: LocalizedString<'a>) -> String {
+        ls.string()
     }
 }

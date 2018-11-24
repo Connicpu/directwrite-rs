@@ -1,3 +1,5 @@
+
+
 use helpers::hresult_to_string;
 
 use std::borrow::Cow;
@@ -7,9 +9,11 @@ use std::result;
 
 use winapi::shared::ntdef::HRESULT;
 
+/// Result type that could contain a DWriteError.
 pub type DWResult<T> = result::Result<T, DWriteError>;
 
 #[derive(Copy, Clone)]
+/// An error arising from a call to a DirectWrite function that results in an HRESULT error.
 pub struct DWriteError(pub HRESULT);
 
 impl DWriteError {

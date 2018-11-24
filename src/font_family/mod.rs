@@ -10,9 +10,10 @@ use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFamily;
 use wio::com::ComPtr;
 
+#[repr(transparent)]
 #[derive(Clone, ComWrapper, PartialEq)]
 #[com(send, sync, debug)]
-#[repr(transparent)]
+/// Represents a family of related fonts.
 pub struct FontFamily {
     ptr: ComPtr<IDWriteFontFamily>,
 }

@@ -1,8 +1,8 @@
+use descriptions::{FontKey, KeyPayload};
 use error::DWResult;
 use factory::Factory;
 use font_collection::loader::CollectionLoaderHandle;
 use font_collection::FontCollection;
-use key::{FontKey, KeyPayload};
 
 use std::mem;
 use std::ptr;
@@ -10,6 +10,10 @@ use std::ptr;
 use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 
+#[must_use]
+/// Builder for a FontCollection
+///
+/// `loader` and `key` are both required.
 pub struct FontCollectionBuilder<'a, K>
 where
     K: FontKey + ?Sized,
@@ -23,7 +27,7 @@ impl<'a, K> FontCollectionBuilder<'a, K>
 where
     K: FontKey + ?Sized,
 {
-    pub fn new(factory: &'a Factory) -> Self {
+    pub(super) fn new(factory: &'a Factory) -> Self {
         FontCollectionBuilder {
             factory,
             loader: None,
@@ -31,6 +35,8 @@ where
         }
     }
 
+    /// Finalize the builder, attempting to create the FontCollection with the
+    /// specified parameters.
     pub fn build(self) -> DWResult<FontCollection> {
         let loader = self.loader.expect("Font Loader must be specified");
         let key = KeyPayload::new(self.key.expect("Key must be specified"));
@@ -53,12 +59,19 @@ where
             }
         }
     }
+}
 
+impl<'a, K> FontCollectionBuilder<'a, K>
+where
+    K: FontKey + ?Sized,
+{
+    /// Specify the collection loader that should be used in creating this collection
     pub fn with_loader(mut self, loader: &'a CollectionLoaderHandle<K>) -> Self {
         self.loader = Some(loader);
         self
     }
 
+    /// Specify the key passed to the collection. This is required.
     pub fn with_key(mut self, key: &'a K) -> Self {
         self.key = Some(key);
         self

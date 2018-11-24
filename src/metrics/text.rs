@@ -2,6 +2,8 @@ use winapi::um::dwrite::DWRITE_TEXT_METRICS;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
+/// Contains the metrics associated with text after layout. All coordinates are in device
+/// independent pixels (DIPs).
 pub struct TextMetrics {
     /// A value that indicates the left-most point of formatted text relative to the layout box,
     /// while excluding any glyph overhang.

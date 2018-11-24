@@ -9,14 +9,16 @@ use winapi::um::unknwnbase::IUnknown;
 use winapi::Interface;
 use wio::com::ComPtr;
 
-#[derive(Clone, ComWrapper)]
-#[com(send, sync)]
 #[repr(transparent)]
+#[derive(Clone, ComWrapper)]
+#[com(send, sync, debug)]
+/// The root type required to access all directwrite functionality.
 pub struct Factory {
     ptr: ComPtr<IDWriteFactory>,
 }
 
 impl Factory {
+    /// Initializes a new Factory.
     pub fn new() -> DWResult<Factory> {
         unsafe {
             let mut ptr: *mut IDWriteFactory = ptr::null_mut();

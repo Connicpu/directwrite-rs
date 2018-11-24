@@ -63,19 +63,19 @@ fn set_attributes() {
 
     layout.set_underline(true, ..text.len() as u32).unwrap();
 
-    let (is_underlined, range) = layout.underline(0).unwrap();
+    let (is_underlined, range) = layout.underline(0).unwrap().into();
     assert!(is_underlined);
     assert_eq!(range.start, 0);
     assert_eq!(range.length as usize, text.len());
 
     layout.set_underline(false, 0).unwrap();
 
-    let (is_underlined, range) = layout.underline(0).unwrap();
+    let (is_underlined, range) = layout.underline(0).unwrap().into();
     assert!(!is_underlined);
     assert_eq!(range.start, 0);
     assert_eq!(range.length, 1);
-    
-    let (is_underlined, range) = layout.underline(1).unwrap();
+
+    let (is_underlined, range) = layout.underline(1).unwrap().into();
     assert!(is_underlined);
     assert_eq!(range.start, 1);
     assert_eq!(range.length as usize, text.len() - 1);
@@ -93,10 +93,11 @@ fn query_fonts() {
         let family = collection.family(i).unwrap();
         let family_name = family
             .family_name()
-            .unwrap()
-            .locale_by_name("en-US")
-            .unwrap()
-            .string();
+            .as_ref()
+            .and_then(|n| n.get_by_name("en-US"))
+            .map(|s| s.string())
+            .unwrap();
+
         assert_eq!(collection.find_family_by_name(&family_name).unwrap(), i);
     }
 

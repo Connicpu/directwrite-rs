@@ -1,4 +1,7 @@
+//!
+
 #![cfg(windows)]
+#![warn(missing_docs)]
 
 #[macro_use]
 extern crate auto_enum;
@@ -17,9 +20,7 @@ extern crate winapi;
 extern crate wio;
 
 #[doc(inline)]
-pub use client_effect::ClientEffect;
-#[doc(inline)]
-pub use drawing_effect::DrawingEffect;
+pub use error::{DWResult, DWriteError};
 #[doc(inline)]
 pub use factory::Factory;
 #[doc(inline)]
@@ -39,42 +40,50 @@ pub use geometry_sink::GeometrySink;
 #[doc(inline)]
 pub use inline_object::InlineObject;
 #[doc(inline)]
-pub use localized_strings::LocalizedStrings;
-#[doc(inline)]
 pub use rendering_params::RenderingParams;
 #[doc(inline)]
 pub use text_format::TextFormat;
 #[doc(inline)]
 pub use text_layout::TextLayout;
 #[doc(inline)]
-pub use text_range::TextRange;
-#[doc(inline)]
 pub use text_renderer::TextRenderer;
+#[doc(inline)]
+pub use typography::Typography;
 
-#[doc(hidden)]
-pub mod client_effect;
-#[doc(hidden)]
-pub mod drawing_effect;
+#[macro_use]
+mod helpers;
+
+pub mod descriptions;
+pub mod effects;
 pub mod enums;
+#[doc(hidden)]
 pub mod error;
+#[doc(hidden)]
 pub mod factory;
+#[doc(hidden)]
 pub mod font;
 pub mod font_collection;
 pub mod font_face;
+#[doc(hidden)]
 pub mod font_family;
 pub mod font_file;
+#[doc(hidden)]
 pub mod font_list;
+#[doc(hidden)]
 pub mod geometry_sink;
-pub mod glyphs;
 pub mod inline_object;
-pub mod key;
 pub mod localized_strings;
 pub mod metrics;
+pub mod pixel_snapping;
+#[doc(hidden)]
 pub mod rendering_params;
 pub mod text_format;
 pub mod text_layout;
-#[doc(hidden)]
-pub mod text_range;
 pub mod text_renderer;
+pub mod typography;
 
-mod helpers;
+/// Shortcut to initialize a Factory, which is required to access all other
+/// functionality in the library.
+pub fn initialize() -> error::DWResult<Factory> {
+    Factory::new()
+}
