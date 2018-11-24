@@ -11,7 +11,7 @@
 //! # use winapi::shared::winerror::{HRESULT_FROM_WIN32, ERROR_NOT_FOUND};
 //! const OPENSANS_REGULAR: StaticDataStream = StaticDataStream {
 //!     // Sunday, November 11, 2018 18:30:45
-//!     last_modified: 636775578456076107,
+//!     last_write: 636775578456076107,
 //! # /*
 //!     data: include_bytes!("OpenSans-Regular.ttf"),
 //! # */
