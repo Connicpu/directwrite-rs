@@ -25,6 +25,8 @@ pub use enums::line_spacing_method::LineSpacingMethod;
 #[doc(inline)]
 pub use enums::measuring_mode::MeasuringMode;
 #[doc(inline)]
+pub use enums::number_substitution_method::NumberSubstitutionMethod;
+#[doc(inline)]
 pub use enums::paragraph_alignment::ParagraphAlignment;
 #[doc(inline)]
 pub use enums::pixel_geometry::PixelGeometry;
@@ -63,6 +65,8 @@ pub mod informational_string_id;
 pub mod line_spacing_method;
 #[doc(hidden)]
 pub mod measuring_mode;
+#[doc(hidden)]
+pub mod number_substitution_method;
 #[doc(hidden)]
 pub mod paragraph_alignment;
 #[doc(hidden)]

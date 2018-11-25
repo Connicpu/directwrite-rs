@@ -19,9 +19,7 @@ impl<'a> WideStr<'a> {
     /// Attempt to convert this string to UTF-8. Will replace bad codepoints with the question
     /// mark diamond.
     pub fn to_string_lossy(&self) -> String {
-        self.to_os_string()
-            .into_string()
-            .unwrap_or_else(|s| s.to_string_lossy().into_owned())
+        String::from_utf16_lossy(self.data)
     }
 }
 
@@ -54,9 +52,12 @@ impl WideCStr {
     /// Attempt to convert this string to UTF-8. Will replace bad codepoints with the question
     /// mark diamond.
     pub fn to_string_lossy(&self) -> String {
-        self.to_os_string()
-            .into_string()
-            .unwrap_or_else(|s| s.to_string_lossy().into_owned())
+        unsafe {
+            let ptr = self.as_ptr();
+            let len = wstrlen(ptr);
+            let slice = std::slice::from_raw_parts(ptr, len);
+            String::from_utf16_lossy(slice)
+        }
     }
 }
 

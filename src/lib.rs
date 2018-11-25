@@ -76,6 +76,7 @@ pub mod geometry_sink;
 pub mod inline_object;
 pub mod localized_strings;
 pub mod metrics;
+pub mod number_substitution;
 pub mod pixel_snapping;
 #[doc(hidden)]
 pub mod rendering_params;

@@ -48,7 +48,7 @@ macro_rules! member_compat_test {
     (
         $testname:ident :
         $t1:ident <=> $t2:ty {
-            $( $m1:ident <=> $m2:ident, )*
+            $( $($m1:ident).+ <=> $m2:ident, )*
         }
     ) => {
         #[test]
@@ -58,7 +58,7 @@ macro_rules! member_compat_test {
             assert_eq!(align_of::<$t1>(), align_of::<$t2>(), "types are not the same alignment");
             let mut tracker = ::helpers::StructSizeTracker::new();
             $(
-                member_compat_test!(@member tracker, $t1, $t2, $m1, $m2);
+                member_compat_test!(@member tracker, $t1, $t2, $($m1).+, $m2);
             )*
             tracker.finalize();
             assert_eq!(
@@ -73,39 +73,39 @@ macro_rules! member_compat_test {
             );
         }
     };
-    (@member $tracker:ident, $t1:ty, $t2:ty, $m1:ident, $m2:ident) => {
+    (@member $tracker:ident, $t1:ty, $t2:ty, $($m1:ident).+, $m2:ident) => {
         unsafe {
             use std::mem::{align_of_val, size_of_val, transmute, zeroed};
             let f1: &$t1 = &zeroed();
             {let f2: &$t2 = transmute(f1);
             assert_eq!(
-                (&f1.$m1) as *const _ as *const u8,
+                (&f1.$($m1).+) as *const _ as *const u8,
                 (&f2.$m2) as *const _ as *const u8,
-                concat!("(&", stringify!($m1), " == &", stringify!($m2), ")"),
+                concat!("(&", stringify!($($m1).+), " == &", stringify!($m2), ")"),
             );
             assert_eq!(
-                size_of_val(&f1.$m1),
+                size_of_val(&f1.$($m1).+),
                 size_of_val(&f2.$m2),
                 concat!(
                     "(size_of_val(&",
-                    stringify!($m1),
+                    stringify!($($m1).+),
                     ") == size_of_val(&",
                     stringify!($m2),
                     "))"
                 ),
             );
             assert_eq!(
-                align_of_val(&f1.$m1),
+                align_of_val(&f1.$($m1).+),
                 align_of_val(&f2.$m2),
                 concat!(
                     "(align_of_val(&",
-                    stringify!($m1),
+                    stringify!($($m1).+),
                     ") == align_of_val(&",
                     stringify!($m2),
                     "))"
                 ),
             );
-            $tracker.incr(size_of_val(&f1.$m1), align_of_val(&f1.$m1));}
+            $tracker.incr(size_of_val(&f1.$($m1).+), align_of_val(&f1.$($m1).+));}
             std::mem::forget(f1);
         }
     };

@@ -1,6 +1,7 @@
 //! TextLayout and types for building new ones.
 
 use descriptions::TextRange;
+use effects::client_effect::ClientEffect;
 use effects::DrawingEffect;
 use enums::{FontStretch, FontStyle, FontWeight};
 use error::DWResult;
@@ -23,11 +24,12 @@ use std::{mem, ptr, u32};
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
-use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;
 use wio::wide::ToWide;
+
+const E_NOT_SUFFICIENT_BUFFER: i32 = -2147024774;
 
 #[doc(inline)]
 pub use self::builder::TextLayoutBuilder;
@@ -166,12 +168,31 @@ impl TextLayout {
         buf
     }
 
+    /// Get the drawing effect applied at the specified position
+    pub fn drawing_effect(&self, position: u32) -> RangeResult<Option<ClientEffect>> {
+        unsafe {
+            let mut ptr = std::ptr::null_mut();
+            let mut range = std::mem::zeroed();
+            let hr = self.ptr.GetDrawingEffect(position, &mut ptr, &mut range);
+            if SUCCEEDED(hr) {
+                let effect = if ptr.is_null() {
+                    None
+                } else {
+                    Some(ClientEffect::from_raw(ptr))
+                };
+                Ok((effect, range.into()).into())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
     /// Gets the font collection of the text at the specified position. Also returns the text range
     /// which has identical formatting to the current character.
     pub fn font_collection(&self, position: u32) -> RangeResult<FontCollection> {
         unsafe {
             let mut collection = ptr::null_mut();
-            let mut range = mem::uninitialized();
+            let mut range = mem::zeroed();
             let res = self
                 .ptr
                 .GetFontCollection(position, &mut collection, &mut range);
@@ -179,6 +200,33 @@ impl TextLayout {
                 return Err(res.into());
             }
             Ok((FontCollection::from_raw(collection), range.into()).into())
+        }
+    }
+
+    /// Get the font family name applied at the specified text position.
+    pub fn font_family_name(&self, position: u32) -> RangeResult<String> {
+        unsafe {
+            let mut len = 0;
+            let mut range = mem::zeroed();
+            let hr = self
+                .ptr
+                .GetFontFamilyNameLength(position, &mut len, &mut range);
+            if !SUCCEEDED(hr) {
+                return Err(hr.into());
+            }
+
+            let mut buf = vec![0u16; len as usize + 1];
+            let hr = self.ptr.GetFontFamilyName(
+                position,
+                buf.as_mut_ptr(),
+                buf.len() as u32,
+                &mut range,
+            );
+            if !SUCCEEDED(hr) {
+                return Err(hr.into());
+            }
+
+            Ok((String::from_utf16_lossy(&buf), range.into()).into())
         }
     }
 
@@ -299,6 +347,28 @@ impl TextLayout {
         buf
     }
 
+    /// Gets the locale name applied to the text at the specified text position.
+    pub fn locale_name(&self, position: u32) -> RangeResult<String> {
+        unsafe {
+            let mut len = 0;
+            let mut range = mem::zeroed();
+            let hr = self.ptr.GetLocaleNameLength(position, &mut len, &mut range);
+            if !SUCCEEDED(hr) {
+                return Err(hr.into());
+            }
+
+            let mut buf = vec![0u16; len as usize + 1];
+            let hr =
+                self.ptr
+                    .GetLocaleName(position, buf.as_mut_ptr(), buf.len() as u32, &mut range);
+            if !SUCCEEDED(hr) {
+                return Err(hr.into());
+            }
+
+            Ok((String::from_utf16_lossy(&buf), range.into()).into())
+        }
+    }
+
     /// Gets the layout maximum height.
     pub fn max_height(&self) -> f32 {
         unsafe { self.ptr.GetMaxHeight() }
@@ -356,7 +426,7 @@ impl TextLayout {
         }
     }
 
-    ///
+    /// Gets the typography description applied to the text at the specified text position.
     pub fn typography(&self, position: u32) -> RangeResult<Typography> {
         unsafe {
             let (mut ptr, mut range) = mem::zeroed();
@@ -402,7 +472,7 @@ impl TextLayout {
         let trailing = if trailing { 0 } else { 1 };
         unsafe {
             let (mut x, mut y) = (0.0, 0.0);
-            let mut metrics = mem::uninitialized();
+            let mut metrics = mem::zeroed();
             let res =
                 self.ptr
                     .HitTestTextPosition(position, trailing, &mut x, &mut y, &mut metrics);
@@ -428,11 +498,13 @@ impl TextLayout {
         origin_x: f32,
         origin_y: f32,
         metrics: &mut Vec<HitTestMetrics>,
-    ) -> bool {
+    ) -> DWResult<()> {
         unsafe {
+            metrics.clear();
+
             // Calculate the total number of items we need
             let mut actual_count = 0;
-            let res = self.ptr.HitTestTextRange(
+            let hr = self.ptr.HitTestTextRange(
                 position,
                 length,
                 origin_x,
@@ -441,29 +513,29 @@ impl TextLayout {
                 0,
                 &mut actual_count,
             );
-            if res != S_OK {
-                return false;
+            match hr {
+                E_NOT_SUFFICIENT_BUFFER => (),
+                S_OK => return Ok(()),
+                hr => return Err(hr.into()),
             }
 
-            metrics.set_len(actual_count as usize);
-            let buf_ptr = metrics[..].as_mut_ptr() as *mut _;
-            let len = metrics.len() as u32;
-            let res = self.ptr.HitTestTextRange(
+            metrics.reserve(actual_count as usize);
+            let hr = self.ptr.HitTestTextRange(
                 position,
                 length,
                 origin_x,
                 origin_y,
-                buf_ptr,
-                len,
+                metrics.as_mut_ptr() as *mut _,
+                metrics.capacity() as u32,
                 &mut actual_count,
             );
-            if res != S_OK {
+            if hr != S_OK {
                 metrics.set_len(0);
-                return false;
+                return Err(hr.into());
             }
 
             metrics.set_len(actual_count as usize);
-            true
+            Ok(())
         }
     }
 
@@ -503,6 +575,61 @@ impl TextLayout {
 
         unsafe {
             let hr = self.ptr.SetFontCollection(collection.get_raw(), range);
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    /// Sets the font family used for the specified range of text.
+    pub fn set_font_family_name(
+        &mut self,
+        name: &str,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        unsafe {
+            let name = name.to_wide_null();
+            let range = range.into();
+
+            let hr = self.ptr.SetFontFamilyName(name.as_ptr(), range.into());
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    /// Sets the font size used for the specified range of text.
+    pub fn set_font_size(&mut self, size: f32, range: impl Into<TextRange>) -> DWResult<()> {
+        unsafe {
+            let range = range.into();
+
+            let hr = self.ptr.SetFontSize(size, range.into());
+            if SUCCEEDED(hr) {
+                Ok(())
+            } else {
+                Err(hr.into())
+            }
+        }
+    }
+
+    /// Sets the font stretch for text within a text range.
+    pub fn set_font_stretch(
+        &mut self,
+        stretch: FontStretch,
+        range: impl Into<TextRange>,
+    ) -> DWResult<()> {
+        let range = range.into();
+        let range = DWRITE_TEXT_RANGE {
+            startPosition: range.start,
+            length: range.length,
+        };
+
+        unsafe {
+            let hr = self.ptr.SetFontStretch(stretch as u32, range);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -627,16 +754,10 @@ impl TextLayout {
         strikethrough: bool,
         range: impl Into<TextRange>,
     ) -> DWResult<()> {
-        let range = range.into();
-
-        let strikethrough = if strikethrough { 1 } else { 0 };
-        let range = DWRITE_TEXT_RANGE {
-            startPosition: range.start,
-            length: range.length,
-        };
+        let range = range.into().into();
 
         unsafe {
-            let hr = self.ptr.SetStrikethrough(strikethrough, range);
+            let hr = self.ptr.SetStrikethrough(strikethrough as i32, range);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -650,7 +771,7 @@ impl TextLayout {
         let range = range.into().into();
 
         unsafe {
-            let hr = self.ptr.SetUnderline(underline as BOOL, range);
+            let hr = self.ptr.SetUnderline(underline as i32, range);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
