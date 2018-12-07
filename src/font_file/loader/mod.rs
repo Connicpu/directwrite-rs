@@ -43,27 +43,27 @@
 //! # }
 //! ```
 
-use descriptions::FontKey;
-use error::DWResult;
-use factory::Factory;
+use crate::descriptions::FontKey;
+use crate::error::DWResult;
+use crate::factory::Factory;
 
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 
 #[doc(inline)]
-pub use font_file::loader::file_stream::FileStream;
+pub use self::file_stream::FileStream;
 #[doc(inline)]
-pub use font_file::loader::handle::FileLoaderHandle;
+pub use self::handle::FileLoaderHandle;
 #[doc(inline)]
-pub use font_file::loader::mmap_stream::MmapStream;
+pub use self::mmap_stream::MmapStream;
 #[doc(inline)]
-pub use font_file::loader::owned_stream::OwnedDataStream;
+pub use self::owned_stream::OwnedDataStream;
 #[doc(inline)]
-pub use font_file::loader::set_loader::SetLoader;
+pub use self::set_loader::SetLoader;
 #[doc(inline)]
-pub use font_file::loader::shared_stream::SharedDataStream;
+pub use self::shared_stream::SharedDataStream;
 #[doc(inline)]
-pub use font_file::loader::static_stream::StaticDataStream;
+pub use self::static_stream::StaticDataStream;
 
 pub(crate) mod com_loader;
 pub(crate) mod com_stream;

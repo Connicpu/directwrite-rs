@@ -1,45 +1,45 @@
 //! Enumerations and bit-combining flag structures for DirectWrite.
 
 #[doc(inline)]
-pub use enums::break_condition::BreakCondition;
+pub use self::break_condition::BreakCondition;
 #[doc(inline)]
-pub use enums::flow_direction::FlowDirection;
+pub use self::flow_direction::FlowDirection;
 #[doc(inline)]
-pub use enums::font_face_type::FontFaceType;
+pub use self::font_face_type::FontFaceType;
 #[doc(inline)]
-pub use enums::font_feature_tag::FontFeatureTag;
+pub use self::font_feature_tag::FontFeatureTag;
 #[doc(inline)]
-pub use enums::font_file_type::FontFileType;
+pub use self::font_file_type::FontFileType;
 #[doc(inline)]
-pub use enums::font_simulations::FontSimulations;
+pub use self::font_simulations::FontSimulations;
 #[doc(inline)]
-pub use enums::font_stretch::FontStretch;
+pub use self::font_stretch::FontStretch;
 #[doc(inline)]
-pub use enums::font_style::FontStyle;
+pub use self::font_style::FontStyle;
 #[doc(inline)]
-pub use enums::font_weight::FontWeight;
+pub use self::font_weight::FontWeight;
 #[doc(inline)]
-pub use enums::informational_string_id::InformationalStringId;
+pub use self::informational_string_id::InformationalStringId;
 #[doc(inline)]
-pub use enums::line_spacing_method::LineSpacingMethod;
+pub use self::line_spacing_method::LineSpacingMethod;
 #[doc(inline)]
-pub use enums::measuring_mode::MeasuringMode;
+pub use self::measuring_mode::MeasuringMode;
 #[doc(inline)]
-pub use enums::number_substitution_method::NumberSubstitutionMethod;
+pub use self::number_substitution_method::NumberSubstitutionMethod;
 #[doc(inline)]
-pub use enums::paragraph_alignment::ParagraphAlignment;
+pub use self::paragraph_alignment::ParagraphAlignment;
 #[doc(inline)]
-pub use enums::pixel_geometry::PixelGeometry;
+pub use self::pixel_geometry::PixelGeometry;
 #[doc(inline)]
-pub use enums::reading_direction::ReadingDirection;
+pub use self::reading_direction::ReadingDirection;
 #[doc(inline)]
-pub use enums::rendering_mode::RenderingMode;
+pub use self::rendering_mode::RenderingMode;
 #[doc(inline)]
-pub use enums::text_alignment::TextAlignment;
+pub use self::text_alignment::TextAlignment;
 #[doc(inline)]
-pub use enums::trimming_granularity::TrimmingGranularity;
+pub use self::trimming_granularity::TrimmingGranularity;
 #[doc(inline)]
-pub use enums::word_wrapping::WordWrapping;
+pub use self::word_wrapping::WordWrapping;
 
 #[doc(hidden)]
 pub mod break_condition;

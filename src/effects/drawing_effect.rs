@@ -1,4 +1,4 @@
-use effects::ClientEffect;
+use crate::effects::ClientEffect;
 
 use winapi::um::unknwnbase::IUnknown;
 

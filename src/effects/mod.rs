@@ -1,9 +1,9 @@
 //! Custom effects that may be applied to individual runs of text in a layout.
 
 #[doc(inline)]
-pub use effects::client_effect::ClientEffect;
+pub use self::client_effect::ClientEffect;
 #[doc(inline)]
-pub use effects::drawing_effect::DrawingEffect;
+pub use self::drawing_effect::DrawingEffect;
 
 #[doc(hidden)]
 pub mod client_effect;

@@ -2,6 +2,9 @@
 /// Specifies algorithmic style simulations to be applied to the font face.
 /// Bold and oblique simulations can be combined via bitwise OR operation.
 pub enum FontSimulations {
+    /// Indicates that no simulations are performed.
+    NONE = 0,
+
     /// Indicates that algorithmic emboldening is applied to the font face.
     /// `BOLD` increases weight by applying a widening algorithm to the glyph
     /// outline. This may be used to simulate a bold weight where no designed

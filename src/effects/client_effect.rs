@@ -1,4 +1,4 @@
-use effects::DrawingEffect;
+use crate::effects::DrawingEffect;
 
 use winapi::um::unknwnbase::IUnknown;
 use wio::com::ComPtr;
