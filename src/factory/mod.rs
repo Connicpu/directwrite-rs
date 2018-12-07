@@ -1,4 +1,4 @@
-use error::DWResult;
+use crate::error::DWResult;
 
 use std::ptr;
 

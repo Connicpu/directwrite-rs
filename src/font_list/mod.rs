@@ -1,5 +1,5 @@
-use font::Font;
-use font_collection::FontCollection;
+use crate::font::Font;
+use crate::font_collection::FontCollection;
 
 use std::ptr;
 

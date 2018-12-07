@@ -1,7 +1,7 @@
-use enums::pixel_geometry::PixelGeometry;
-use enums::rendering_mode::RenderingMode;
-use error::DWResult;
-use factory::Factory;
+use crate::enums::pixel_geometry::PixelGeometry;
+use crate::enums::rendering_mode::RenderingMode;
+use crate::error::DWResult;
+use crate::factory::Factory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;

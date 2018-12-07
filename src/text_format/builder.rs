@@ -1,7 +1,7 @@
-use enums::{FontStretch, FontStyle, FontWeight};
-use error::DWriteError;
-use font_collection::FontCollection;
-use text_format::TextFormat;
+use crate::enums::{FontStretch, FontStyle, FontWeight};
+use crate::error::DWriteError;
+use crate::font_collection::FontCollection;
+use crate::text_format::TextFormat;
 
 use std::ptr;
 

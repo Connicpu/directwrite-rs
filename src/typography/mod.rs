@@ -1,7 +1,7 @@
 //! Typography and types for building new ones.
 
-use descriptions::FontFeature;
-use factory::Factory;
+use crate::descriptions::FontFeature;
+use crate::factory::Factory;
 
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteTypography;

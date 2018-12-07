@@ -1,4 +1,4 @@
-use enums::trimming_granularity::TrimmingGranularity;
+use crate::enums::trimming_granularity::TrimmingGranularity;
 
 use checked_enum::UncheckedEnum;
 use winapi::um::dwrite::DWRITE_TRIMMING;

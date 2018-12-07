@@ -1,6 +1,6 @@
 //! Describes how numberic digits should be substituted.
 
-use factory::Factory;
+use crate::factory::Factory;
 
 use winapi::um::dwrite::IDWriteNumberSubstitution;
 use wio::com::ComPtr;

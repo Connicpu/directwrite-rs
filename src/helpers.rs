@@ -56,7 +56,7 @@ macro_rules! member_compat_test {
             use std::mem::{align_of, size_of};
             assert_eq!(size_of::<$t1>(), size_of::<$t2>(), "types are not the same size");
             assert_eq!(align_of::<$t1>(), align_of::<$t2>(), "types are not the same alignment");
-            let mut tracker = ::helpers::StructSizeTracker::new();
+            let mut tracker = crate::helpers::StructSizeTracker::new();
             $(
                 member_compat_test!(@member tracker, $t1, $t2, $($m1).+, $m2);
             )*

@@ -1,4 +1,4 @@
-use helpers::wstrlen;
+use crate::helpers::wstrlen;
 
 use std::ffi::OsString;
 

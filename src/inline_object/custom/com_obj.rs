@@ -1,7 +1,7 @@
-use helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_mut_com};
-use inline_object::custom::CustomInlineObject;
-use inline_object::DrawingContext;
-use text_renderer::DrawContext;
+use crate::helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_mut_com};
+use crate::inline_object::custom::CustomInlineObject;
+use crate::inline_object::DrawingContext;
+use crate::text_renderer::DrawContext;
 
 use com_impl::Refcount;
 use com_impl::VTable;

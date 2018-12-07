@@ -1,7 +1,7 @@
-use enums::NumberSubstitutionMethod;
-use error::DWResult;
-use factory::Factory;
-use number_substitution::NumberSubstitution;
+use crate::enums::NumberSubstitutionMethod;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::number_substitution::NumberSubstitution;
 
 use std::borrow::Cow;
 

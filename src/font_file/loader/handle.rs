@@ -1,8 +1,8 @@
-use descriptions::FontKey;
-use error::DWResult;
-use factory::Factory;
-use font_file::loader::com_loader::ComFontFileLoader;
-use font_file::loader::FontFileLoader;
+use crate::descriptions::FontKey;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_file::loader::com_loader::ComFontFileLoader;
+use crate::font_file::loader::FontFileLoader;
 
 use com_wrapper::ComWrapper;
 use std::marker::PhantomData;

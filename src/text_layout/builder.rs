@@ -1,5 +1,5 @@
-use error::DWResult;
-use {TextFormat, TextLayout};
+use crate::error::DWResult;
+use crate::{TextFormat, TextLayout};
 
 use std::borrow::Cow;
 use std::ptr;

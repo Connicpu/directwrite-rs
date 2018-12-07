@@ -1,14 +1,14 @@
-use descriptions::{GlyphRun, GlyphRunDescription};
-use descriptions::{Strikethrough, Underline};
-use helpers::wrap_opt_ref_to_raw_com;
-use helpers::wrap_ref_to_raw_com;
-use text_renderer::custom::CustomTextRenderer;
-use text_renderer::custom::DrawGlyphRun;
-use text_renderer::custom::DrawInlineObject;
-use text_renderer::custom::DrawStrikethrough;
-use text_renderer::custom::DrawUnderline;
-use text_renderer::DrawContext;
-use text_renderer::TextRenderer;
+use crate::descriptions::{GlyphRun, GlyphRunDescription};
+use crate::descriptions::{Strikethrough, Underline};
+use crate::helpers::wrap_opt_ref_to_raw_com;
+use crate::helpers::wrap_ref_to_raw_com;
+use crate::text_renderer::custom::CustomTextRenderer;
+use crate::text_renderer::custom::DrawGlyphRun;
+use crate::text_renderer::custom::DrawInlineObject;
+use crate::text_renderer::custom::DrawStrikethrough;
+use crate::text_renderer::custom::DrawUnderline;
+use crate::text_renderer::DrawContext;
+use crate::text_renderer::TextRenderer;
 
 use com_impl::Refcount;
 use com_impl::VTable;

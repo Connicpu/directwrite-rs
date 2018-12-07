@@ -1,11 +1,11 @@
 //! TextFormat and types for building new ones.
 
-use descriptions::Trimming;
-use enums::*;
-use error::DWResult;
-use factory::Factory;
-use font_collection::FontCollection;
-use inline_object::InlineObject;
+use crate::descriptions::Trimming;
+use crate::enums::*;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_collection::FontCollection;
+use crate::inline_object::InlineObject;
 
 use std::ffi::OsString;
 use std::ptr;

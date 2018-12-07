@@ -1,23 +1,23 @@
 //! TextLayout and types for building new ones.
 
-use descriptions::TextRange;
-use effects::client_effect::ClientEffect;
-use effects::DrawingEffect;
-use enums::{FontStretch, FontStyle, FontWeight};
-use error::DWResult;
-use factory::Factory;
-use font_collection::FontCollection;
-use helpers::{deref_com_wrapper, deref_com_wrapper_mut};
-use inline_object::InlineObject;
-use metrics::cluster::ClusterMetrics;
-use metrics::hit_test::HitTestMetrics;
-use metrics::line::LineMetrics;
-use metrics::overhang::OverhangMetrics;
-use metrics::text::TextMetrics;
-use text_format::TextFormat;
-use text_renderer::DrawContext;
-use text_renderer::TextRenderer;
-use typography::Typography;
+use crate::descriptions::TextRange;
+use crate::effects::client_effect::ClientEffect;
+use crate::effects::DrawingEffect;
+use crate::enums::{FontStretch, FontStyle, FontWeight};
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_collection::FontCollection;
+use crate::helpers::{deref_com_wrapper, deref_com_wrapper_mut};
+use crate::inline_object::InlineObject;
+use crate::metrics::cluster::ClusterMetrics;
+use crate::metrics::hit_test::HitTestMetrics;
+use crate::metrics::line::LineMetrics;
+use crate::metrics::overhang::OverhangMetrics;
+use crate::metrics::text::TextMetrics;
+use crate::text_format::TextFormat;
+use crate::text_renderer::DrawContext;
+use crate::text_renderer::TextRenderer;
+use crate::typography::Typography;
 
 use std::ops::{Deref, DerefMut};
 use std::{mem, ptr, u32};

@@ -1,5 +1,5 @@
-use error::DWResult;
-use font_file::loader::{FontFileStream, Fragment};
+use crate::error::DWResult;
+use crate::font_file::loader::{FontFileStream, Fragment};
 
 use winapi::shared::winerror::E_FAIL;
 

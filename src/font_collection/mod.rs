@@ -1,11 +1,11 @@
 //! Font collections and types for building application-defined collections.
 
-use descriptions::FontKey;
-use error::DWResult;
-use factory::Factory;
-use font::Font;
-use font_face::FontFace;
-use font_family::FontFamily;
+use crate::descriptions::FontKey;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font::Font;
+use crate::font_face::FontFace;
+use crate::font_family::FontFamily;
 
 use std::ptr;
 
@@ -16,7 +16,7 @@ use wio::com::ComPtr;
 use wio::wide::ToWide;
 
 #[doc(inline)]
-pub use font_collection::builder::FontCollectionBuilder;
+pub use crate::font_collection::builder::FontCollectionBuilder;
 
 #[doc(hidden)]
 pub mod builder;

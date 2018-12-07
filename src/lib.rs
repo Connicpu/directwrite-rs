@@ -22,35 +22,35 @@ extern crate winapi;
 extern crate wio;
 
 #[doc(inline)]
-pub use error::{DWResult, DWriteError};
+pub use crate::error::{DWResult, DWriteError};
 #[doc(inline)]
-pub use factory::Factory;
+pub use crate::factory::Factory;
 #[doc(inline)]
-pub use font::Font;
+pub use crate::font::Font;
 #[doc(inline)]
-pub use font_collection::FontCollection;
+pub use crate::font_collection::FontCollection;
 #[doc(inline)]
-pub use font_face::FontFace;
+pub use crate::font_face::FontFace;
 #[doc(inline)]
-pub use font_family::FontFamily;
+pub use crate::font_family::FontFamily;
 #[doc(inline)]
-pub use font_file::FontFile;
+pub use crate::font_file::FontFile;
 #[doc(inline)]
-pub use font_list::FontList;
+pub use crate::font_list::FontList;
 #[doc(inline)]
-pub use geometry_sink::GeometrySink;
+pub use crate::geometry_sink::GeometrySink;
 #[doc(inline)]
-pub use inline_object::InlineObject;
+pub use crate::inline_object::InlineObject;
 #[doc(inline)]
-pub use rendering_params::RenderingParams;
+pub use crate::rendering_params::RenderingParams;
 #[doc(inline)]
-pub use text_format::TextFormat;
+pub use crate::text_format::TextFormat;
 #[doc(inline)]
-pub use text_layout::TextLayout;
+pub use crate::text_layout::TextLayout;
 #[doc(inline)]
-pub use text_renderer::TextRenderer;
+pub use crate::text_renderer::TextRenderer;
 #[doc(inline)]
-pub use typography::Typography;
+pub use crate::typography::Typography;
 
 #[macro_use]
 mod helpers;

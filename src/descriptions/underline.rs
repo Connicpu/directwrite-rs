@@ -1,5 +1,5 @@
-use descriptions::wide_str::WideCStr;
-use enums::{FlowDirection, MeasuringMode, ReadingDirection};
+use crate::descriptions::wide_str::WideCStr;
+use crate::enums::{FlowDirection, MeasuringMode, ReadingDirection};
 
 use checked_enum::UncheckedEnum;
 use winapi::um::dwrite::DWRITE_UNDERLINE;

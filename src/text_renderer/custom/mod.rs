@@ -1,21 +1,21 @@
 //! Types and traits for creating application-implemented TextRenderer objects.
 
-use descriptions::GlyphRun;
-use descriptions::GlyphRunDescription;
-use descriptions::Strikethrough;
-use descriptions::Underline;
-use effects::ClientEffect;
-use enums::MeasuringMode;
-use error::DWResult;
-use inline_object::InlineObject;
-use text_renderer::DrawContext;
+use crate::descriptions::GlyphRun;
+use crate::descriptions::GlyphRunDescription;
+use crate::descriptions::Strikethrough;
+use crate::descriptions::Underline;
+use crate::effects::ClientEffect;
+use crate::enums::MeasuringMode;
+use crate::error::DWResult;
+use crate::inline_object::InlineObject;
+use crate::text_renderer::DrawContext;
 
 use checked_enum::UncheckedEnum;
 use math2d::Matrix3x2f;
 use math2d::Point2f;
 
 #[doc(inline)]
-pub use text_renderer::custom::com_renderer::ComRenderer;
+pub use crate::text_renderer::custom::com_renderer::ComRenderer;
 
 #[doc(hidden)]
 pub mod com_renderer;

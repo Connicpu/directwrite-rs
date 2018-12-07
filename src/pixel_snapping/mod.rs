@@ -1,7 +1,7 @@
 //! PixelSnapping is for objects that describe pixel snapping behaviors, such as TextRenderer.
 
-use error::DWResult;
-use text_renderer::DrawContext;
+use crate::error::DWResult;
+use crate::text_renderer::DrawContext;
 
 use math2d::Matrix3x2f;
 use winapi::shared::winerror::SUCCEEDED;

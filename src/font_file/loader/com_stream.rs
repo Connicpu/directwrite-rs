@@ -1,4 +1,4 @@
-use font_file::loader::FontFileStream;
+use crate::font_file::loader::FontFileStream;
 
 use com_impl::Refcount;
 use com_impl::VTable;

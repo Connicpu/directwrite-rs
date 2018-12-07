@@ -1,5 +1,5 @@
-use error::DWResult;
-use font_file::loader::{file_timestamp, FontFileStream, Fragment};
+use crate::error::DWResult;
+use crate::font_file::loader::{file_timestamp, FontFileStream, Fragment};
 
 use std::fs::File;
 

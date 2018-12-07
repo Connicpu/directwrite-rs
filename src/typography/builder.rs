@@ -1,8 +1,8 @@
-use descriptions::FontFeature;
-use enums::FontFeatureTag;
-use error::DWResult;
-use factory::Factory;
-use typography::Typography;
+use crate::descriptions::FontFeature;
+use crate::enums::FontFeatureTag;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::typography::Typography;
 
 use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;

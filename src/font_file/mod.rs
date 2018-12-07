@@ -1,10 +1,10 @@
 //! FontFile and types for creating your own instances.
 
-use descriptions::FontKey;
-use enums::FontFaceType;
-use enums::FontFileType;
-use error::DWResult;
-use factory::Factory;
+use crate::descriptions::FontKey;
+use crate::enums::FontFaceType;
+use crate::enums::FontFileType;
+use crate::error::DWResult;
+use crate::factory::Factory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
@@ -13,7 +13,7 @@ use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
 
 #[doc(inline)]
-pub use font_file::builder::FontFileBuilder;
+pub use crate::font_file::builder::FontFileBuilder;
 
 #[doc(hidden)]
 pub mod builder;

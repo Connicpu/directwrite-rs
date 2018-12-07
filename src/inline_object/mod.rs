@@ -1,16 +1,16 @@
 //! InlineObject and types for creating your own instances.
 
-use effects::ClientEffect;
-use enums::BreakCondition;
-use error::DWResult;
-use factory::Factory;
-use helpers::unwrap_opt_com;
-use inline_object::custom::CustomInlineObject;
-use metrics::overhang::OverhangMetrics;
-use metrics::InlineObjectMetrics;
-use text_format::TextFormat;
-use text_renderer::DrawContext;
-use text_renderer::TextRenderer;
+use crate::effects::ClientEffect;
+use crate::enums::BreakCondition;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::helpers::unwrap_opt_com;
+use crate::inline_object::custom::CustomInlineObject;
+use crate::metrics::overhang::OverhangMetrics;
+use crate::metrics::InlineObjectMetrics;
+use crate::text_format::TextFormat;
+use crate::text_renderer::DrawContext;
+use crate::text_renderer::TextRenderer;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;

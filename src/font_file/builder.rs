@@ -1,7 +1,7 @@
-use descriptions::{FontKey, KeyPayload};
-use error::DWResult;
-use font_file::loader::handle::FileLoaderHandle;
-use font_file::FontFile;
+use crate::descriptions::{FontKey, KeyPayload};
+use crate::error::DWResult;
+use crate::font_file::loader::handle::FileLoaderHandle;
+use crate::font_file::FontFile;
 
 use std::ptr;
 

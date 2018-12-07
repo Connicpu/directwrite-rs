@@ -1,4 +1,4 @@
-use enums::font_feature_tag::FontFeatureTag;
+use crate::enums::font_feature_tag::FontFeatureTag;
 
 use winapi::um::dwrite::DWRITE_FONT_FEATURE;
 

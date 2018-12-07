@@ -1,9 +1,9 @@
-use descriptions::key::FontKey;
-use error::DWResult;
-use factory::Factory;
-use font_collection::loader::FontCollectionLoader;
-use font_file::loader::handle::FileLoaderHandle;
-use font_file::FontFile;
+use crate::descriptions::key::FontKey;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_collection::loader::FontCollectionLoader;
+use crate::font_file::loader::handle::FileLoaderHandle;
+use crate::font_file::FontFile;
 
 use std::borrow::Borrow;
 use std::sync::Arc;

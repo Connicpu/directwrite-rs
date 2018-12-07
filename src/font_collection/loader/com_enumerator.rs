@@ -1,11 +1,11 @@
-use font_file::FontFile;
+use crate::font_file::FontFile;
 
 use std::ptr;
 
 use com_impl::Refcount;
 use com_impl::VTable;
 use com_wrapper::ComWrapper;
-use error::DWResult;
+use crate::error::DWResult;
 use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{E_FAIL, HRESULT, S_OK};
 use winapi::um::dwrite::IDWriteFontFile;

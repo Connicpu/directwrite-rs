@@ -1,7 +1,7 @@
-use enums::{FontStretch, FontStyle, FontWeight};
-use font::Font;
-use font_list::FontList;
-use localized_strings::LocalizedStrings;
+use crate::enums::{FontStretch, FontStyle, FontWeight};
+use crate::font::Font;
+use crate::font_list::FontList;
+use crate::localized_strings::LocalizedStrings;
 
 use std::ptr;
 

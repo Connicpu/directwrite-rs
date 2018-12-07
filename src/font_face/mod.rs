@@ -1,14 +1,14 @@
 //! FontFace and types for examining its contents and building new ones.
 
-use descriptions::GlyphOffset;
-use enums::font_feature_tag::FontFeatureTag;
-use enums::{FontFaceType, FontSimulations, MeasuringMode, RenderingMode};
-use error::DWResult;
-use factory::Factory;
-use font_file::FontFile;
-use geometry_sink::{self, GeometrySink};
-use metrics::{FontMetrics, GlyphMetrics};
-use rendering_params::RenderingParams;
+use crate::descriptions::GlyphOffset;
+use crate::enums::font_feature_tag::FontFeatureTag;
+use crate::enums::{FontFaceType, FontSimulations, MeasuringMode, RenderingMode};
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_file::FontFile;
+use crate::geometry_sink::{self, GeometrySink};
+use crate::metrics::{FontMetrics, GlyphMetrics};
+use crate::rendering_params::RenderingParams;
 
 use std::{mem, ptr, u32};
 

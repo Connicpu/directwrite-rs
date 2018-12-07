@@ -1,4 +1,4 @@
-use error::DWResult;
+use crate::error::DWResult;
 
 use math2d::BezierSegment;
 use math2d::Point2f;

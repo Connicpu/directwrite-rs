@@ -1,13 +1,13 @@
-use enums::font_simulations::FontSimulations;
-use enums::font_stretch::FontStretch;
-use enums::font_style::FontStyle;
-use enums::font_weight::FontWeight;
-use enums::InformationalStringId;
-use error::DWResult;
-use font_face::FontFace;
-use font_family::FontFamily;
-use localized_strings::LocalizedStrings;
-use metrics::font::FontMetrics;
+use crate::enums::font_simulations::FontSimulations;
+use crate::enums::font_stretch::FontStretch;
+use crate::enums::font_style::FontStyle;
+use crate::enums::font_weight::FontWeight;
+use crate::enums::InformationalStringId;
+use crate::error::DWResult;
+use crate::font_face::FontFace;
+use crate::font_family::FontFamily;
+use crate::localized_strings::LocalizedStrings;
+use crate::metrics::font::FontMetrics;
 
 use std::mem;
 use std::ptr;

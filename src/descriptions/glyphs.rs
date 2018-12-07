@@ -1,7 +1,7 @@
-use descriptions::wide_str::WideCStr;
-use descriptions::wide_str::WideStr;
-use font_face::FontFace;
-use helpers::wrap_ref_to_raw_com;
+use crate::descriptions::wide_str::WideCStr;
+use crate::descriptions::wide_str::WideStr;
+use crate::font_face::FontFace;
+use crate::helpers::wrap_ref_to_raw_com;
 
 use std::slice::from_raw_parts;
 

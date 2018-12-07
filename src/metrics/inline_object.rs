@@ -1,4 +1,4 @@
-use descriptions::DBool;
+use crate::descriptions::DBool;
 
 use math2d::Sizef;
 use winapi::um::dwrite::DWRITE_INLINE_OBJECT_METRICS;

@@ -1,4 +1,4 @@
-use geometry_sink::GeometrySink;
+use crate::geometry_sink::GeometrySink;
 
 use com_impl::{Refcount, VTable};
 use math2d::{BezierSegment, Point2f};

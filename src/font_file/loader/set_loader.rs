@@ -1,6 +1,6 @@
-use error::DWResult;
-use descriptions::key::FontKey;
-use font_file::loader::{FontFileLoader, FontFileStream};
+use crate::error::DWResult;
+use crate::descriptions::key::FontKey;
+use crate::font_file::loader::{FontFileLoader, FontFileStream};
 
 use std::borrow::Borrow;
 use std::collections::HashMap;

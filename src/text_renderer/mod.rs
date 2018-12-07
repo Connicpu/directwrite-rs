@@ -1,10 +1,10 @@
 //! TextRenderer and types for constructing your own application-defined instances.
 
-use error::DWResult;
-use helpers::deref_com_wrapper;
-use helpers::unwrap_opt_com;
-use pixel_snapping::PixelSnapping;
-use text_renderer::custom::{DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline};
+use crate::error::DWResult;
+use crate::helpers::deref_com_wrapper;
+use crate::helpers::unwrap_opt_com;
+use crate::pixel_snapping::PixelSnapping;
+use crate::text_renderer::custom::{DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline};
 
 use com_wrapper::ComWrapper;
 use winapi::ctypes::c_void;

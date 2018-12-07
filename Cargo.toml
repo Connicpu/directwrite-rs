@@ -9,7 +9,7 @@ to be used with direct2d for easy text rendering.
 repository = "https://github.com/Connicpu/directwrite-rs"
 documentation = "https://docs.rs/directwrite/*/x86_64-pc-windows-msvc/directwrite/"
 license = "MIT/Apache-2.0"
-edition = "2015"
+edition = "2018"
 
 [target.'cfg(windows)'.dependencies]
 wio = "0.2"

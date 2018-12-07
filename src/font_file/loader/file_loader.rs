@@ -1,7 +1,7 @@
-use error::DWResult;
-use font_file::loader::file_timestamp;
-use font_file::loader::{FileStream, MmapStream, OwnedDataStream};
-use font_file::loader::{FontFileLoader, FontFileStream};
+use crate::error::DWResult;
+use crate::font_file::loader::file_timestamp;
+use crate::font_file::loader::{FileStream, MmapStream, OwnedDataStream};
+use crate::font_file::loader::{FontFileLoader, FontFileStream};
 
 use std::borrow::Cow;
 use std::fs::File;

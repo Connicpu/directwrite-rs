@@ -1,14 +1,14 @@
 //! Types related to loading custom font collections.
 
-use descriptions::FontKey;
-use error::DWResult;
-use factory::Factory;
-use font_file::FontFile;
+use crate::descriptions::FontKey;
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_file::FontFile;
 
 #[doc(inline)]
-pub use font_collection::loader::handle::CollectionLoaderHandle;
+pub use crate::font_collection::loader::handle::CollectionLoaderHandle;
 #[doc(inline)]
-pub use font_collection::loader::key_loader::KeyLoader;
+pub use crate::font_collection::loader::key_loader::KeyLoader;
 
 #[doc(hidden)]
 pub mod handle;

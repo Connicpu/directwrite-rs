@@ -1,8 +1,8 @@
-use descriptions::{FontKey, KeyPayload};
-use error::DWResult;
-use factory::Factory;
-use font_collection::loader::CollectionLoaderHandle;
-use font_collection::FontCollection;
+use crate::descriptions::{FontKey, KeyPayload};
+use crate::error::DWResult;
+use crate::factory::Factory;
+use crate::font_collection::loader::CollectionLoaderHandle;
+use crate::font_collection::FontCollection;
 
 use std::mem;
 use std::ptr;

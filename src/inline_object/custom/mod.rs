@@ -1,11 +1,11 @@
 //! Traits and Structs for implementing custom inline text objects that can be layed
 //! out inline with text.
 
-use error::DWResult;
-use inline_object::BreakConditions;
-use inline_object::DrawingContext;
-use metrics::InlineObjectMetrics;
-use metrics::OverhangMetrics;
+use crate::error::DWResult;
+use crate::inline_object::BreakConditions;
+use crate::inline_object::DrawingContext;
+use crate::metrics::InlineObjectMetrics;
+use crate::metrics::OverhangMetrics;
 
 
 pub(crate) mod com_obj;

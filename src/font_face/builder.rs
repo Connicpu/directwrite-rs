@@ -1,7 +1,7 @@
-use enums::{FontFaceType, FontSimulations};
-use error::DWriteError;
-use font_face::FontFace;
-use font_file::FontFile;
+use crate::enums::{FontFaceType, FontSimulations};
+use crate::error::DWriteError;
+use crate::font_face::FontFace;
+use crate::font_file::FontFile;
 
 use std::ptr;
 

@@ -1,4 +1,4 @@
-use descriptions::DBool;
+use crate::descriptions::DBool;
 
 use math2d::{Point2f, Sizef};
 use winapi::um::dwrite::DWRITE_HIT_TEST_METRICS;

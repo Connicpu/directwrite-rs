@@ -1,7 +1,7 @@
-use descriptions::KeyPayload;
-use factory::Factory;
-use font_collection::loader::com_enumerator::ComEnumerator;
-use font_collection::loader::FontCollectionLoader;
+use crate::descriptions::KeyPayload;
+use crate::factory::Factory;
+use crate::font_collection::loader::com_enumerator::ComEnumerator;
+use crate::font_collection::loader::FontCollectionLoader;
 
 use std::mem;
 

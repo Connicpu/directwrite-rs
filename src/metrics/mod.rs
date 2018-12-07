@@ -1,21 +1,21 @@
 //! Metrics structs that describe information about various items.
 
 #[doc(inline)]
-pub use metrics::cluster::ClusterMetrics;
+pub use crate::metrics::cluster::ClusterMetrics;
 #[doc(inline)]
-pub use metrics::font::FontMetrics;
+pub use crate::metrics::font::FontMetrics;
 #[doc(inline)]
-pub use metrics::glyph::GlyphMetrics;
+pub use crate::metrics::glyph::GlyphMetrics;
 #[doc(inline)]
-pub use metrics::hit_test::HitTestMetrics;
+pub use crate::metrics::hit_test::HitTestMetrics;
 #[doc(inline)]
-pub use metrics::inline_object::InlineObjectMetrics;
+pub use crate::metrics::inline_object::InlineObjectMetrics;
 #[doc(inline)]
-pub use metrics::line::LineMetrics;
+pub use crate::metrics::line::LineMetrics;
 #[doc(inline)]
-pub use metrics::overhang::OverhangMetrics;
+pub use crate::metrics::overhang::OverhangMetrics;
 #[doc(inline)]
-pub use metrics::text::TextMetrics;
+pub use crate::metrics::text::TextMetrics;
 
 #[doc(hidden)]
 pub mod cluster;

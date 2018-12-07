@@ -1,6 +1,6 @@
-use descriptions::KeyPayload;
-use font_file::loader::com_stream::ComFontFileStream;
-use font_file::loader::FontFileLoader;
+use crate::descriptions::KeyPayload;
+use crate::font_file::loader::com_stream::ComFontFileStream;
+use crate::font_file::loader::FontFileLoader;
 
 use std::mem;
 
