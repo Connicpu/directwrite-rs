@@ -1,10 +1,10 @@
-use crate::helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_mut_com};
 use crate::inline_object::custom::CustomInlineObject;
 use crate::inline_object::DrawingContext;
 use crate::text_renderer::DrawContext;
 
 use com_impl::Refcount;
 use com_impl::VTable;
+use dcommon::helpers::{wrap_opt_ref_to_raw_com, wrap_ref_to_raw_mut_com};
 use winapi::ctypes::c_void;
 use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{E_FAIL, HRESULT, S_OK};

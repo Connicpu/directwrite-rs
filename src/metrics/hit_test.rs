@@ -24,7 +24,7 @@ pub struct HitTestMetrics {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     hit_test_metrics_compat:
     HitTestMetrics <=> DWRITE_HIT_TEST_METRICS {
         text_position <=> textPosition,

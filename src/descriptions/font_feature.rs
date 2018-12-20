@@ -39,7 +39,7 @@ pub struct FontFeature {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     font_feature_compat:
     FontFeature <=> DWRITE_FONT_FEATURE {
         name_tag <=> nameTag,

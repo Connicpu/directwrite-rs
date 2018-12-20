@@ -1,7 +1,5 @@
 use crate::descriptions::{GlyphRun, GlyphRunDescription};
 use crate::descriptions::{Strikethrough, Underline};
-use crate::helpers::wrap_opt_ref_to_raw_com;
-use crate::helpers::wrap_ref_to_raw_com;
 use crate::text_renderer::custom::CustomTextRenderer;
 use crate::text_renderer::custom::DrawGlyphRun;
 use crate::text_renderer::custom::DrawInlineObject;
@@ -13,6 +11,8 @@ use crate::text_renderer::TextRenderer;
 use com_impl::Refcount;
 use com_impl::VTable;
 use com_wrapper::ComWrapper;
+use dcommon::helpers::wrap_opt_ref_to_raw_com;
+use dcommon::helpers::wrap_ref_to_raw_com;
 use winapi::ctypes::c_void;
 use winapi::shared::minwindef::BOOL;
 use winapi::shared::minwindef::FLOAT;

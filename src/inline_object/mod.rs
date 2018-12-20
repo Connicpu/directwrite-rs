@@ -4,7 +4,6 @@ use crate::effects::ClientEffect;
 use crate::enums::BreakCondition;
 use crate::error::DWResult;
 use crate::factory::Factory;
-use crate::helpers::unwrap_opt_com;
 use crate::inline_object::custom::CustomInlineObject;
 use crate::metrics::overhang::OverhangMetrics;
 use crate::metrics::InlineObjectMetrics;
@@ -14,6 +13,7 @@ use crate::text_renderer::TextRenderer;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::helpers::unwrap_opt_com;
 use math2d::Point2f;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteInlineObject;

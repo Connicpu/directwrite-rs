@@ -1,10 +1,10 @@
 use crate::descriptions::wide_str::WideCStr;
 use crate::descriptions::wide_str::WideStr;
 use crate::font_face::FontFace;
-use crate::helpers::wrap_ref_to_raw_com;
 
 use std::slice::from_raw_parts;
 
+use dcommon::helpers::wrap_ref_to_raw_com;
 use com_wrapper::ComWrapper;
 use winapi::um::dwrite::{DWRITE_GLYPH_RUN, DWRITE_GLYPH_RUN_DESCRIPTION};
 
@@ -27,7 +27,7 @@ pub struct GlyphOffset {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     glyph_offset_compat_test:
     GlyphOffset <=> winapi::um::dwrite::DWRITE_GLYPH_OFFSET {
         advance_offset <=> advanceOffset,

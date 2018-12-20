@@ -1,7 +1,6 @@
-use crate::helpers::wstrlen;
-
 use std::ffi::OsString;
 
+use dcommon::helpers::wstrlen;
 use wio::wide::FromWide;
 
 /// Represents a known-width UTF16/UCS-2 borrowed string

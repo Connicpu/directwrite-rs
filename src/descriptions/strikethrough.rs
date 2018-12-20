@@ -40,7 +40,7 @@ pub struct Strikethrough<'a> {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     strikethrough_bin_compat:
     Strikethrough <=> DWRITE_STRIKETHROUGH {
         width <=> width,

@@ -1,11 +1,11 @@
 use crate::enums::{FontStretch, FontStyle, FontWeight};
-use crate::error::DWriteError;
 use crate::font_collection::FontCollection;
 use crate::text_format::TextFormat;
 
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use dcommon::error::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFactory, IDWriteTextFormat};
 use wio::com::ComPtr;
@@ -40,7 +40,7 @@ impl<'a> TextFormatBuilder<'a> {
     }
 
     /// Finalize the builder. Panics if `family` or `size` is not specified.
-    pub fn build(self) -> Result<TextFormat, DWriteError> {
+    pub fn build(self) -> Result<TextFormat, Error> {
         unsafe {
             let family = self
                 .family
@@ -91,7 +91,7 @@ impl<'a> TextFormatBuilder<'a> {
     }
 
     /// Specify a font weight. Defaults to [`NORMAL`][1]
-    /// 
+    ///
     /// [1]: ../enums/struct.FontWeight.html#associatedconstant.NORMAL
     pub fn with_weight(mut self, weight: FontWeight) -> Self {
         self.weight = weight;
@@ -99,16 +99,15 @@ impl<'a> TextFormatBuilder<'a> {
     }
 
     /// Specify a font style. Defaults to [`Normal`][1]
-    /// 
+    ///
     /// [1]: ../enums/enum.FontStyle.html#variant.Normal
     pub fn with_style(mut self, style: FontStyle) -> Self {
         self.style = style;
         self
     }
 
-
     /// Specify a font stretch. Defaults to [`Normal`][1]
-    /// 
+    ///
     /// [1]: ../enums/enum.FontStretch.html#variant.Normal
     pub fn with_stretch(mut self, stretch: FontStretch) -> Self {
         self.stretch = stretch;

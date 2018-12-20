@@ -21,7 +21,7 @@ pub struct Trimming {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     trimming_compat:
     Trimming <=> DWRITE_TRIMMING {
         granularity <=> granularity,

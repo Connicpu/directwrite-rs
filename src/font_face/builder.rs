@@ -1,10 +1,10 @@
 use crate::enums::{FontFaceType, FontSimulations};
-use crate::error::DWriteError;
 use crate::font_face::FontFace;
 use crate::font_file::FontFile;
 
 use std::ptr;
 
+use dcommon::error::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFactory, IDWriteFontFace, IDWriteFontFile};
 use wio::com::ComPtr;
@@ -34,7 +34,7 @@ impl<'a, 'b> FontFaceBuilder<'a, 'b> {
     }
 
     /// Finalizes construction of the FontFace.
-    pub fn build(self) -> Result<FontFace, DWriteError> {
+    pub fn build(self) -> Result<FontFace, Error> {
         unsafe {
             let font_face_type = self
                 .font_face_type

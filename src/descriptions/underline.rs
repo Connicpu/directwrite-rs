@@ -48,7 +48,7 @@ pub struct Underline<'a> {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     underline_bin_compat:
     Underline <=> DWRITE_UNDERLINE {
         width <=> width,

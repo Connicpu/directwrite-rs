@@ -7,7 +7,6 @@ use crate::enums::{FontStretch, FontStyle, FontWeight};
 use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::FontCollection;
-use crate::helpers::{deref_com_wrapper, deref_com_wrapper_mut};
 use crate::inline_object::InlineObject;
 use crate::metrics::cluster::ClusterMetrics;
 use crate::metrics::hit_test::HitTestMetrics;
@@ -24,6 +23,7 @@ use std::{mem, ptr, u32};
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::helpers::{deref_com_wrapper, deref_com_wrapper_mut};
 use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;

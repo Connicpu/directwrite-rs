@@ -11,7 +11,7 @@ pub struct TextRange {
 }
 
 #[cfg(test)]
-member_compat_test! {
+dcommon::member_compat_test! {
     test_range_compat:
     TextRange <=> DWRITE_TEXT_RANGE {
         start <=> startPosition,
