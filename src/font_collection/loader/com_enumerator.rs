@@ -1,11 +1,11 @@
 use crate::font_file::FontFile;
+use crate::error::DWResult;
 
 use std::ptr;
 
 use com_impl::Refcount;
 use com_impl::VTable;
 use com_wrapper::ComWrapper;
-use crate::error::DWResult;
 use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{E_FAIL, HRESULT, S_OK};
 use winapi::um::dwrite::IDWriteFontFile;
@@ -41,6 +41,7 @@ unsafe impl<I> IDWriteFontFileEnumerator for ComEnumerator<I>
 where
     I: Iterator<Item = DWResult<FontFile>> + 'static,
 {
+    #[panic(result = "E_FAIL")]
     unsafe fn get_current_font_file(&self, file: *mut *mut IDWriteFontFile) -> HRESULT {
         if let Some(err) = self.err {
             return err;
@@ -59,6 +60,7 @@ where
         }
     }
 
+    #[panic(result = "E_FAIL")]
     unsafe fn move_next(&mut self, has_next: *mut BOOL) -> HRESULT {
         if let Some(err) = self.err {
             return err;

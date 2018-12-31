@@ -1,11 +1,10 @@
-use crate::descriptions::wide_str::WideCStr;
-use crate::descriptions::wide_str::WideStr;
 use crate::font_face::FontFace;
 
 use std::slice::from_raw_parts;
 
-use dcommon::helpers::wrap_ref_to_raw_com;
 use com_wrapper::ComWrapper;
+use dcommon::helpers::wrap_ref_to_raw_com;
+use dcommon::helpers::{WideCStr, WideStr};
 use winapi::um::dwrite::{DWRITE_GLYPH_RUN, DWRITE_GLYPH_RUN_DESCRIPTION};
 
 #[repr(C)]
@@ -94,7 +93,7 @@ impl<'a> GlyphRun<'a> {
 }
 
 /// Contains additional properties related to those in [`GlyphRun`][1].
-/// 
+///
 /// [1]: struct.GlyphRun.html
 pub struct GlyphRunDescription<'a> {
     /// A string for the locale name associated with this run.

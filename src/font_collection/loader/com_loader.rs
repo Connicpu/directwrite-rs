@@ -7,7 +7,7 @@ use std::mem;
 
 use com_impl::{Refcount, VTable};
 use winapi::ctypes::c_void;
-use winapi::shared::winerror::{E_INVALIDARG, HRESULT, S_OK};
+use winapi::shared::winerror::{E_FAIL, E_INVALIDARG, HRESULT, S_OK};
 use winapi::um::dwrite::IDWriteFactory;
 use winapi::um::dwrite::IDWriteFontFileEnumerator;
 use winapi::um::dwrite::{IDWriteFontCollectionLoader, IDWriteFontCollectionLoaderVtbl};
@@ -40,6 +40,7 @@ unsafe impl<T> IDWriteFontCollectionLoader for ComFontCollectionLoader<T>
 where
     T: FontCollectionLoader,
 {
+    #[panic(result = "E_FAIL")]
     unsafe fn create_enumerator_from_key(
         &self,
         factory: *mut IDWriteFactory,

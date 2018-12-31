@@ -17,8 +17,6 @@ pub use self::text_range::TextRange;
 pub use self::trimming::Trimming;
 #[doc(inline)]
 pub use self::underline::Underline;
-#[doc(inline)]
-pub use self::wide_str::{WideCStr, WideStr};
 
 #[doc(hidden)]
 pub mod dbool;
@@ -36,5 +34,3 @@ pub mod text_range;
 pub mod trimming;
 #[doc(hidden)]
 pub mod underline;
-#[doc(hidden)]
-pub mod wide_str;

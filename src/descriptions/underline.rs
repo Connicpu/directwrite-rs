@@ -1,7 +1,7 @@
-use crate::descriptions::wide_str::WideCStr;
 use crate::enums::{FlowDirection, MeasuringMode, ReadingDirection};
 
 use checked_enum::UncheckedEnum;
+use dcommon::helpers::WideCStr;
 use winapi::um::dwrite::DWRITE_UNDERLINE;
 
 #[repr(C)]
