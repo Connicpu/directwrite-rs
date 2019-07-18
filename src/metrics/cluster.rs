@@ -47,7 +47,7 @@ impl ClusterMetrics {
     }
 }
 
-#[enum_flags(u16)]
+#[auto_enum::enum_flags(u16)]
 pub enum ClusterMetricsFlags {
     /// Indicates whether a line can be broken right after the cluster.
     CAN_WRAP_LINE_AFTER = 1 << (16 - 1),

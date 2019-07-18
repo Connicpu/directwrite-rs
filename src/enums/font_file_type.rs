@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// The type of a font represented by a single font file. Font formats that consist of multiple
 /// files, for example Type 1 .PFM and .PFB, have separate enum values for each of the file types.
 pub enum FontFileType {

@@ -14,7 +14,7 @@ use winapi::um::dwrite::{IDWriteFontCollectionLoader, IDWriteFontCollectionLoade
 use wio::com::ComPtr;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 pub struct ComFontCollectionLoader<T>
 where
     T: FontCollectionLoader,
@@ -35,7 +35,7 @@ where
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T> IDWriteFontCollectionLoader for ComFontCollectionLoader<T>
 where
     T: FontCollectionLoader,

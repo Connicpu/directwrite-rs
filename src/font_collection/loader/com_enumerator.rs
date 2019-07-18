@@ -13,7 +13,7 @@ use winapi::um::dwrite::{IDWriteFontFileEnumerator, IDWriteFontFileEnumeratorVtb
 use wio::com::ComPtr;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 pub struct ComEnumerator<I>
 where
     I: Iterator<Item = DWResult<FontFile>> + 'static,
@@ -36,7 +36,7 @@ where
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<I> IDWriteFontFileEnumerator for ComEnumerator<I>
 where
     I: Iterator<Item = DWResult<FontFile>> + 'static,

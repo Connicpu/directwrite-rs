@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Represents a method of rendering glyphs.
 pub enum RenderingMode {
     /// Specifies that the rendering mode is determined automatically, based on the font and size.

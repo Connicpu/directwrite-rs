@@ -53,7 +53,7 @@ impl FontFileLoader for DataFileLoader {
 pub struct DataCollectionLoader(FileLoaderHandle<str>);
 impl FontCollectionLoader for DataCollectionLoader {
     type Key = ();
-    type Iter = Box<Iterator<Item = DWResult<FontFile>>>;
+    type Iter = Box<dyn Iterator<Item = DWResult<FontFile>>>;
 
     fn get_iterator(&self, factory: &Factory, _key: &()) -> DWResult<Self::Iter> {
         static FONTS: &[&str] = &[

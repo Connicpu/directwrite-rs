@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// The method used for line spacing in a text layout.
 pub enum LineSpacingMethod {
     /// Line spacing depends solely on the content, adjusting to accommodate

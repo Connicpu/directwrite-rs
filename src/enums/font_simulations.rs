@@ -1,4 +1,4 @@
-#[enum_flags(u32)]
+#[auto_enum::enum_flags(u32)]
 /// Specifies algorithmic style simulations to be applied to the font face.
 /// Bold and oblique simulations can be combined via bitwise OR operation.
 pub enum FontSimulations {

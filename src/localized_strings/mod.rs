@@ -4,6 +4,7 @@ use std::ffi::{OsStr, OsString};
 use std::fmt;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteLocalizedStrings;
 use wio::com::ComPtr;

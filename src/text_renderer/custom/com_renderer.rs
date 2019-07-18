@@ -31,7 +31,7 @@ use winapi::um::dwrite::DWRITE_UNDERLINE;
 use winapi::um::unknwnbase::IUnknown;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 #[interfaces(IDWritePixelSnapping, IDWriteTextRenderer)]
 /// A COM-compatible wrapper of an application-implemented TextRenderer
 pub struct ComRenderer<T: CustomTextRenderer> {
@@ -49,7 +49,7 @@ impl<T: CustomTextRenderer> ComRenderer<T> {
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T: CustomTextRenderer> IDWritePixelSnapping for ComRenderer<T> {
     #[panic(result = "E_FAIL")]
     pub unsafe extern "system" fn is_pixel_snapping_disabled(
@@ -85,7 +85,7 @@ unsafe impl<T: CustomTextRenderer> IDWritePixelSnapping for ComRenderer<T> {
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T: CustomTextRenderer> IDWriteTextRenderer for ComRenderer<T> {
     #[panic(result = "E_FAIL")]
     pub unsafe extern "system" fn draw_glyph_run(

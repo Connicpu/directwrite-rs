@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Indicates the direction of how lines of text are placed relative to one another.
 pub enum FlowDirection {
     /// Specifies that text lines are placed from top to bottom.

@@ -20,11 +20,8 @@ memmap = "0.7.0"
 checked-enum = "0.1.1-alpha1"
 auto-enum = "0.2.0-alpha1"
 
-com-wrapper = "0.1.0-alpha2"
-derive-com-wrapper = "0.1.0-alpha4"
-
-com-impl = "0.1.0-alpha2"
-derive-com-impl = "0.1.0-alpha3"
+com-wrapper = "0.1.0"
+com-impl = "0.1.1"
 
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3.6"

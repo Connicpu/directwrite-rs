@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Specifies the alignment of paragraph text along the flow direction axis,
 /// relative to the top and bottom of the flow's layout box.
 pub enum ParagraphAlignment {

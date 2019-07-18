@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// The informational string enumeration which identifies a string embedded
 /// in a font file.
 pub enum InformationalStringId {

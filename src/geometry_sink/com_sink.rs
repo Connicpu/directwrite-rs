@@ -10,7 +10,7 @@ use winapi::um::dwrite::IDWriteGeometrySink;
 use wio::com::ComPtr;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 pub struct ComGeometrySink<T>
 where
     T: GeometrySink,
@@ -31,7 +31,7 @@ where
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T> ID2D1SimplifiedGeometrySink for ComGeometrySink<T>
 where
     T: GeometrySink,

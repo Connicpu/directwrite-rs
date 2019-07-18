@@ -1,5 +1,6 @@
 use crate::effects::DrawingEffect;
 
+use com_wrapper::ComWrapper;
 use winapi::um::unknwnbase::IUnknown;
 use wio::com::ComPtr;
 

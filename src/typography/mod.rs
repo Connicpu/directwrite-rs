@@ -3,6 +3,7 @@
 use crate::descriptions::FontFeature;
 use crate::factory::Factory;
 
+use com_wrapper::ComWrapper;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteTypography;
 use wio::com::ComPtr;
@@ -10,8 +11,7 @@ use wio::com::ComPtr;
 #[doc(inline)]
 pub use self::builder::TypographyBuilder;
 
-#[doc(hidden)]
-pub mod builder;
+mod builder;
 
 #[repr(transparent)]
 #[derive(ComWrapper)]

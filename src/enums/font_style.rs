@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Represents the style of a font face as normal, italic, or oblique.
 /// 
 /// Three terms categorize the slant of a font: normal, italic, and oblique.

@@ -3,6 +3,7 @@
 use crate::error::DWResult;
 use crate::text_renderer::DrawContext;
 
+use com_wrapper::ComWrapper;
 use math2d::Matrix3x2f;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWritePixelSnapping;

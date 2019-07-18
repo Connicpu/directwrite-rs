@@ -9,7 +9,7 @@ use winapi::um::dwrite::{IDWriteFontFileStream, IDWriteFontFileStreamVtbl};
 use wio::com::ComPtr;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 pub struct ComFontFileStream<T>
 where
     T: FontFileStream,
@@ -30,7 +30,7 @@ where
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T> IDWriteFontFileStream for ComFontFileStream<T>
 where
     T: FontFileStream,

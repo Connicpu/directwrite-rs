@@ -4,23 +4,6 @@
 #![cfg(windows)]
 //#![warn(missing_docs)]
 
-#[macro_use]
-extern crate auto_enum;
-
-#[macro_use]
-extern crate derive_com_wrapper;
-
-#[macro_use]
-extern crate derive_com_impl;
-
-extern crate checked_enum;
-extern crate com_impl;
-extern crate com_wrapper;
-extern crate math2d;
-extern crate memmap;
-extern crate winapi;
-extern crate wio;
-
 pub use crate::error::DWResult;
 pub use crate::factory::Factory;
 pub use crate::font::Font;
@@ -55,6 +38,7 @@ pub mod metrics;
 pub mod number_substitution;
 pub mod pixel_snapping;
 pub mod rendering_params;
+pub mod text_analysis;
 pub mod text_format;
 pub mod text_layout;
 pub mod text_renderer;

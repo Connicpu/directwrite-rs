@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Represents the internal structure of a device pixel (that is, the physical arrangement of
 /// red, green, and blue color components) that is assumed for purposes of rendering text.
 pub enum PixelGeometry {

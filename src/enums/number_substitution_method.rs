@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// How to apply number substitution on digits and related punctuation.
 pub enum NumberSubstitutionMethod {
     /// Specifies that the substitution method should be determined based

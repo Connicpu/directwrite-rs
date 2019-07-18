@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Indicates the measuring method used for text layout.
 pub enum MeasuringMode {
     /// Specifies that text is measured using glyph ideal metrics whose values

@@ -2,6 +2,7 @@
 
 use crate::factory::Factory;
 
+use com_wrapper::ComWrapper;
 use winapi::um::dwrite::IDWriteNumberSubstitution;
 use wio::com::ComPtr;
 

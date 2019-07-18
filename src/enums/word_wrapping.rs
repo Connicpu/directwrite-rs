@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Specifies the word wrapping to be used in a particular multiline paragraph.
 ///
 /// <div style="padding: 10px 10px 2px 10px; margin: 10px; background-color: #F2F2F2">

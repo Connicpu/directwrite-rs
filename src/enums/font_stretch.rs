@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Represents the degree to which a font has been stretched compared to a
 /// font's normal aspect ratio.The enumerated values correspond to the
 /// usWidthClass definition in the OpenType specification. The usWidthClass

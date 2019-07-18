@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Text granularity used to trim text overflowing the layout box.
 pub enum TrimmingGranularity {
     /// No trimming occurs. Text flows beyond the layout width.

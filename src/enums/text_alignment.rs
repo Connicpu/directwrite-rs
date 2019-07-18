@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Specifies the alignment of paragraph text along the reading direction axis,
 /// relative to the leading and trailing edge of the layout box.
 pub enum TextAlignment {

@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Indicates the condition at the edges of inline object or text used to
 /// determine line-breaking behavior.
 pub enum BreakCondition {

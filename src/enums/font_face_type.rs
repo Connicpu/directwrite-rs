@@ -1,4 +1,4 @@
-#[auto_enum(u32, checked)]
+#[auto_enum::auto_enum(u32, checked)]
 /// Indicates the file format of a complete font face.
 pub enum FontFaceType {
     /// OpenType font face with CFF outlines.

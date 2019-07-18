@@ -15,7 +15,7 @@ use winapi::um::unknwnbase::IUnknown;
 use wio::com::ComPtr;
 
 #[repr(C)]
-#[derive(ComImpl)]
+#[derive(com_impl::ComImpl)]
 pub struct ComInlineObject<T: CustomInlineObject> {
     vtable: VTable<IDWriteInlineObjectVtbl>,
     refcount: Refcount,
@@ -30,7 +30,7 @@ impl<T: CustomInlineObject> ComInlineObject<T> {
     }
 }
 
-#[com_impl]
+#[com_impl::com_impl]
 unsafe impl<T: CustomInlineObject> IDWriteInlineObject for ComInlineObject<T> {
     #[panic(result = "E_FAIL")]
     unsafe fn draw(
