@@ -58,7 +58,7 @@ impl PartialEq<bool> for DBool {
     fn eq(&self, rhs: &bool) -> bool {
         bool::from(*self) == *rhs
     }
-    
+
     #[inline]
     fn ne(&self, rhs: &bool) -> bool {
         bool::from(*self) != *rhs
@@ -70,7 +70,7 @@ impl PartialEq<DBool> for bool {
     fn eq(&self, rhs: &DBool) -> bool {
         *self == bool::from(*rhs)
     }
-    
+
     #[inline]
     fn ne(&self, rhs: &DBool) -> bool {
         *self != bool::from(*rhs)

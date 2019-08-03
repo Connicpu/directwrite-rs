@@ -5,7 +5,7 @@ pub enum BreakCondition {
     /// Indicates whether a break is allowed by determining the condition of
     /// the neighboring text span or inline object.
     Neutral = 0,
-    
+
     /// Indicates that a line break is allowed, unless overruled by the
     /// condition of the neighboring text span or inline object, either
     /// prohibited by a "may not break" condition or forced by a "must break"

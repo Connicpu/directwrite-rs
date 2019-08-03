@@ -1,5 +1,5 @@
-use crate::font_file::FontFile;
 use crate::error::DWResult;
+use crate::font_file::FontFile;
 
 use std::ptr;
 

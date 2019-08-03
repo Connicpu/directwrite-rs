@@ -14,7 +14,10 @@ fn main() {
         .matching_fonts(FontWeight::NORMAL, FontStretch::Normal, FontStyle::Normal)
         .unwrap();
     for font in segoe_fonts.all_fonts() {
-        println!("Font name: {:#?}", font.informational_strings(InformationalStringId::FullName));
+        println!(
+            "Font name: {:#?}",
+            font.informational_strings(InformationalStringId::FullName)
+        );
         println!("Face name: {:#?}", font.face_name());
     }
 }

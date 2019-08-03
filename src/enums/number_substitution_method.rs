@@ -11,11 +11,11 @@ pub enum NumberSubstitutionMethod {
     /// there is none) the reading direction of the paragraph.
     Contextual,
 
-    /// Specifies that code points 0x30-0x39 are always rendered as nominal numeral 
+    /// Specifies that code points 0x30-0x39 are always rendered as nominal numeral
     /// shapes (ones of the European number), i.e., no substitution is performed.
     None,
 
-    /// Specifies that number are rendered using the national number shape 
+    /// Specifies that number are rendered using the national number shape
     /// as specified by the LOCALE_SNATIVEDIGITS value of the specified text culture.
     National,
 

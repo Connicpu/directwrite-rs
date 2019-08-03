@@ -21,14 +21,14 @@ pub struct RenderingParams {
 
 impl RenderingParams {
     /// Get the rendering parameters appropriate for rendering on the given monitor.
-    /// 
+    ///
     /// <div style="padding: 10px 10px 2px 10px; margin: 10px; background-color: #F2F2F2">
-    /// 
+    ///
     /// **Safety**
     /// This method is safe to take an `HMONITOR` because `HMONITOR` is just a handle and will
     /// therefore return an error if an invalid one is passed instead of creating memory
     /// safety errors.
-    /// 
+    ///
     /// </div>
     pub fn create_for_monitor(factory: &Factory, monitor: HMONITOR) -> DWResult<RenderingParams> {
         unsafe {
@@ -45,7 +45,7 @@ impl RenderingParams {
     /// Creates a rendering parameters object with default settings for the primary monitor.
     /// Different monitors may have different rendering parameters, for more information see the
     /// [How to Add Support for Multiple Monitors][1] topic.
-    /// 
+    ///
     /// [1]: https://msdn.microsoft.com/62274126-49da-4166-8482-73aac2b29c26
     pub fn create_default(factory: &Factory) -> DWResult<RenderingParams> {
         unsafe {

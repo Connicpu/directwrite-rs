@@ -8,7 +8,7 @@ pub enum ParagraphAlignment {
     /// The bottom of the text flow is aligned to the bottom edge of the
     /// layout box.
     Far,
-    
+
     /// The center of the flow is aligned to the center of the layout box.
     Center,
 }

@@ -13,7 +13,7 @@ pub enum FontSimulations {
 
     /// Indicates that algorithmic italicization is applied to the font face.
     /// `OBLIQUE` applies obliquing (shear) to the glyph outline. This may be
-    /// used to simulate an oblique/italic style where no designed 
+    /// used to simulate an oblique/italic style where no designed
     /// blique/italic style is available.
     OBLIQUE = 2,
 }

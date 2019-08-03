@@ -1,5 +1,5 @@
-use crate::error::DWResult;
 use crate::descriptions::key::FontKey;
+use crate::error::DWResult;
 use crate::font_file::loader::{FontFileLoader, FontFileStream};
 
 use std::borrow::Borrow;
@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
-use winapi::shared::winerror::{HRESULT_FROM_WIN32, ERROR_FILE_NOT_FOUND};
+use winapi::shared::winerror::{ERROR_FILE_NOT_FOUND, HRESULT_FROM_WIN32};
 
 /// Represents a loader from a set of preloaded streams which may be cloned.
 pub struct SetLoader<K, S, Key>
@@ -48,7 +48,7 @@ where
     fn create_stream(&self, key: &Key) -> DWResult<S> {
         match self.streams.get(key) {
             Some(stream) => Ok(stream.clone()),
-            None => Err(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND).into())
+            None => Err(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND).into()),
         }
     }
 }

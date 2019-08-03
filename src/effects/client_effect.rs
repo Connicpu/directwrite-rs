@@ -8,11 +8,11 @@ use wio::com::ComPtr;
 #[derive(ComWrapper, Clone)]
 #[com(send, sync, debug)]
 /// Represents a wrapped value that could be any drawing effect type.
-/// 
+///
 /// Use the [`DrawingEffect`][1] trait to cast this to a type that could have been passed to
 /// [`TextLayout::set_drawing_effect`][2]. If you need an escape hatch to cast this to another type
 /// that doesn't implement [`DrawingEffect`][1], see the [`ComWrapper`][3] trait.
-/// 
+///
 /// [1]: trait.DrawingEffect.html
 /// [2]: ../struct.TextLayout.html#method.set_drawing_effect
 /// [3]: https://docs.rs/com-wrapper/*/com_wrapper/trait.ComWrapper.html

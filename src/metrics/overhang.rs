@@ -12,7 +12,7 @@ use winapi::um::dwrite::DWRITE_OVERHANG_METRICS;
 pub struct OverhangMetrics {
     /// The distance from the left-most visible DIP to its left-alignment edge.
     pub left: f32,
-    
+
     /// The distance from the top-most visible DIP to its top alignment edge.
     pub top: f32,
 

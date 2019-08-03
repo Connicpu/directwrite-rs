@@ -58,7 +58,6 @@ impl FontCollectionLoader for DataCollectionLoader {
     fn get_iterator(&self, factory: &Factory, _key: &()) -> DWResult<Self::Iter> {
         static FONTS: &[&str] = &[
             "OpenSans-Regular",
-
             "FiraCode-Regular",
             "FiraCode-Bold",
             "FiraCode-Medium",
@@ -101,7 +100,10 @@ fn load_custom_font() {
         .unwrap();
 
     assert_eq!(opensans.font_collection().as_ref(), Some(&collection));
-    assert_eq!(opensans.font_family_name().as_ref().map(|s| &s[..]), Some("Open Sans"));
+    assert_eq!(
+        opensans.font_family_name().as_ref().map(|s| &s[..]),
+        Some("Open Sans")
+    );
 
     let firacode = TextFormat::create(&factory)
         .with_collection(&collection)
@@ -111,7 +113,10 @@ fn load_custom_font() {
         .unwrap();
 
     assert_eq!(firacode.font_collection().as_ref(), Some(&collection));
-    assert_eq!(firacode.font_family_name().as_ref().map(|s| &s[..]), Some("Fira Code"));
+    assert_eq!(
+        firacode.font_family_name().as_ref().map(|s| &s[..]),
+        Some("Fira Code")
+    );
 
     fn test_layout(factory: &Factory, format: &TextFormat, text: &str) {
         TextLayout::create(&factory)

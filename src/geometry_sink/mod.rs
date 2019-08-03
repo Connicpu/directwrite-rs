@@ -10,7 +10,7 @@ pub trait GeometrySink: Sized {
     /// Sets the fill mode to be used for any figures that come after this method call until
     /// this method is called again. See [`direct2d::enums::FillMode`][1] for interpreting
     /// the mode parameter.
-    /// 
+    ///
     /// [1]: https://docs.rs/direct2d/*/direct2d/enums/enum.FillMode.html
     fn set_fill_mode(&mut self, mode: u32);
 
@@ -19,13 +19,13 @@ pub trait GeometrySink: Sized {
     /// subsequently added to the sink. The segment flags are applied to every additional segment
     /// until this method is called again and a different set of segment flags is specified. See
     /// [`direct2d::enums::PathSegment`][1] for interpreting the flags parameter.
-    /// 
+    ///
     /// [1]: https://docs.rs/direct2d/*/direct2d/enums/struct.PathSegment.html
     fn set_segment_flags(&mut self, flags: u32);
 
     /// Called at the beginning of a new figure. See [`direct2d::enums::FigureBegin`][1]
     /// for interpreting the flag parameter.
-    /// 
+    ///
     /// [1]: https://docs.rs/direct2d/*/direct2d/enums/enum.FigureBegin.html
     fn begin_figure(&mut self, start: Point2f, begin_flag: u32);
 
@@ -41,7 +41,7 @@ pub trait GeometrySink: Sized {
 
     /// Called to end a figure. See [`direct2d::enums::FigureEnd`][1]
     /// for interpreting the flag parameter.
-    /// 
+    ///
     /// [1]: https://docs.rs/direct2d/*/direct2d/enums/enum.FigureEnd.html
     fn end_figure(&mut self, end_flag: u32);
 
@@ -77,7 +77,7 @@ where
     fn end_figure(&mut self, end_flag: u32) {
         T::end_figure(*self, end_flag)
     }
-    
+
     fn close(&mut self) -> DWResult<()> {
         T::close(*self)
     }

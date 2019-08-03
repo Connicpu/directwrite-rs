@@ -11,7 +11,7 @@ pub enum InformationalStringId {
 
     /// Indicates the string containing a version number.
     VersionStrings,
-    
+
     /// Indicates the string containing the trademark information
     /// provided by the font.
     Trademark,

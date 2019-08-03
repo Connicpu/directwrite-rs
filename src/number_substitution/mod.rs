@@ -26,4 +26,3 @@ impl NumberSubstitution {
         NumberSubstitutionBuilder::new(factory)
     }
 }
-

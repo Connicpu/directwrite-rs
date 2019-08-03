@@ -7,7 +7,6 @@ use crate::inline_object::DrawingContext;
 use crate::metrics::InlineObjectMetrics;
 use crate::metrics::OverhangMetrics;
 
-
 pub(crate) mod com_obj;
 
 /// Custom implementation of an inline text object in Rust.

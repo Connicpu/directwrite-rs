@@ -32,8 +32,8 @@ pub enum RenderingMode {
     /// diagonal lines look smoother. The antialiasing may be either ClearType or grayscale
     /// depending on the text antialiasing mode.
     NaturalSymmetric,
-    
-    /// Specifies that rendering should bypass the rasterizer and use the outlines directly. 
+
+    /// Specifies that rendering should bypass the rasterizer and use the outlines directly.
     /// This is typically used at very large sizes.
     Outline,
 }

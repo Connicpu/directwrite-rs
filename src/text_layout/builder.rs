@@ -12,9 +12,9 @@ use wio::wide::ToWide;
 
 #[must_use]
 /// Builder for a TextLayout.
-/// 
+///
 /// `text`, `format`, `width`, and `height` are not optional.
-/// 
+///
 /// `centered` defaults to false.
 pub struct TextLayoutBuilder<'a> {
     factory: &'a IDWriteFactory,
@@ -70,7 +70,7 @@ impl<'a> TextLayoutBuilder<'a> {
     }
 
     /// Specify the text from a UTF-8 string.
-    /// 
+    ///
     /// Be aware that all of the text positions returned from the directwrite APIs will use text
     /// positions as if this text was converted to UTF-16.
     pub fn with_str(mut self, text: &str) -> Self {

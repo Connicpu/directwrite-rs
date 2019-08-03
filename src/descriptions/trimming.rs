@@ -14,7 +14,7 @@ pub struct Trimming {
     /// preserved, most useful for path ellipsis, where the delimiter would be a slash. Leave this
     /// zero if there is no delimiter.
     pub delimiter: u32,
-    
+
     /// How many occurrences of the delimiter to step back. Leave this zero if there is no
     /// delimiter.
     pub delimiter_count: u32,

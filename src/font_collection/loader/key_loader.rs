@@ -17,7 +17,7 @@ where
 {
     /// The list of keys which are passed to the file loader.
     pub keys: Arc<[K]>,
-    
+
     /// The handle to the file loader.
     pub file_source: FileLoaderHandle<IK>,
 }
@@ -28,15 +28,9 @@ where
     IK: FontKey + ?Sized,
 {
     /// Initialize a new KeyLoader from its parts.
-    pub fn new(
-        keys: impl Into<Arc<[K]>>,
-        file_source: FileLoaderHandle<IK>,
-    ) -> Self {
+    pub fn new(keys: impl Into<Arc<[K]>>, file_source: FileLoaderHandle<IK>) -> Self {
         let keys = keys.into();
-        KeyLoader {
-            keys,
-            file_source,
-        }
+        KeyLoader { keys, file_source }
     }
 }
 

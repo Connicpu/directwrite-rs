@@ -1,6 +1,6 @@
 [package]
 name = "directwrite"
-version = "0.3.0-alpha4"
+version = "0.3.0-beta1"
 authors = ["Connie Hilarides <conni_h@outlook.com>"]
 description = """
 A safe abstraction for interacting with DirectWrite, intended initially
@@ -14,7 +14,6 @@ workspace = ".."
 
 [target.'cfg(windows)'.dependencies]
 wio = "0.2"
-math2d = { version = "0.2.0-alpha1", path = "../math2d", features = ["d2d"] }
 memmap = "0.7.0"
 
 checked-enum = "0.1.1-alpha1"
@@ -27,8 +26,13 @@ com-impl = "0.1.1"
 version = "0.3.6"
 features = ["dwrite", "winbase", "winnls"]
 
+[target.'cfg(windows)'.dependencies.math2d]
+version = "0.3.0-beta1"
+path = "../math2d"
+features = ["d2d"]
+
 [target.'cfg(windows)'.dependencies.dcommon]
-version = "0.3.0-alpha1"
+version = "0.3.0-beta1"
 path = "../dcommon"
 
 [package.metadata.docs.rs]

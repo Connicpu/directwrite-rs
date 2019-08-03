@@ -1,6 +1,6 @@
-use winapi::shared::winerror::E_FAIL;
 use crate::error::DWResult;
 use crate::font_file::loader::{FontFileStream, Fragment};
+use winapi::shared::winerror::E_FAIL;
 
 /// A simple FontFileStream implementation for when you want to just read the file
 /// into memory completely.

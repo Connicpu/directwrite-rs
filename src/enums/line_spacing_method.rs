@@ -12,16 +12,16 @@ pub enum LineSpacingMethod {
 
     /// Line spacing and baseline distances are proportional to the computed
     /// values based on the content, the size of the fonts and inline objects.
-    /// 
+    ///
     /// <div style="padding: 10px 10px 2px 10px; margin: 10px; background-color: #F2F2F2">
-    /// 
+    ///
     /// **Note**
     /// This value is only available on Windows 10 or later and it can be used
     /// with `IDWriteTextLayout3::SetLineSpacing`, but can not be used with
     /// `IDWriteTextFormat::SetLineSpacing`. This means if you would like to
     /// use this line spacing method with this crate, you need to manually
     /// retrieve the inner DWrite pointer and QueryInterface it to a Layout3.
-    /// 
+    ///
     /// </div>
     Proportional = 2,
 }

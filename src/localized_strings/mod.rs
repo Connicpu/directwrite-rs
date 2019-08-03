@@ -67,7 +67,9 @@ impl fmt::Debug for LocalizedStrings {
         struct LocalizedStringsMap<'a>(&'a LocalizedStrings);
         impl<'a> fmt::Debug for LocalizedStringsMap<'a> {
             fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-                fmt.debug_map().entries(self.0.all_strings().map(|s| (s.locale(), s.string()))).finish()
+                fmt.debug_map()
+                    .entries(self.0.all_strings().map(|s| (s.locale(), s.string())))
+                    .finish()
             }
         }
 
