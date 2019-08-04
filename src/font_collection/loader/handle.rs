@@ -1,5 +1,4 @@
 use crate::descriptions::FontKey;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::loader::com_loader::ComFontCollectionLoader;
 use crate::font_collection::loader::FontCollectionLoader;
@@ -7,6 +6,7 @@ use crate::font_collection::loader::FontCollectionLoader;
 use std::marker::PhantomData;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontCollectionLoader;
 use wio::com::ComPtr;
@@ -21,7 +21,7 @@ pub struct CollectionLoaderHandle<K: FontKey + ?Sized> {
 
 impl<K: FontKey + ?Sized> CollectionLoaderHandle<K> {
     /// Register the loader with the Factory so that its collections can be loaded.
-    pub fn register<T>(factory: &Factory, loader: T) -> DWResult<Self>
+    pub fn register<T>(factory: &Factory, loader: T) -> Result<Self, Error>
     where
         T: FontCollectionLoader<Key = K>,
     {

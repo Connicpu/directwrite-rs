@@ -1,4 +1,3 @@
-use crate::error::DWResult;
 use crate::font_file::loader::file_timestamp;
 use crate::font_file::loader::{FileStream, MmapStream, OwnedDataStream};
 use crate::font_file::loader::{FontFileLoader, FontFileStream};
@@ -8,10 +7,12 @@ use std::fs::File;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
+use dcommon::Error;
+
 /// Represents a FontFileStream that may be constructed from a `File`
 pub trait FileBackedStream: FontFileStream {
     /// Construct the stream.
-    fn from_file(file: File) -> DWResult<Self>;
+    fn from_file(file: File) -> Result<Self, Error>;
 }
 
 /// A simple implementation of FontFileLoader that loads files from paths.
@@ -49,7 +50,7 @@ where
     type Key = Path;
     type Stream = S;
 
-    fn create_stream(&self, key: &Path) -> DWResult<S> {
+    fn create_stream(&self, key: &Path) -> Result<S, Error> {
         let path = if let Some(base_dir) = &self.base_dir {
             Cow::Owned(base_dir.join(key))
         } else {
@@ -64,19 +65,19 @@ where
 }
 
 impl FileBackedStream for FileStream {
-    fn from_file(file: File) -> DWResult<Self> {
+    fn from_file(file: File) -> Result<Self, Error> {
         FileStream::new(file)
     }
 }
 
 impl FileBackedStream for MmapStream {
-    fn from_file(file: File) -> DWResult<Self> {
+    fn from_file(file: File) -> Result<Self, Error> {
         MmapStream::map(&file)
     }
 }
 
 impl FileBackedStream for OwnedDataStream {
-    fn from_file(mut file: File) -> DWResult<Self> {
+    fn from_file(mut file: File) -> Result<Self, Error> {
         use std::io::Read;
         let meta = file.metadata()?;
         let last_write = file_timestamp(&meta)?;

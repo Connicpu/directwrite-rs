@@ -1,5 +1,4 @@
 use crate::descriptions::{FontKey, KeyPayload};
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::loader::CollectionLoaderHandle;
 use crate::font_collection::FontCollection;
@@ -8,6 +7,7 @@ use std::mem;
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 
 #[must_use]
@@ -37,7 +37,7 @@ where
 
     /// Finalize the builder, attempting to create the FontCollection with the
     /// specified parameters.
-    pub fn build(self) -> DWResult<FontCollection> {
+    pub fn build(self) -> Result<FontCollection, Error> {
         let loader = self.loader.expect("Font Loader must be specified");
         let key = KeyPayload::new(self.key.expect("Key must be specified"));
 

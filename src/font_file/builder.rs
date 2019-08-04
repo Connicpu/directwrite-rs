@@ -1,11 +1,11 @@
 use crate::descriptions::{FontKey, KeyPayload};
-use crate::error::DWResult;
 use crate::font_file::loader::handle::FileLoaderHandle;
 use crate::font_file::FontFile;
 
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::minwindef::FILETIME;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFactory;
@@ -49,7 +49,7 @@ impl<'a, K: FontKey + ?Sized> FontFileBuilder<'a, K> {
     }
 
     /// Finalizes the builder and constructs the FontFile.
-    pub fn build(self) -> DWResult<FontFile> {
+    pub fn build(self) -> Result<FontFile, Error> {
         unsafe {
             match self.source {
                 Source::Unspecified => {

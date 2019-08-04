@@ -1,5 +1,4 @@
-use crate::error::DWResult;
-
+use dcommon::Error;
 use math2d::BezierSegment;
 use math2d::Point2f;
 
@@ -47,7 +46,7 @@ pub trait GeometrySink: Sized {
 
     /// Closes the geometry sink, indicates whether it is in an error state, and resets the
     /// sink's error state.
-    fn close(&mut self) -> DWResult<()>;
+    fn close(&mut self) -> Result<(), Error>;
 }
 
 impl<'a, T> GeometrySink for &'a mut T
@@ -78,7 +77,7 @@ where
         T::end_figure(*self, end_flag)
     }
 
-    fn close(&mut self) -> DWResult<()> {
+    fn close(&mut self) -> Result<(), Error> {
         T::close(*self)
     }
 }

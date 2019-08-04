@@ -3,11 +3,11 @@
 use crate::descriptions::FontKey;
 use crate::enums::FontFaceType;
 use crate::enums::FontFileType;
-use crate::error::DWResult;
 use crate::factory::Factory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFile;
 use wio::com::ComPtr;
@@ -37,7 +37,7 @@ impl FontFile {
 
     /// Analyzes a file and returns whether it represents a font, and whether the font type is
     /// supported by the font system.
-    pub fn analyze(&self) -> DWResult<Analysis> {
+    pub fn analyze(&self) -> Result<Analysis, Error> {
         unsafe {
             let mut sup = 0;
             let mut file = 0;

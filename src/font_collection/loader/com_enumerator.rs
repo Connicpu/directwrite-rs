@@ -1,4 +1,3 @@
-use crate::error::DWResult;
 use crate::font_file::FontFile;
 
 use std::ptr;
@@ -6,6 +5,7 @@ use std::ptr;
 use com_impl::Refcount;
 use com_impl::VTable;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::minwindef::BOOL;
 use winapi::shared::winerror::{E_FAIL, HRESULT, S_OK};
 use winapi::um::dwrite::IDWriteFontFile;
@@ -16,7 +16,7 @@ use wio::com::ComPtr;
 #[derive(com_impl::ComImpl)]
 pub struct ComEnumerator<I>
 where
-    I: Iterator<Item = DWResult<FontFile>> + 'static,
+    I: Iterator<Item = Result<FontFile, Error>> + 'static,
 {
     vtbl: VTable<IDWriteFontFileEnumeratorVtbl>,
     refcount: Refcount,
@@ -27,7 +27,7 @@ where
 
 impl<I> ComEnumerator<I>
 where
-    I: Iterator<Item = DWResult<FontFile>> + 'static,
+    I: Iterator<Item = Result<FontFile, Error>> + 'static,
 {
     pub fn new(iter: I) -> ComPtr<IDWriteFontFileEnumerator> {
         let ptr = ComEnumerator::create_raw(None, None, iter);
@@ -39,7 +39,7 @@ where
 #[com_impl::com_impl]
 unsafe impl<I> IDWriteFontFileEnumerator for ComEnumerator<I>
 where
-    I: Iterator<Item = DWResult<FontFile>> + 'static,
+    I: Iterator<Item = Result<FontFile, Error>> + 'static,
 {
     #[panic(result = "E_FAIL")]
     unsafe fn get_current_font_file(&self, file: *mut *mut IDWriteFontFile) -> HRESULT {

@@ -1,8 +1,5 @@
-use crate::error::DWResult;
-
-use std::ptr;
-
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{DWriteCreateFactory, IDWriteFactory, DWRITE_FACTORY_TYPE_SHARED};
 use winapi::um::unknwnbase::IUnknown;
@@ -19,9 +16,9 @@ pub struct Factory {
 
 impl Factory {
     /// Initializes a new Factory.
-    pub fn new() -> DWResult<Factory> {
+    pub fn new() -> Result<Factory, Error> {
         unsafe {
-            let mut ptr: *mut IDWriteFactory = ptr::null_mut();
+            let mut ptr: *mut IDWriteFactory = std::ptr::null_mut();
             let hr = DWriteCreateFactory(
                 DWRITE_FACTORY_TYPE_SHARED,
                 &IDWriteFactory::uuidof(),

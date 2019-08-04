@@ -1,9 +1,10 @@
-use crate::error::DWResult;
 use crate::font_file::loader::{file_timestamp, FontFileStream, Fragment};
 
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::sync::Mutex;
+
+use dcommon::Error;
 
 /// A FontFileStream implementation backed by a file. Seeks to positions and reads them into
 /// a new buffer for every time `read_fragment` is called.
@@ -15,7 +16,7 @@ pub struct FileStream {
 
 impl FileStream {
     /// Construct a new FileStream from a given File.
-    pub fn new(file: File) -> DWResult<FileStream> {
+    pub fn new(file: File) -> Result<FileStream, Error> {
         let meta = file.metadata()?;
 
         let stream = FileStream {
@@ -37,7 +38,7 @@ impl FontFileStream for FileStream {
         self.last_write
     }
 
-    fn read_fragment(&self, offset: u64, length: u64) -> DWResult<Fragment> {
+    fn read_fragment(&self, offset: u64, length: u64) -> Result<Fragment, Error> {
         assert!(length < std::isize::MAX as u64);
 
         // Seek to the position

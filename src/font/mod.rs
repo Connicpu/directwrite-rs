@@ -3,7 +3,6 @@ use crate::enums::font_stretch::FontStretch;
 use crate::enums::font_style::FontStyle;
 use crate::enums::font_weight::FontWeight;
 use crate::enums::InformationalStringId;
-use crate::error::DWResult;
 use crate::font_face::FontFace;
 use crate::font_family::FontFamily;
 use crate::localized_strings::LocalizedStrings;
@@ -14,6 +13,7 @@ use std::ptr;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFont;
 use wio::com::ComPtr;
@@ -30,7 +30,7 @@ pub struct Font {
 
 impl Font {
     /// Creates a font face object for the font.
-    pub fn create_face(&self) -> DWResult<FontFace> {
+    pub fn create_face(&self) -> Result<FontFace, Error> {
         unsafe {
             let mut ptr = ptr::null_mut();
             let hr = self.ptr.CreateFontFace(&mut ptr);

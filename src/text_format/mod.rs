@@ -2,7 +2,6 @@
 
 use crate::descriptions::Trimming;
 use crate::enums::*;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::FontCollection;
 use crate::inline_object::InlineObject;
@@ -12,6 +11,7 @@ use std::ptr;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteTextFormat;
 use wio::com::ComPtr;
@@ -99,7 +99,7 @@ impl TextFormat {
     }
 
     /// Get the line spacing information for this format.
-    pub fn line_spacing(&self) -> DWResult<LineSpacing> {
+    pub fn line_spacing(&self) -> Result<LineSpacing, Error> {
         unsafe {
             let mut method = 0;
             let mut spacing = 0.0;
@@ -121,7 +121,7 @@ impl TextFormat {
     }
 
     /// Get the locale used for this format.
-    pub fn locale_name(&self) -> DWResult<String> {
+    pub fn locale_name(&self) -> Result<String, Error> {
         unsafe {
             let len = self.ptr.GetLocaleNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
@@ -158,7 +158,7 @@ impl TextFormat {
     ///
     /// The inline object is an omission sign that will be rendered to show that
     /// text was omitted.
-    pub fn trimming(&self) -> DWResult<(Trimming, Option<InlineObject>)> {
+    pub fn trimming(&self) -> Result<(Trimming, Option<InlineObject>), Error> {
         unsafe {
             let mut trimming = std::mem::zeroed();
             let mut ptr = std::ptr::null_mut();
@@ -182,7 +182,7 @@ impl TextFormat {
     }
 
     /// Set the flow direction for text under this format.
-    pub fn set_flow_direction(&mut self, value: FlowDirection) -> DWResult<()> {
+    pub fn set_flow_direction(&mut self, value: FlowDirection) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetFlowDirection(value as u32);
             if SUCCEEDED(hr) {
@@ -194,7 +194,7 @@ impl TextFormat {
     }
 
     /// Set the incremental tabstop value for text under this format.
-    pub fn set_incremental_tabstop(&mut self, value: f32) -> DWResult<()> {
+    pub fn set_incremental_tabstop(&mut self, value: f32) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetIncrementalTabStop(value);
             if SUCCEEDED(hr) {
@@ -211,7 +211,7 @@ impl TextFormat {
         method: LineSpacingMethod,
         spacing: f32,
         baseline: f32,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetLineSpacing(method as u32, spacing, baseline);
             if SUCCEEDED(hr) {
@@ -223,7 +223,7 @@ impl TextFormat {
     }
 
     /// Set the paragraph alignment for text under this format.
-    pub fn set_paragraph_alignment(&mut self, value: ParagraphAlignment) -> DWResult<()> {
+    pub fn set_paragraph_alignment(&mut self, value: ParagraphAlignment) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetParagraphAlignment(value as u32);
             if SUCCEEDED(hr) {
@@ -235,7 +235,7 @@ impl TextFormat {
     }
 
     /// Set the reading direction used to lay out text under this format.
-    pub fn set_reading_direction(&mut self, value: ReadingDirection) -> DWResult<()> {
+    pub fn set_reading_direction(&mut self, value: ReadingDirection) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetReadingDirection(value as u32);
             if SUCCEEDED(hr) {
@@ -247,7 +247,7 @@ impl TextFormat {
     }
 
     /// Set the text alignment for this format.
-    pub fn set_text_alignment(&mut self, value: TextAlignment) -> DWResult<()> {
+    pub fn set_text_alignment(&mut self, value: TextAlignment) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetTextAlignment(value as u32);
             if SUCCEEDED(hr) {
@@ -263,7 +263,7 @@ impl TextFormat {
         &self,
         trimming: &Trimming,
         omission_sign: Option<&InlineObject>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         unsafe {
             let omission_sign = match omission_sign {
                 Some(sign) => sign.get_raw(),
@@ -281,7 +281,7 @@ impl TextFormat {
     }
 
     /// Set the word wrapping for text under this format.
-    pub fn set_word_wrapping(&mut self, value: WordWrapping) -> DWResult<()> {
+    pub fn set_word_wrapping(&mut self, value: WordWrapping) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetWordWrapping(value as u32);
             if SUCCEEDED(hr) {

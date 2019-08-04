@@ -2,9 +2,7 @@
 //! and rendering text and glyphs to TextRenderers.
 
 #![cfg(windows)]
-//#![warn(missing_docs)]
 
-pub use crate::error::DWResult;
 pub use crate::factory::Factory;
 pub use crate::font::Font;
 pub use crate::font_collection::FontCollection;
@@ -23,7 +21,6 @@ pub use crate::typography::Typography;
 pub mod descriptions;
 pub mod effects;
 pub mod enums;
-pub mod error;
 pub mod factory;
 pub mod font;
 pub mod font_collection;
@@ -46,6 +43,6 @@ pub mod typography;
 
 /// Shortcut to initialize a Factory, which is required to access all other
 /// functionality in the library.
-pub fn initialize() -> error::DWResult<Factory> {
+pub fn initialize() -> Result<Factory, dcommon::Error> {
     Factory::new()
 }

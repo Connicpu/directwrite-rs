@@ -1,11 +1,12 @@
 //! Traits and Structs for implementing custom inline text objects that can be layed
 //! out inline with text.
 
-use crate::error::DWResult;
 use crate::inline_object::BreakConditions;
 use crate::inline_object::DrawingContext;
 use crate::metrics::InlineObjectMetrics;
 use crate::metrics::OverhangMetrics;
+
+use dcommon::Error;
 
 pub(crate) mod com_obj;
 
@@ -23,5 +24,5 @@ pub trait CustomInlineObject: Send + Sync + 'static {
     fn break_conditions(&self) -> BreakConditions;
 
     /// Called by the text renderer to render your object within the text.
-    fn draw(&self, context: &DrawingContext) -> DWResult<()>;
+    fn draw(&self, context: &DrawingContext) -> Result<(), Error>;
 }

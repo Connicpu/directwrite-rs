@@ -6,11 +6,11 @@ use crate::descriptions::Strikethrough;
 use crate::descriptions::Underline;
 use crate::effects::ClientEffect;
 use crate::enums::MeasuringMode;
-use crate::error::DWResult;
 use crate::inline_object::InlineObject;
 use crate::text_renderer::DrawContext;
 
 use checked_enum::UncheckedEnum;
+use dcommon::Error;
 use math2d::Matrix3x2f;
 use math2d::Point2f;
 
@@ -40,7 +40,7 @@ pub trait CustomTextRenderer: Send + 'static {
     /// render a run of glyphs.
     ///
     /// [1]: ../../struct.TextLayout.html#method.draw
-    fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> DWResult<()>;
+    fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> Result<(), Error>;
 
     /// [`TextLayout::draw`][1] calls this function to instruct the client to draw
     /// an underline.
@@ -63,7 +63,7 @@ pub trait CustomTextRenderer: Send + 'static {
     /// </div>
     ///
     /// [1]: ../../struct.TextLayout.html#method.draw
-    fn draw_underline(&mut self, context: &DrawUnderline) -> DWResult<()>;
+    fn draw_underline(&mut self, context: &DrawUnderline) -> Result<(), Error>;
 
     /// [`TextLayout::draw`][1] calls this function to instruct the client to draw
     /// an inline object.
@@ -78,7 +78,7 @@ pub trait CustomTextRenderer: Send + 'static {
     /// </div>
     ///
     /// [1]: ../../struct.TextLayout.html#method.draw
-    fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> DWResult<()>;
+    fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> Result<(), Error>;
 
     /// [`TextLayout::draw`][1] calls this function to instruct the client to draw
     /// a strikethrough.
@@ -97,7 +97,7 @@ pub trait CustomTextRenderer: Send + 'static {
     /// </div>
     ///
     /// [1]: ../../struct.TextLayout.html#method.draw
-    fn draw_inline_object(&mut self, context: &DrawInlineObject) -> DWResult<()>;
+    fn draw_inline_object(&mut self, context: &DrawInlineObject) -> Result<(), Error>;
 }
 
 /// All of the contextual information required to draw a run of glyphs.

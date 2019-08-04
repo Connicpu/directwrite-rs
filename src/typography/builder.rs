@@ -1,10 +1,10 @@
 use crate::descriptions::FontFeature;
 use crate::enums::FontFeatureTag;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::typography::Typography;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 
 /// Builds a Typography object with the listed font features.
@@ -29,7 +29,7 @@ impl<'a> TypographyBuilder<'a> {
     }
 
     /// Build the typography.
-    pub fn build(self) -> DWResult<Typography> {
+    pub fn build(self) -> Result<Typography, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
             let hr = (*self.factory.get_raw()).CreateTypography(&mut ptr);
@@ -113,11 +113,11 @@ impl<'a> FeatureList<'a> {
         FeatureList::Sublists(vec![item, Self::slice(slice)])
     }
 
-    fn for_all(&self, mut f: impl FnMut(FontFeature) -> i32) -> DWResult<()> {
+    fn for_all(&self, mut f: impl FnMut(FontFeature) -> i32) -> Result<(), Error> {
         self.for_all_imp(&mut f)
     }
 
-    fn for_all_imp(&self, f: &mut impl FnMut(FontFeature) -> i32) -> DWResult<()> {
+    fn for_all_imp(&self, f: &mut impl FnMut(FontFeature) -> i32) -> Result<(), Error> {
         match self {
             FeatureList::Empty => (),
             FeatureList::Slice(features) => {

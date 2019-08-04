@@ -6,7 +6,7 @@
 //! # extern crate directwrite; extern crate winapi;
 //! # fn main() {
 //! # use directwrite::font_file::loader::{StaticDataStream, FontFileLoader};
-//! # use directwrite::error::DWResult;
+//! # use dcommon::Error;
 //! # use directwrite::{Factory, FontFile};
 //! # use winapi::shared::winerror::{HRESULT_FROM_WIN32, ERROR_NOT_FOUND};
 //! const OPENSANS_REGULAR: StaticDataStream = StaticDataStream {
@@ -23,7 +23,7 @@
 //!     type Key = str;
 //!     type Stream = StaticDataStream;
 //!
-//!     fn create_stream(&self, key: &str) -> DWResult<StaticDataStream> {
+//!     fn create_stream(&self, key: &str) -> Result<StaticDataStream, Error> {
 //!         match key {
 //!             "OpenSans-Regular" => Ok(OPENSANS_REGULAR),
 //!             _ => Err(HRESULT_FROM_WIN32(ERROR_NOT_FOUND).into()),
@@ -44,11 +44,12 @@
 //! ```
 
 use crate::descriptions::FontKey;
-use crate::error::DWResult;
 use crate::factory::Factory;
 
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
+
+use dcommon::Error;
 
 #[doc(inline)]
 pub use self::file_stream::FileStream;
@@ -96,10 +97,10 @@ pub trait FontFileLoader: Sized + Send + Sync + 'static {
     type Stream: FontFileStream;
 
     /// Try to create a stream for a file associated with the given key.
-    fn create_stream(&self, key: &Self::Key) -> DWResult<Self::Stream>;
+    fn create_stream(&self, key: &Self::Key) -> Result<Self::Stream, Error>;
 
     /// Register this file loader in the factory
-    fn register(self, factory: &Factory) -> DWResult<FileLoaderHandle<Self::Key>>
+    fn register(self, factory: &Factory) -> Result<FileLoaderHandle<Self::Key>, Error>
     where
         Self: Sized,
     {
@@ -151,7 +152,7 @@ pub trait FontFileStream: Sized + Send + Sync + 'static {
     /// threads simultaneously, this method only takes a shared self. Any internal mutable state
     /// must be protected by a Mutex or similar mechanism, and more complicated logic with files
     /// should ensure `read_fragment` calls are serialized.
-    fn read_fragment(&self, offset: u64, length: u64) -> DWResult<Fragment>;
+    fn read_fragment(&self, offset: u64, length: u64) -> Result<Fragment, Error>;
 
     /// Called when the runtime is finished with a Fragment so that this class may release any
     /// data it allocated when `read_fragment` was called. `key` will be the exact value that the
@@ -171,7 +172,7 @@ where
         T::last_write_time(self)
     }
 
-    fn read_fragment(&self, offset: u64, length: u64) -> DWResult<Fragment> {
+    fn read_fragment(&self, offset: u64, length: u64) -> Result<Fragment, Error> {
         T::read_fragment(self, offset, length)
     }
 
@@ -199,7 +200,7 @@ impl Fragment {
 }
 
 /// Given a std::fs::Metadata, compute the appropriate timestamp in 100-nanosecond ticks.
-pub fn file_timestamp(meta: &Metadata) -> DWResult<u64> {
+pub fn file_timestamp(meta: &Metadata) -> Result<u64, Error> {
     let modified = meta.modified()?;
     let (neg, unix_modified) = match modified.duration_since(UNIX_EPOCH) {
         Ok(dur) => (false, dur),

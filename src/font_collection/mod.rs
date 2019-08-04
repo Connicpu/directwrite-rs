@@ -1,7 +1,6 @@
 //! Font collections and types for building application-defined collections.
 
 use crate::descriptions::FontKey;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font::Font;
 use crate::font_face::FontFace;
@@ -10,6 +9,7 @@ use crate::font_family::FontFamily;
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontCollection;
 use wio::com::ComPtr;
@@ -47,7 +47,7 @@ impl FontCollection {
     pub fn system_font_collection(
         factory: &Factory,
         check_for_updates: bool,
-    ) -> DWResult<FontCollection> {
+    ) -> Result<FontCollection, Error> {
         unsafe {
             let mut fc = ptr::null_mut();
             let check = if check_for_updates { 1 } else { 0 };

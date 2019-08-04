@@ -1,7 +1,7 @@
 extern crate directwrite;
 extern crate winapi;
 
-use directwrite::error::DWResult;
+use dcommon::Error;
 use directwrite::font_collection::loader::FontCollectionLoader;
 use directwrite::font_file::loader::{FileLoaderHandle, FontFileLoader, StaticDataStream};
 use directwrite::{Factory, FontCollection, FontFile, TextFormat, TextLayout};
@@ -38,7 +38,7 @@ impl FontFileLoader for DataFileLoader {
     type Key = str;
     type Stream = StaticDataStream;
 
-    fn create_stream(&self, key: &str) -> DWResult<StaticDataStream> {
+    fn create_stream(&self, key: &str) -> Result<StaticDataStream, Error> {
         match key {
             "OpenSans-Regular" => Ok(OPENSANS_REGULAR),
             "FiraCode-Regular" => Ok(FIRACODE_REGULAR),
@@ -53,9 +53,9 @@ impl FontFileLoader for DataFileLoader {
 pub struct DataCollectionLoader(FileLoaderHandle<str>);
 impl FontCollectionLoader for DataCollectionLoader {
     type Key = ();
-    type Iter = Box<dyn Iterator<Item = DWResult<FontFile>>>;
+    type Iter = Box<dyn Iterator<Item = Result<FontFile, Error>>>;
 
-    fn get_iterator(&self, factory: &Factory, _key: &()) -> DWResult<Self::Iter> {
+    fn get_iterator(&self, factory: &Factory, _key: &()) -> Result<Self::Iter, Error> {
         static FONTS: &[&str] = &[
             "OpenSans-Regular",
             "FiraCode-Regular",

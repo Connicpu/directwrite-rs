@@ -1,5 +1,4 @@
 use crate::descriptions::key::FontKey;
-use crate::error::DWResult;
 use crate::font_file::loader::{FontFileLoader, FontFileStream};
 
 use std::borrow::Borrow;
@@ -7,6 +6,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
+use dcommon::Error;
 use winapi::shared::winerror::{ERROR_FILE_NOT_FOUND, HRESULT_FROM_WIN32};
 
 /// Represents a loader from a set of preloaded streams which may be cloned.
@@ -45,7 +45,7 @@ where
     type Key = Key;
     type Stream = S;
 
-    fn create_stream(&self, key: &Key) -> DWResult<S> {
+    fn create_stream(&self, key: &Key) -> Result<S, Error> {
         match self.streams.get(key) {
             Some(stream) => Ok(stream.clone()),
             None => Err(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND).into()),

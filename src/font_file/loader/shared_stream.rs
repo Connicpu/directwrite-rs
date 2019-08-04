@@ -1,9 +1,9 @@
-use crate::error::DWResult;
 use crate::font_file::loader::{FontFileStream, Fragment};
 
-use winapi::shared::winerror::E_FAIL;
-
 use std::sync::Arc;
+
+use dcommon::Error;
+use winapi::shared::winerror::E_FAIL;
 
 #[derive(Clone)]
 /// A simple FontFileStream implementation for when you want to just read the file
@@ -33,7 +33,7 @@ impl FontFileStream for SharedDataStream {
         self.last_write
     }
 
-    fn read_fragment(&self, offset: u64, length: u64) -> DWResult<Fragment> {
+    fn read_fragment(&self, offset: u64, length: u64) -> Result<Fragment, Error> {
         let len64 = self.data.len() as u64;
         if offset > len64 || length > len64 || offset + length > len64 {
             return Err(E_FAIL.into());

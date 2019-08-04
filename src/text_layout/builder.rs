@@ -1,10 +1,10 @@
-use crate::error::DWResult;
 use crate::{TextFormat, TextLayout};
 
 use std::borrow::Cow;
 use std::ptr;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;
@@ -39,7 +39,7 @@ impl<'a> TextLayoutBuilder<'a> {
     }
 
     /// Build the TextLayout from the passed parameters.
-    pub fn build(self) -> DWResult<TextLayout> {
+    pub fn build(self) -> Result<TextLayout, Error> {
         unsafe {
             let text = self.text.expect("`text` must be specified");
             let format = self.format.expect("`format` must be specified");

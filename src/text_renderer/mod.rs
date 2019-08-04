@@ -1,6 +1,5 @@
 //! TextRenderer and types for constructing your own application-defined instances.
 
-use crate::error::DWResult;
 use crate::pixel_snapping::PixelSnapping;
 use crate::text_renderer::custom::{
     DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline,
@@ -9,6 +8,7 @@ use crate::text_renderer::custom::{
 use com_wrapper::ComWrapper;
 use dcommon::helpers::deref_com_wrapper;
 use dcommon::helpers::unwrap_opt_com;
+use dcommon::Error;
 use winapi::ctypes::c_void;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteTextRenderer;
@@ -34,7 +34,7 @@ impl TextRenderer {
     /// but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> DWResult<()> {
+    pub fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.DrawGlyphRun(
                 context.context.ptr(),
@@ -57,7 +57,7 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_underline(&mut self, context: &DrawUnderline) -> DWResult<()> {
+    pub fn draw_underline(&mut self, context: &DrawUnderline) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.DrawUnderline(
                 context.context.ptr(),
@@ -78,7 +78,7 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> DWResult<()> {
+    pub fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.DrawStrikethrough(
                 context.context.ptr(),
@@ -99,7 +99,7 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_inline_object(&mut self, context: &DrawInlineObject) -> DWResult<()> {
+    pub fn draw_inline_object(&mut self, context: &DrawInlineObject) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.DrawInlineObject(
                 context.context.ptr(),

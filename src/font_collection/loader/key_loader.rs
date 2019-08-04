@@ -1,5 +1,4 @@
 use crate::descriptions::key::FontKey;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::loader::FontCollectionLoader;
 use crate::font_file::loader::handle::FileLoaderHandle;
@@ -7,6 +6,8 @@ use crate::font_file::FontFile;
 
 use std::borrow::Borrow;
 use std::sync::Arc;
+
+use dcommon::Error;
 
 /// A FontCollection loader that loads FontFiles from a predefined list of keys
 /// which key passed to a loader.
@@ -43,7 +44,7 @@ where
     type Key = ();
     type Iter = KeyLoaderIter<K, IK>;
 
-    fn get_iterator(&self, factory: &Factory, _key: &()) -> DWResult<Self::Iter> {
+    fn get_iterator(&self, factory: &Factory, _key: &()) -> Result<Self::Iter, Error> {
         Ok(KeyLoaderIter {
             pos: 0,
             keys: self.keys.clone(),
@@ -69,7 +70,7 @@ where
     K: FontKey + Borrow<IK>,
     IK: FontKey + ?Sized,
 {
-    type Item = DWResult<FontFile>;
+    type Item = Result<FontFile, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.pos >= self.keys.len() {

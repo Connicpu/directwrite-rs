@@ -1,6 +1,6 @@
-use crate::error::DWResult;
 use crate::font_file::loader::{FontFileStream, Fragment};
 
+use dcommon::Error;
 use winapi::shared::winerror::E_FAIL;
 
 #[derive(Clone)]
@@ -30,7 +30,7 @@ impl FontFileStream for StaticDataStream {
         self.last_write
     }
 
-    fn read_fragment(&self, offset: u64, length: u64) -> DWResult<Fragment> {
+    fn read_fragment(&self, offset: u64, length: u64) -> Result<Fragment, Error> {
         let len64 = self.data.len() as u64;
         if offset > len64 || length > len64 || offset + length > len64 {
             return Err(E_FAIL.into());

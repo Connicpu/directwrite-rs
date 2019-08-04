@@ -3,7 +3,6 @@
 use crate::descriptions::GlyphOffset;
 use crate::enums::font_feature_tag::FontFeatureTag;
 use crate::enums::{FontFaceType, FontSimulations, MeasuringMode, RenderingMode};
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_file::FontFile;
 use crate::geometry_sink::{self, GeometrySink};
@@ -14,6 +13,7 @@ use std::{mem, ptr, u32};
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use math2d::Matrix3x2f;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::{IDWriteFontFace, IDWriteFontFile, DWRITE_GLYPH_METRICS};
@@ -50,7 +50,7 @@ impl FontFace {
         &self,
         glyph_indices: &[u16],
         is_sideways: bool,
-    ) -> DWResult<Vec<GlyphMetrics>> {
+    ) -> Result<Vec<GlyphMetrics>, Error> {
         unsafe {
             let mut metrics = vec![mem::uninitialized(); glyph_indices.len()];
             let hr = self.ptr.GetDesignGlyphMetrics(
@@ -74,7 +74,7 @@ impl FontFace {
     }
 
     /// Obtains the font files representing a font face.
-    pub fn files(&self) -> DWResult<Vec<FontFile>> {
+    pub fn files(&self) -> Result<Vec<FontFile>, Error> {
         unsafe {
             let mut count = 0;
             let hr = self.ptr.GetFiles(&mut count, ptr::null_mut());
@@ -104,7 +104,7 @@ impl FontFace {
 
     /// Returns the nominal mapping of UCS4 Unicode code points to glyph indices as defined by the
     /// font 'CMAP' table.
-    pub fn glyph_indices(&self, code_points: &[u32]) -> DWResult<Vec<u16>> {
+    pub fn glyph_indices(&self, code_points: &[u32]) -> Result<Vec<u16>, Error> {
         unsafe {
             let mut indices: Vec<u16> = Vec::with_capacity(code_points.len());
             let hr = self.ptr.GetGlyphIndices(
@@ -132,7 +132,7 @@ impl FontFace {
         is_sideways: bool,
         is_rtl: bool,
         geometry_sink: impl GeometrySink,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let gi = glyph_indices;
         assert!(glyph_advances.map(|g| g.len() == gi.len()).unwrap_or(true));
         assert!(glyph_offsets.map(|g| g.len() == gi.len()).unwrap_or(true));
@@ -188,7 +188,7 @@ impl FontFace {
         pixels_per_dip: f32,
         measuring_mode: MeasuringMode,
         params: &RenderingParams,
-    ) -> DWResult<UncheckedEnum<RenderingMode>> {
+    ) -> Result<UncheckedEnum<RenderingMode>, Error> {
         unsafe {
             let mut mode = 0;
             let hr = self.ptr.GetRecommendedRenderingMode(
@@ -232,7 +232,7 @@ impl FontFace {
         use_gdi_natural: bool,
         glyph_indices: &[u16],
         is_sideways: bool,
-    ) -> DWResult<Vec<GlyphMetrics>> {
+    ) -> Result<Vec<GlyphMetrics>, Error> {
         unsafe {
             let mut metrics = vec![mem::uninitialized(); glyph_indices.len()];
             let hr = self.ptr.GetGdiCompatibleGlyphMetrics(
@@ -270,7 +270,7 @@ impl FontFace {
         em_size: f32,
         pixels_per_dip: f32,
         transform: Option<&Matrix3x2f>,
-    ) -> DWResult<FontMetrics> {
+    ) -> Result<FontMetrics, Error> {
         unsafe {
             let mut metrics = mem::uninitialized();
             let hr = self.ptr.GetGdiCompatibleMetrics(

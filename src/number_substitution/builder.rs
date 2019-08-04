@@ -1,11 +1,11 @@
 use crate::enums::NumberSubstitutionMethod;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::number_substitution::NumberSubstitution;
 
 use std::borrow::Cow;
 
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use wio::wide::ToWide;
 
@@ -28,7 +28,7 @@ impl<'a> NumberSubstitutionBuilder<'a> {
     }
 
     /// Build the number substitution object.
-    pub fn build(self) -> DWResult<NumberSubstitution> {
+    pub fn build(self) -> Result<NumberSubstitution, Error> {
         let method = self.method.expect("`method` must be specified");
         unsafe {
             let mut ptr = std::ptr::null_mut();

@@ -23,28 +23,28 @@ impl TextRenderer for DummyRenderer {
         })
     }
 
-    fn pixels_per_dip(&self, _context: Context) -> DWResult<f32> {
+    fn pixels_per_dip(&self, _context: Context) -> Result<f32, Error> {
         Ok(1.0)
     }
 
-    fn is_pixel_snapping_disabled(&self, _context: Context) -> DWResult<bool> {
+    fn is_pixel_snapping_disabled(&self, _context: Context) -> Result<bool, Error> {
         Ok(true)
     }
 
-    fn draw_glyph_run(&mut self, _context: &DrawGlyphRun) -> DWResult<()> {
+    fn draw_glyph_run(&mut self, _context: &DrawGlyphRun) -> Result<(), Error> {
         self.0 += 1;
         Ok(())
     }
 
-    fn draw_inline_object(&mut self, _context: &DrawInlineObject) -> DWResult<()> {
+    fn draw_inline_object(&mut self, _context: &DrawInlineObject) -> Result<(), Error> {
         Ok(())
     }
 
-    fn draw_strikethrough(&mut self, _context: &DrawStrikethrough) -> DWResult<()> {
+    fn draw_strikethrough(&mut self, _context: &DrawStrikethrough) -> Result<(), Error> {
         Ok(())
     }
 
-    fn draw_underline(&mut self, _context: &DrawUnderline) -> DWResult<()> {
+    fn draw_underline(&mut self, _context: &DrawUnderline) -> Result<(), Error> {
         self.1 += 1;
         Ok(())
     }

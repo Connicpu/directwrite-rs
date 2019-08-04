@@ -1,10 +1,10 @@
 use crate::enums::pixel_geometry::PixelGeometry;
 use crate::enums::rendering_mode::RenderingMode;
-use crate::error::DWResult;
 use crate::factory::Factory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::windef::HMONITOR;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteRenderingParams;
@@ -30,7 +30,10 @@ impl RenderingParams {
     /// safety errors.
     ///
     /// </div>
-    pub fn create_for_monitor(factory: &Factory, monitor: HMONITOR) -> DWResult<RenderingParams> {
+    pub fn create_for_monitor(
+        factory: &Factory,
+        monitor: HMONITOR,
+    ) -> Result<RenderingParams, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
             let hr = (*factory.get_raw()).CreateMonitorRenderingParams(monitor, &mut ptr);
@@ -47,7 +50,7 @@ impl RenderingParams {
     /// [How to Add Support for Multiple Monitors][1] topic.
     ///
     /// [1]: https://msdn.microsoft.com/62274126-49da-4166-8482-73aac2b29c26
-    pub fn create_default(factory: &Factory) -> DWResult<RenderingParams> {
+    pub fn create_default(factory: &Factory) -> Result<RenderingParams, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
             let hr = (*factory.get_raw()).CreateRenderingParams(&mut ptr);

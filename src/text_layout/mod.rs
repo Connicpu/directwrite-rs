@@ -4,7 +4,6 @@ use crate::descriptions::TextRange;
 use crate::effects::client_effect::ClientEffect;
 use crate::effects::DrawingEffect;
 use crate::enums::{FontStretch, FontStyle, FontWeight};
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_collection::FontCollection;
 use crate::inline_object::InlineObject;
@@ -24,6 +23,7 @@ use std::{mem, ptr, u32};
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
 use dcommon::helpers::{deref_com_wrapper, deref_com_wrapper_mut};
+use dcommon::Error;
 use winapi::shared::winerror::{SUCCEEDED, S_OK};
 use winapi::um::dwrite::*;
 use wio::com::ComPtr;
@@ -69,7 +69,7 @@ impl<T> std::ops::Deref for RangeValue<T> {
 }
 
 /// A function result that is either a pair of T and an associated text range, or a DWriteError.
-pub type RangeResult<T> = DWResult<RangeValue<T>>;
+pub type RangeResult<T> = Result<RangeValue<T>, Error>;
 
 #[derive(ComWrapper)]
 #[com(send, sync, debug)]
@@ -116,7 +116,7 @@ impl TextLayout {
         origin_x: f32,
         origin_y: f32,
         context: &DrawContext,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         unsafe {
             let hr = self
                 .ptr
@@ -498,7 +498,7 @@ impl TextLayout {
         origin_x: f32,
         origin_y: f32,
         metrics: &mut Vec<HitTestMetrics>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         unsafe {
             metrics.clear();
 
@@ -544,7 +544,7 @@ impl TextLayout {
         &mut self,
         effect: &impl DrawingEffect,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -566,7 +566,7 @@ impl TextLayout {
         &mut self,
         collection: FontCollection,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -588,7 +588,7 @@ impl TextLayout {
         &mut self,
         name: &str,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         unsafe {
             let name = name.to_wide_null();
             let range = range.into();
@@ -603,7 +603,7 @@ impl TextLayout {
     }
 
     /// Sets the font size used for the specified range of text.
-    pub fn set_font_size(&mut self, size: f32, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_font_size(&mut self, size: f32, range: impl Into<TextRange>) -> Result<(), Error> {
         unsafe {
             let range = range.into();
 
@@ -621,7 +621,7 @@ impl TextLayout {
         &mut self,
         stretch: FontStretch,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -643,7 +643,7 @@ impl TextLayout {
         &mut self,
         style: FontStyle,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -665,7 +665,7 @@ impl TextLayout {
         &mut self,
         weight: FontWeight,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -687,7 +687,7 @@ impl TextLayout {
         &mut self,
         obj: &InlineObject,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into();
         let range = DWRITE_TEXT_RANGE {
             startPosition: range.start,
@@ -705,7 +705,11 @@ impl TextLayout {
     }
 
     /// Set the locale used for a range of text.
-    pub fn set_locale_name(&mut self, locale: &str, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_locale_name(
+        &mut self,
+        locale: &str,
+        range: impl Into<TextRange>,
+    ) -> Result<(), Error> {
         let range = range.into();
 
         let locale = locale.to_wide_null();
@@ -725,7 +729,7 @@ impl TextLayout {
     }
 
     /// Set the max height in DIPs for this text layout.
-    pub fn set_max_height(&mut self, maxh: f32) -> DWResult<()> {
+    pub fn set_max_height(&mut self, maxh: f32) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetMaxHeight(maxh);
             if SUCCEEDED(hr) {
@@ -737,7 +741,7 @@ impl TextLayout {
     }
 
     /// Set the max width in DIPs for this text layout.
-    pub fn set_max_width(&mut self, maxw: f32) -> DWResult<()> {
+    pub fn set_max_width(&mut self, maxw: f32) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.SetMaxWidth(maxw);
             if SUCCEEDED(hr) {
@@ -753,7 +757,7 @@ impl TextLayout {
         &mut self,
         strikethrough: bool,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into().into();
 
         unsafe {
@@ -767,7 +771,11 @@ impl TextLayout {
     }
 
     /// Sets underlining for text within a specified text range.
-    pub fn set_underline(&mut self, underline: bool, range: impl Into<TextRange>) -> DWResult<()> {
+    pub fn set_underline(
+        &mut self,
+        underline: bool,
+        range: impl Into<TextRange>,
+    ) -> Result<(), Error> {
         let range = range.into().into();
 
         unsafe {
@@ -785,7 +793,7 @@ impl TextLayout {
         &mut self,
         typography: &Typography,
         range: impl Into<TextRange>,
-    ) -> DWResult<()> {
+    ) -> Result<(), Error> {
         let range = range.into().into();
 
         unsafe {

@@ -2,7 +2,6 @@
 
 use crate::effects::ClientEffect;
 use crate::enums::BreakCondition;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::inline_object::custom::CustomInlineObject;
 use crate::metrics::overhang::OverhangMetrics;
@@ -14,6 +13,7 @@ use crate::text_renderer::TextRenderer;
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
 use dcommon::helpers::unwrap_opt_com;
+use dcommon::Error;
 use math2d::Point2f;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteInlineObject;
@@ -41,7 +41,7 @@ impl InlineObject {
     pub fn create_trimming_ellipsis(
         factory: &Factory,
         format: &TextFormat,
-    ) -> DWResult<InlineObject> {
+    ) -> Result<InlineObject, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
             let hr = (*factory.get_raw()).CreateEllipsisTrimmingSign(format.get_raw(), &mut ptr);
@@ -84,7 +84,7 @@ impl InlineObject {
     }
 
     /// Requests the inline object to draw itself.
-    pub fn draw(&self, context: &DrawingContext) -> DWResult<()> {
+    pub fn draw(&self, context: &DrawingContext) -> Result<(), Error> {
         unsafe {
             let hr = self.ptr.Draw(
                 context.client_context.ptr(),

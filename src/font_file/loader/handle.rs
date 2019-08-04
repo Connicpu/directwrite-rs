@@ -1,11 +1,12 @@
 use crate::descriptions::FontKey;
-use crate::error::DWResult;
 use crate::factory::Factory;
 use crate::font_file::loader::com_loader::ComFontFileLoader;
 use crate::font_file::loader::FontFileLoader;
 
-use com_wrapper::ComWrapper;
 use std::marker::PhantomData;
+
+use com_wrapper::ComWrapper;
+use dcommon::Error;
 use winapi::shared::winerror::SUCCEEDED;
 use winapi::um::dwrite::IDWriteFontFileLoader;
 use wio::com::ComPtr;
@@ -20,7 +21,7 @@ pub struct FileLoaderHandle<K: FontKey + ?Sized> {
 impl<K: FontKey + ?Sized> FileLoaderHandle<K> {
     /// Register a new file loader into the factory and get a handle
     /// that you can use to load custom font files.
-    pub fn register<T>(factory: &Factory, loader: T) -> DWResult<Self>
+    pub fn register<T>(factory: &Factory, loader: T) -> Result<Self, Error>
     where
         T: FontFileLoader<Key = K>,
     {
