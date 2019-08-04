@@ -37,17 +37,19 @@ impl TextFormat {
     pub fn create<'a>(factory: &'a Factory) -> TextFormatBuilder<'a> {
         unsafe { TextFormatBuilder::new(&*factory.get_raw()) }
     }
+}
 
+pub unsafe trait ITextFormat {
     /// Get the flow direction of text in this format.
-    pub fn flow_direction(&self) -> UncheckedEnum<FlowDirection> {
-        unsafe { self.ptr.GetFlowDirection().into() }
+    fn flow_direction(&self) -> UncheckedEnum<FlowDirection> {
+        unsafe { self.raw_tf().GetFlowDirection().into() }
     }
 
     /// Get the font collection this format loaded its font from.
-    pub fn font_collection(&self) -> Option<FontCollection> {
+    fn font_collection(&self) -> Option<FontCollection> {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFontCollection(&mut ptr);
+            let hr = self.raw_tf().GetFontCollection(&mut ptr);
             if SUCCEEDED(hr) && ptr != ptr::null_mut() {
                 Some(FontCollection::from_raw(ptr))
             } else {
@@ -57,11 +59,11 @@ impl TextFormat {
     }
 
     /// Get the name of the font family specified for this format.
-    pub fn font_family_name(&self) -> Option<String> {
+    fn font_family_name(&self) -> Option<String> {
         unsafe {
-            let len = self.ptr.GetFontFamilyNameLength();
+            let len = self.raw_tf().GetFontFamilyNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
-            let hr = self.ptr.GetFontFamilyName(buf.as_mut_ptr(), len + 1);
+            let hr = self.raw_tf().GetFontFamilyName(buf.as_mut_ptr(), len + 1);
             if SUCCEEDED(hr) {
                 buf.set_len(len as usize);
                 let osstr = OsString::from_wide(&buf);
@@ -74,38 +76,38 @@ impl TextFormat {
     }
 
     /// Get the font size associated with this format.
-    pub fn font_size(&self) -> f32 {
-        unsafe { self.ptr.GetFontSize() }
+    fn font_size(&self) -> f32 {
+        unsafe { self.raw_tf().GetFontSize() }
     }
 
     /// Get the stretch applied to this format.
-    pub fn font_stretch(&self) -> UncheckedEnum<FontStretch> {
-        unsafe { self.ptr.GetFontStretch().into() }
+    fn font_stretch(&self) -> UncheckedEnum<FontStretch> {
+        unsafe { self.raw_tf().GetFontStretch().into() }
     }
 
     /// Get the style applied to this format.
-    pub fn font_style(&self) -> UncheckedEnum<FontStyle> {
-        unsafe { self.ptr.GetFontStyle().into() }
+    fn font_style(&self) -> UncheckedEnum<FontStyle> {
+        unsafe { self.raw_tf().GetFontStyle().into() }
     }
 
     /// Get the weight applied to this format.
-    pub fn font_weight(&self) -> FontWeight {
-        unsafe { FontWeight(self.ptr.GetFontWeight()) }
+    fn font_weight(&self) -> FontWeight {
+        unsafe { FontWeight(self.raw_tf().GetFontWeight()) }
     }
 
     /// Get the incremental tabstop size for this format.
-    pub fn incremental_tabstop(&self) -> f32 {
-        unsafe { self.ptr.GetIncrementalTabStop() }
+    fn incremental_tabstop(&self) -> f32 {
+        unsafe { self.raw_tf().GetIncrementalTabStop() }
     }
 
     /// Get the line spacing information for this format.
-    pub fn line_spacing(&self) -> Result<LineSpacing, Error> {
+    fn line_spacing(&self) -> Result<LineSpacing, Error> {
         unsafe {
             let mut method = 0;
             let mut spacing = 0.0;
             let mut baseline = 0.0;
             let hr = self
-                .ptr
+                .raw_tf()
                 .GetLineSpacing(&mut method, &mut spacing, &mut baseline);
             if SUCCEEDED(hr) {
                 let method = method.into();
@@ -121,11 +123,11 @@ impl TextFormat {
     }
 
     /// Get the locale used for this format.
-    pub fn locale_name(&self) -> Result<String, Error> {
+    fn locale_name(&self) -> Result<String, Error> {
         unsafe {
-            let len = self.ptr.GetLocaleNameLength();
+            let len = self.raw_tf().GetLocaleNameLength();
             let mut buf = Vec::with_capacity(len as usize + 1);
-            let hr = self.ptr.GetLocaleName(buf.as_mut_ptr(), len + 1);
+            let hr = self.raw_tf().GetLocaleName(buf.as_mut_ptr(), len + 1);
             if SUCCEEDED(hr) {
                 buf.set_len(len as usize);
                 let osstr = OsString::from_wide(&buf);
@@ -140,29 +142,29 @@ impl TextFormat {
     }
 
     /// Get the paragraph alignment of text under this format.
-    pub fn paragraph_alignment(&self) -> UncheckedEnum<ParagraphAlignment> {
-        unsafe { self.ptr.GetParagraphAlignment().into() }
+    fn paragraph_alignment(&self) -> UncheckedEnum<ParagraphAlignment> {
+        unsafe { self.raw_tf().GetParagraphAlignment().into() }
     }
 
     /// Get the reading direction of text under this format.
-    pub fn reading_direction(&self) -> UncheckedEnum<ReadingDirection> {
-        unsafe { self.ptr.GetReadingDirection().into() }
+    fn reading_direction(&self) -> UncheckedEnum<ReadingDirection> {
+        unsafe { self.raw_tf().GetReadingDirection().into() }
     }
 
     /// Get the alignment of text under this format.
-    pub fn text_alignment(&self) -> UncheckedEnum<TextAlignment> {
-        unsafe { self.ptr.GetTextAlignment().into() }
+    fn text_alignment(&self) -> UncheckedEnum<TextAlignment> {
+        unsafe { self.raw_tf().GetTextAlignment().into() }
     }
 
     /// Gets the trimming options for text that overflows the layout box.
     ///
     /// The inline object is an omission sign that will be rendered to show that
     /// text was omitted.
-    pub fn trimming(&self) -> Result<(Trimming, Option<InlineObject>), Error> {
+    fn trimming(&self) -> Result<(Trimming, Option<InlineObject>), Error> {
         unsafe {
             let mut trimming = std::mem::zeroed();
             let mut ptr = std::ptr::null_mut();
-            let hr = self.ptr.GetTrimming(&mut trimming, &mut ptr);
+            let hr = self.raw_tf().GetTrimming(&mut trimming, &mut ptr);
             if SUCCEEDED(hr) {
                 let obj = if !ptr.is_null() {
                     Some(InlineObject::from_raw(ptr))
@@ -177,14 +179,14 @@ impl TextFormat {
     }
 
     /// Get the word wrapping for text under this format.
-    pub fn word_wrapping(&self) -> UncheckedEnum<WordWrapping> {
-        unsafe { self.ptr.GetWordWrapping().into() }
+    fn word_wrapping(&self) -> UncheckedEnum<WordWrapping> {
+        unsafe { self.raw_tf().GetWordWrapping().into() }
     }
 
     /// Set the flow direction for text under this format.
-    pub fn set_flow_direction(&mut self, value: FlowDirection) -> Result<(), Error> {
+    fn set_flow_direction(&mut self, value: FlowDirection) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetFlowDirection(value as u32);
+            let hr = self.raw_tf().SetFlowDirection(value as u32);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -194,9 +196,9 @@ impl TextFormat {
     }
 
     /// Set the incremental tabstop value for text under this format.
-    pub fn set_incremental_tabstop(&mut self, value: f32) -> Result<(), Error> {
+    fn set_incremental_tabstop(&mut self, value: f32) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetIncrementalTabStop(value);
+            let hr = self.raw_tf().SetIncrementalTabStop(value);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -206,14 +208,16 @@ impl TextFormat {
     }
 
     /// Set the line spacing metrics for text under this format.
-    pub fn set_line_spacing(
+    fn set_line_spacing(
         &mut self,
         method: LineSpacingMethod,
         spacing: f32,
         baseline: f32,
     ) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetLineSpacing(method as u32, spacing, baseline);
+            let hr = self
+                .raw_tf()
+                .SetLineSpacing(method as u32, spacing, baseline);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -223,9 +227,9 @@ impl TextFormat {
     }
 
     /// Set the paragraph alignment for text under this format.
-    pub fn set_paragraph_alignment(&mut self, value: ParagraphAlignment) -> Result<(), Error> {
+    fn set_paragraph_alignment(&mut self, value: ParagraphAlignment) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetParagraphAlignment(value as u32);
+            let hr = self.raw_tf().SetParagraphAlignment(value as u32);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -235,9 +239,9 @@ impl TextFormat {
     }
 
     /// Set the reading direction used to lay out text under this format.
-    pub fn set_reading_direction(&mut self, value: ReadingDirection) -> Result<(), Error> {
+    fn set_reading_direction(&mut self, value: ReadingDirection) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetReadingDirection(value as u32);
+            let hr = self.raw_tf().SetReadingDirection(value as u32);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -247,9 +251,9 @@ impl TextFormat {
     }
 
     /// Set the text alignment for this format.
-    pub fn set_text_alignment(&mut self, value: TextAlignment) -> Result<(), Error> {
+    fn set_text_alignment(&mut self, value: TextAlignment) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetTextAlignment(value as u32);
+            let hr = self.raw_tf().SetTextAlignment(value as u32);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
@@ -259,7 +263,7 @@ impl TextFormat {
     }
 
     /// Sets trimming options for text overflowing the layout width.
-    pub fn set_trimming(
+    fn set_trimming(
         &self,
         trimming: &Trimming,
         omission_sign: Option<&InlineObject>,
@@ -270,7 +274,7 @@ impl TextFormat {
                 None => ptr::null_mut(),
             };
             let hr = self
-                .ptr
+                .raw_tf()
                 .SetTrimming(trimming as *const _ as *const _, omission_sign);
             if SUCCEEDED(hr) {
                 Ok(())
@@ -281,15 +285,23 @@ impl TextFormat {
     }
 
     /// Set the word wrapping for text under this format.
-    pub fn set_word_wrapping(&mut self, value: WordWrapping) -> Result<(), Error> {
+    fn set_word_wrapping(&mut self, value: WordWrapping) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.SetWordWrapping(value as u32);
+            let hr = self.raw_tf().SetWordWrapping(value as u32);
             if SUCCEEDED(hr) {
                 Ok(())
             } else {
                 Err(hr.into())
             }
         }
+    }
+
+    unsafe fn raw_tf(&self) -> &IDWriteTextFormat;
+}
+
+unsafe impl ITextFormat for TextFormat {
+    unsafe fn raw_tf(&self) -> &IDWriteTextFormat {
+        &self.ptr
     }
 }
 

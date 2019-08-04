@@ -1,12 +1,10 @@
 //! Font collections and types for building application-defined collections.
 
 use crate::descriptions::FontKey;
-use crate::factory::Factory;
+use crate::factory::IFactory;
 use crate::font::Font;
 use crate::font_face::FontFace;
 use crate::font_family::FontFamily;
-
-use std::ptr;
 
 use com_wrapper::ComWrapper;
 use dcommon::Error;
@@ -35,7 +33,7 @@ pub struct FontCollection {
 impl FontCollection {
     /// Construct a builder for a FontCollection. You'll need a CollectionLoaderHandle
     /// and its associated Key type.
-    pub fn create<'a, K>(factory: &'a Factory) -> FontCollectionBuilder<'a, K>
+    pub fn create<'a, K>(factory: &'a dyn IFactory) -> FontCollectionBuilder<'a, K>
     where
         K: FontKey,
     {
@@ -45,14 +43,13 @@ impl FontCollection {
     /// Gets the FontCollection for System-installed fonts. This represents all of the fonts
     /// installed on the user's system.
     pub fn system_font_collection(
-        factory: &Factory,
+        factory: &dyn IFactory,
         check_for_updates: bool,
     ) -> Result<FontCollection, Error> {
         unsafe {
-            let mut fc = ptr::null_mut();
+            let mut fc = std::ptr::null_mut();
             let check = if check_for_updates { 1 } else { 0 };
-            let factory_ptr = &*(factory.get_raw());
-            let hr = factory_ptr.GetSystemFontCollection(&mut fc, check);
+            let hr = factory.raw_f().GetSystemFontCollection(&mut fc, check);
             if SUCCEEDED(hr) {
                 Ok(FontCollection::from_raw(fc))
             } else {
@@ -61,14 +58,23 @@ impl FontCollection {
         }
     }
 
+    /// Get an iterator of all font families in this collection
+    pub fn all_families<'a>(&'a self) -> impl Iterator<Item = FontFamily> + 'a {
+        (0..self.family_count()).filter_map(move |i| self.family(i))
+    }
+}
+
+pub unsafe trait IFontCollection {
     /// Finds the font family with the specified family name and returns its index
-    pub fn find_family_by_name(&self, family_name: &str) -> Option<u32> {
+    fn find_family_by_name(&self, family_name: &str) -> Option<u32> {
         unsafe {
             let family = family_name.to_wide_null();
             let family = family.as_ptr();
             let mut idx = 0;
             let mut exists = 0;
-            let hr = self.ptr.FindFamilyName(family, &mut idx, &mut exists);
+            let hr = self
+                .raw_fontcol()
+                .FindFamilyName(family, &mut idx, &mut exists);
             if SUCCEEDED(hr) && exists != 0 {
                 Some(idx)
             } else {
@@ -78,15 +84,15 @@ impl FontCollection {
     }
 
     /// Gets the number of font families in the collection
-    pub fn family_count(&self) -> u32 {
-        unsafe { self.ptr.GetFontFamilyCount() }
+    fn family_count(&self) -> u32 {
+        unsafe { self.raw_fontcol().GetFontFamilyCount() }
     }
 
     /// Gets a FontFamily object given a zero-based font family index
-    pub fn family(&self, index: u32) -> Option<FontFamily> {
+    fn family(&self, index: u32) -> Option<FontFamily> {
         unsafe {
-            let mut ff = ptr::null_mut();
-            let hr = self.ptr.GetFontFamily(index, &mut ff);
+            let mut ff = std::ptr::null_mut();
+            let hr = self.raw_fontcol().GetFontFamily(index, &mut ff);
             if SUCCEEDED(hr) {
                 Some(FontFamily::from_raw(ff))
             } else {
@@ -95,22 +101,27 @@ impl FontCollection {
         }
     }
 
-    /// Get an iterator of all font families in this collection
-    pub fn all_families<'a>(&'a self) -> impl Iterator<Item = FontFamily> + 'a {
-        (0..self.family_count()).filter_map(move |i| self.family(i))
-    }
-
     /// Gets the font object that corresponds to the same physical font as the specified font face object.
     /// The specified physical font must belong to the font collection.
-    pub fn font_from_face(&self, face: &FontFace) -> Option<Font> {
+    fn font_from_face(&self, face: &FontFace) -> Option<Font> {
         unsafe {
-            let mut f = ptr::null_mut();
-            let hr = self.ptr.GetFontFromFontFace(face.get_raw(), &mut f);
+            let mut f = std::ptr::null_mut();
+            let hr = self
+                .raw_fontcol()
+                .GetFontFromFontFace(face.get_raw(), &mut f);
             if SUCCEEDED(hr) {
                 Some(Font::from_raw(f))
             } else {
                 None
             }
         }
+    }
+
+    unsafe fn raw_fontcol(&self) -> &IDWriteFontCollection;
+}
+
+unsafe impl IFontCollection for FontCollection {
+    unsafe fn raw_fontcol(&self) -> &IDWriteFontCollection {
+        &self.ptr
     }
 }

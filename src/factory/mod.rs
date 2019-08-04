@@ -33,3 +33,13 @@ impl Factory {
         }
     }
 }
+
+pub unsafe trait IFactory {
+    unsafe fn raw_f(&self) -> &IDWriteFactory;
+}
+
+unsafe impl IFactory for Factory {
+    unsafe fn raw_f(&self) -> &IDWriteFactory {
+        &self.ptr
+    }
+}

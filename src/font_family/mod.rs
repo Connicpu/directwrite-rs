@@ -18,13 +18,13 @@ pub struct FontFamily {
     ptr: ComPtr<IDWriteFontFamily>,
 }
 
-impl FontFamily {
+pub unsafe trait IFontFamily {
     /// Creates a localized strings object that contains the family names for the font family,
     /// indexed by locale name.
-    pub fn family_name(&self) -> Option<LocalizedStrings> {
+    fn family_name(&self) -> Option<LocalizedStrings> {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFamilyNames(&mut ptr);
+            let hr = self.raw_fontfamily().GetFamilyNames(&mut ptr);
             if SUCCEEDED(hr) {
                 Some(LocalizedStrings::from_raw(ptr))
             } else {
@@ -34,7 +34,7 @@ impl FontFamily {
     }
 
     /// Gets the font that best matches the specified properties.
-    pub fn first_matching_font(
+    fn first_matching_font(
         &self,
         weight: FontWeight,
         stretch: FontStretch,
@@ -42,7 +42,7 @@ impl FontFamily {
     ) -> Option<Font> {
         unsafe {
             let mut font_ptr = ptr::null_mut();
-            let hr = self.ptr.GetFirstMatchingFont(
+            let hr = self.raw_fontfamily().GetFirstMatchingFont(
                 weight.0,
                 stretch as u32,
                 style as u32,
@@ -58,7 +58,7 @@ impl FontFamily {
 
     /// Gets a list of fonts in the font family ranked in order of how well they match the
     /// specified properties.
-    pub fn matching_fonts(
+    fn matching_fonts(
         &self,
         weight: FontWeight,
         stretch: FontStretch,
@@ -66,14 +66,25 @@ impl FontFamily {
     ) -> Option<FontList> {
         unsafe {
             let mut list = ptr::null_mut();
-            let hr = self
-                .ptr
-                .GetMatchingFonts(weight.0, stretch as u32, style as u32, &mut list);
+            let hr = self.raw_fontfamily().GetMatchingFonts(
+                weight.0,
+                stretch as u32,
+                style as u32,
+                &mut list,
+            );
             if SUCCEEDED(hr) {
                 Some(FontList::from_raw(list))
             } else {
                 None
             }
         }
+    }
+
+    unsafe fn raw_fontfamily(&self) -> &IDWriteFontFamily;
+}
+
+unsafe impl IFontFamily for FontFamily {
+    unsafe fn raw_fontfamily(&self) -> &IDWriteFontFamily {
+        &self.ptr
     }
 }

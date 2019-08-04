@@ -1,17 +1,16 @@
 //! TextRenderer and types for constructing your own application-defined instances.
 
-use crate::pixel_snapping::PixelSnapping;
+use crate::pixel_snapping::IPixelSnapping;
 use crate::text_renderer::custom::{
     DrawGlyphRun, DrawInlineObject, DrawStrikethrough, DrawUnderline,
 };
 
 use com_wrapper::ComWrapper;
-use dcommon::helpers::deref_com_wrapper;
 use dcommon::helpers::unwrap_opt_com;
 use dcommon::Error;
 use winapi::ctypes::c_void;
 use winapi::shared::winerror::SUCCEEDED;
-use winapi::um::dwrite::IDWriteTextRenderer;
+use winapi::um::dwrite::{IDWritePixelSnapping, IDWriteTextRenderer};
 use wio::com::ComPtr;
 
 pub mod custom;
@@ -29,14 +28,16 @@ impl TextRenderer {
     pub fn new(renderer: impl custom::CustomTextRenderer) -> TextRenderer {
         custom::com_renderer::ComRenderer::new(renderer)
     }
+}
 
+pub unsafe trait ITextRenderer: IPixelSnapping {
     /// Draws a run of glyphs using this text renderer. Normally you won't call this directly,
     /// but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> Result<(), Error> {
+    fn draw_glyph_run(&mut self, context: &DrawGlyphRun) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.DrawGlyphRun(
+            let hr = self.raw_tr().DrawGlyphRun(
                 context.context.ptr(),
                 context.baseline_origin.x,
                 context.baseline_origin.y,
@@ -57,9 +58,9 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_underline(&mut self, context: &DrawUnderline) -> Result<(), Error> {
+    fn draw_underline(&mut self, context: &DrawUnderline) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.DrawUnderline(
+            let hr = self.raw_tr().DrawUnderline(
                 context.context.ptr(),
                 context.baseline_origin.x,
                 context.baseline_origin.y,
@@ -78,9 +79,9 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> Result<(), Error> {
+    fn draw_strikethrough(&mut self, context: &DrawStrikethrough) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.DrawStrikethrough(
+            let hr = self.raw_tr().DrawStrikethrough(
                 context.context.ptr(),
                 context.baseline_origin.x,
                 context.baseline_origin.y,
@@ -99,9 +100,9 @@ impl TextRenderer {
     /// directly, but it will be called indirectly from [`TextLayout::draw`][1]
     ///
     /// [1]: struct.TextLayout.html#method.draw
-    pub fn draw_inline_object(&mut self, context: &DrawInlineObject) -> Result<(), Error> {
+    fn draw_inline_object(&mut self, context: &DrawInlineObject) -> Result<(), Error> {
         unsafe {
-            let hr = self.ptr.DrawInlineObject(
+            let hr = self.raw_tr().DrawInlineObject(
                 context.context.ptr(),
                 context.origin.x,
                 context.origin.y,
@@ -117,12 +118,19 @@ impl TextRenderer {
             }
         }
     }
+
+    unsafe fn raw_tr(&self) -> &IDWriteTextRenderer;
 }
 
-impl std::ops::Deref for TextRenderer {
-    type Target = PixelSnapping;
-    fn deref(&self) -> &PixelSnapping {
-        unsafe { deref_com_wrapper(self) }
+unsafe impl IPixelSnapping for TextRenderer {
+    unsafe fn raw_psnap(&self) -> &IDWritePixelSnapping {
+        &self.ptr
+    }
+}
+
+unsafe impl ITextRenderer for TextRenderer {
+    unsafe fn raw_tr(&self) -> &IDWriteTextRenderer {
+        &self.ptr
     }
 }
 

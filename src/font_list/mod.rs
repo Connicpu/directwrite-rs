@@ -17,16 +17,23 @@ pub struct FontList {
 }
 
 impl FontList {
+    /// Get an iterator over all fonts in the list.
+    pub fn all_fonts<'a>(&'a self) -> impl Iterator<Item = Font> + Clone + 'a {
+        (0..self.count()).filter_map(move |i| self.get(i))
+    }
+}
+
+pub unsafe trait IFontList {
     /// The number of fonts in the list
-    pub fn count(&self) -> u32 {
-        unsafe { self.ptr.GetFontCount() }
+    fn count(&self) -> u32 {
+        unsafe { self.raw_fontlist().GetFontCount() }
     }
 
     /// The collection that owns these fonts
-    pub fn collection(&self) -> Option<FontCollection> {
+    fn collection(&self) -> Option<FontCollection> {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFontCollection(&mut ptr);
+            let hr = self.raw_fontlist().GetFontCollection(&mut ptr);
             if SUCCEEDED(hr) {
                 Some(FontCollection::from_raw(ptr))
             } else {
@@ -36,10 +43,10 @@ impl FontList {
     }
 
     /// Get a specific font in the list at the given index.
-    pub fn get(&self, i: u32) -> Option<Font> {
+    fn get(&self, i: u32) -> Option<Font> {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFont(i, &mut ptr);
+            let hr = self.raw_fontlist().GetFont(i, &mut ptr);
             if SUCCEEDED(hr) {
                 Some(Font::from_raw(ptr))
             } else {
@@ -48,8 +55,11 @@ impl FontList {
         }
     }
 
-    /// Get an iterator over all fonts in the list.
-    pub fn all_fonts<'a>(&'a self) -> impl Iterator<Item = Font> + Clone + 'a {
-        (0..self.count()).filter_map(move |i| self.get(i))
+    unsafe fn raw_fontlist(&self) -> &IDWriteFontList;
+}
+
+unsafe impl IFontList for FontList {
+    unsafe fn raw_fontlist(&self) -> &IDWriteFontList {
+        &self.ptr
     }
 }

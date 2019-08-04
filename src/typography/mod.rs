@@ -27,16 +27,23 @@ impl Typography {
         TypographyBuilder::new(factory)
     }
 
+    /// Get an iterator over all of the features stored in this typography object.
+    pub fn all_features<'a>(&'a self) -> impl Iterator<Item = FontFeature> + 'a {
+        (0..self.feature_count()).filter_map(move |i| self.feature(i))
+    }
+}
+
+pub unsafe trait ITypography {
     /// Get the number of font features included in this typography object.
-    pub fn feature_count(&self) -> u32 {
-        unsafe { self.ptr.GetFontFeatureCount() }
+    fn feature_count(&self) -> u32 {
+        unsafe { self.raw_typography().GetFontFeatureCount() }
     }
 
     /// Get the font feature at the specified index.
-    pub fn feature(&self, index: u32) -> Option<FontFeature> {
+    fn feature(&self, index: u32) -> Option<FontFeature> {
         unsafe {
             let mut feature = std::mem::zeroed();
-            let hr = self.ptr.GetFontFeature(index, &mut feature);
+            let hr = self.raw_typography().GetFontFeature(index, &mut feature);
             if SUCCEEDED(hr) {
                 Some(feature.into())
             } else {
@@ -45,9 +52,12 @@ impl Typography {
         }
     }
 
-    /// Get an iterator over all of the features stored in this typography object.
-    pub fn all_features<'a>(&'a self) -> impl Iterator<Item = FontFeature> + 'a {
-        (0..self.feature_count()).filter_map(move |i| self.feature(i))
+    unsafe fn raw_typography(&self) -> &IDWriteTypography;
+}
+
+unsafe impl ITypography for Typography {
+    unsafe fn raw_typography(&self) -> &IDWriteTypography {
+        &self.ptr
     }
 }
 

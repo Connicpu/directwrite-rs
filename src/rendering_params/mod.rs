@@ -1,6 +1,6 @@
 use crate::enums::pixel_geometry::PixelGeometry;
 use crate::enums::rendering_mode::RenderingMode;
-use crate::factory::Factory;
+use crate::factory::IFactory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
@@ -31,12 +31,14 @@ impl RenderingParams {
     ///
     /// </div>
     pub fn create_for_monitor(
-        factory: &Factory,
+        factory: &dyn IFactory,
         monitor: HMONITOR,
     ) -> Result<RenderingParams, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
-            let hr = (*factory.get_raw()).CreateMonitorRenderingParams(monitor, &mut ptr);
+            let hr = factory
+                .raw_f()
+                .CreateMonitorRenderingParams(monitor, &mut ptr);
             if SUCCEEDED(hr) {
                 Ok(RenderingParams::from_raw(ptr))
             } else {
@@ -50,10 +52,10 @@ impl RenderingParams {
     /// [How to Add Support for Multiple Monitors][1] topic.
     ///
     /// [1]: https://msdn.microsoft.com/62274126-49da-4166-8482-73aac2b29c26
-    pub fn create_default(factory: &Factory) -> Result<RenderingParams, Error> {
+    pub fn create_default(factory: &dyn IFactory) -> Result<RenderingParams, Error> {
         unsafe {
             let mut ptr = std::ptr::null_mut();
-            let hr = (*factory.get_raw()).CreateRenderingParams(&mut ptr);
+            let hr = factory.raw_f().CreateRenderingParams(&mut ptr);
             if SUCCEEDED(hr) {
                 Ok(RenderingParams::from_raw(ptr))
             } else {
@@ -61,15 +63,17 @@ impl RenderingParams {
             }
         }
     }
+}
 
+pub unsafe trait IRenderingParams {
     /// Gets the ClearType level of the rendering parameters object.
     ///
     /// The ClearType level represents the amount of ClearType – that is, the degree to which the
     /// red, green, and blue subpixels of each pixel are treated differently. Valid values range
     /// from zero (meaning no ClearType, which is equivalent to grayscale anti-aliasing) to one
     /// (meaning full ClearType).
-    pub fn cleartype_level(&self) -> f32 {
-        unsafe { self.ptr.GetClearTypeLevel() }
+    fn cleartype_level(&self) -> f32 {
+        unsafe { self.raw_rp().GetClearTypeLevel() }
     }
 
     /// Gets the enhanced contrast property of the rendering parameters object. Valid values are
@@ -77,8 +81,8 @@ impl RenderingParams {
     ///
     /// Enhanced contrast is the amount to increase the darkness of text, and typically ranges
     /// from 0 to 1. Zero means no contrast enhancement.
-    pub fn enhanced_contrast(&self) -> f32 {
-        unsafe { self.ptr.GetEnhancedContrast() }
+    fn enhanced_contrast(&self) -> f32 {
+        unsafe { self.raw_rp().GetEnhancedContrast() }
     }
 
     /// Gets the gamma value used for gamma correction. Valid values must be greater than zero
@@ -86,13 +90,13 @@ impl RenderingParams {
     ///
     /// The gamma value is used for gamma correction, which compensates for the non-linear
     /// luminosity response of most monitors.
-    pub fn gamma(&self) -> f32 {
-        unsafe { self.ptr.GetGamma() }
+    fn gamma(&self) -> f32 {
+        unsafe { self.raw_rp().GetGamma() }
     }
 
     /// Gets the pixel geometry of the rendering parameters object.
-    pub fn pixel_geometry(&self) -> UncheckedEnum<PixelGeometry> {
-        unsafe { self.ptr.GetPixelGeometry().into() }
+    fn pixel_geometry(&self) -> UncheckedEnum<PixelGeometry> {
+        unsafe { self.raw_rp().GetPixelGeometry().into() }
     }
 
     /// Gets the rendering mode of the rendering parameters object.
@@ -104,7 +108,15 @@ impl RenderingParams {
     ///
     /// [1]: enums/enum.RenderingMode.html#variant.Default
     /// [2]: struct.FontFace.html#method.recommended_rendering_mode
-    pub fn rendering_mode(&self) -> UncheckedEnum<RenderingMode> {
-        unsafe { self.ptr.GetRenderingMode().into() }
+    fn rendering_mode(&self) -> UncheckedEnum<RenderingMode> {
+        unsafe { self.raw_rp().GetRenderingMode().into() }
+    }
+
+    unsafe fn raw_rp(&self) -> &IDWriteRenderingParams;
+}
+
+unsafe impl IRenderingParams for RenderingParams {
+    unsafe fn raw_rp(&self) -> &IDWriteRenderingParams {
+        &self.ptr
     }
 }

@@ -3,7 +3,7 @@
 use crate::descriptions::FontKey;
 use crate::enums::FontFaceType;
 use crate::enums::FontFileType;
-use crate::factory::Factory;
+use crate::factory::IFactory;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
@@ -31,20 +31,24 @@ pub struct FontFile {
 
 impl FontFile {
     /// Initializes a builder for creating a FontFile from either custom loaders or a file path.
-    pub fn create<K: FontKey + ?Sized>(factory: &Factory) -> FontFileBuilder<K> {
-        unsafe { FontFileBuilder::new(&*factory.get_raw()) }
+    pub fn create<K: FontKey + ?Sized>(factory: &dyn IFactory) -> FontFileBuilder<K> {
+        unsafe { FontFileBuilder::new(factory.raw_f()) }
     }
+}
 
+pub unsafe trait IFontFile {
     /// Analyzes a file and returns whether it represents a font, and whether the font type is
     /// supported by the font system.
-    pub fn analyze(&self) -> Result<Analysis, Error> {
+    fn analyze(&self) -> Result<Analysis, Error> {
         unsafe {
             let mut sup = 0;
             let mut file = 0;
             let mut face = 0;
             let mut num = 0;
 
-            let hr = self.ptr.Analyze(&mut sup, &mut file, &mut face, &mut num);
+            let hr = self
+                .raw_fontfile()
+                .Analyze(&mut sup, &mut file, &mut face, &mut num);
 
             if SUCCEEDED(hr) {
                 Ok(Analysis {
@@ -57,6 +61,22 @@ impl FontFile {
                 Err(hr.into())
             }
         }
+    }
+
+    fn as_font_file(&self) -> FontFile {
+        unsafe {
+            let ptr = self.raw_fontfile();
+            ptr.AddRef();
+            FontFile::from_raw(ptr as *const _ as *mut _)
+        }
+    }
+
+    unsafe fn raw_fontfile(&self) -> &IDWriteFontFile;
+}
+
+unsafe impl IFontFile for FontFile {
+    unsafe fn raw_fontfile(&self) -> &IDWriteFontFile {
+        &self.ptr
     }
 }
 

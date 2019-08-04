@@ -24,10 +24,10 @@ impl<T> ComGeometrySink<T>
 where
     T: GeometrySink,
 {
-    pub fn new(sink: T) -> ComPtr<IDWriteGeometrySink> {
+    pub unsafe fn create(sink: T) -> ComPtr<IDWriteGeometrySink> {
         let ptr = Self::create_raw(sink);
         let ptr = ptr as *mut IDWriteGeometrySink;
-        unsafe { ComPtr::from_raw(ptr) }
+        ComPtr::from_raw(ptr)
     }
 }
 

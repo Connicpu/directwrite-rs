@@ -8,8 +8,7 @@ use crate::font_family::FontFamily;
 use crate::localized_strings::LocalizedStrings;
 use crate::metrics::font::FontMetrics;
 
-use std::mem;
-use std::ptr;
+use std::mem::MaybeUninit;
 
 use checked_enum::UncheckedEnum;
 use com_wrapper::ComWrapper;
@@ -28,12 +27,12 @@ pub struct Font {
     ptr: ComPtr<IDWriteFont>,
 }
 
-impl Font {
+pub unsafe trait IFont {
     /// Creates a font face object for the font.
-    pub fn create_face(&self) -> Result<FontFace, Error> {
+    fn create_face(&self) -> Result<FontFace, Error> {
         unsafe {
-            let mut ptr = ptr::null_mut();
-            let hr = self.ptr.CreateFontFace(&mut ptr);
+            let mut ptr = std::ptr::null_mut();
+            let hr = self.raw_font().CreateFontFace(&mut ptr);
             if SUCCEEDED(hr) {
                 Ok(FontFace::from_raw(ptr))
             } else {
@@ -44,10 +43,10 @@ impl Font {
 
     /// It is unclear in what situations this method may fail to return a face
     /// names collection, and so is returned as an Option to be safe.
-    pub fn face_name(&self) -> Option<LocalizedStrings> {
+    fn face_name(&self) -> Option<LocalizedStrings> {
         unsafe {
-            let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFaceNames(&mut ptr);
+            let mut ptr = std::ptr::null_mut();
+            let hr = self.raw_font().GetFaceNames(&mut ptr);
             if SUCCEEDED(hr) {
                 Some(LocalizedStrings::from_raw(ptr))
             } else {
@@ -57,10 +56,10 @@ impl Font {
     }
 
     /// Gets the font family to which the specified font belongs.
-    pub fn font_family(&self) -> Option<FontFamily> {
+    fn font_family(&self) -> Option<FontFamily> {
         unsafe {
-            let mut ptr = ptr::null_mut();
-            let hr = self.ptr.GetFontFamily(&mut ptr);
+            let mut ptr = std::ptr::null_mut();
+            let hr = self.raw_font().GetFontFamily(&mut ptr);
             if SUCCEEDED(hr) {
                 Some(FontFamily::from_raw(ptr))
             } else {
@@ -71,12 +70,12 @@ impl Font {
 
     /// Gets a localized strings collection containing the specified
     /// informational strings, indexed by locale name.
-    pub fn informational_strings(&self, id: InformationalStringId) -> Option<LocalizedStrings> {
+    fn informational_strings(&self, id: InformationalStringId) -> Option<LocalizedStrings> {
         unsafe {
-            let mut ptr = ptr::null_mut();
+            let mut ptr = std::ptr::null_mut();
             let mut exists = 0;
             let hr = self
-                .ptr
+                .raw_font()
                 .GetInformationalStrings(id as u32, &mut ptr, &mut exists);
             if SUCCEEDED(hr) && exists != 0 {
                 Some(LocalizedStrings::from_raw(ptr))
@@ -87,45 +86,53 @@ impl Font {
     }
 
     /// Get metric information for this Font.
-    pub fn metrics(&self) -> FontMetrics {
+    fn metrics(&self) -> FontMetrics {
         unsafe {
-            let mut metrics = mem::uninitialized();
-            self.ptr.GetMetrics(&mut metrics);
-            metrics.into()
+            let mut metrics = MaybeUninit::uninit();
+            self.raw_font().GetMetrics(metrics.as_mut_ptr());
+            metrics.assume_init().into()
         }
     }
 
     /// Get simulations applied to this Font.
-    pub fn simulations(&self) -> FontSimulations {
-        unsafe { FontSimulations(self.ptr.GetSimulations()) }
+    fn simulations(&self) -> FontSimulations {
+        unsafe { FontSimulations(self.raw_font().GetSimulations()) }
     }
 
     /// Get the stretch value of this Font.
-    pub fn stretch(&self) -> UncheckedEnum<FontStretch> {
-        unsafe { self.ptr.GetStretch().into() }
+    fn stretch(&self) -> UncheckedEnum<FontStretch> {
+        unsafe { self.raw_font().GetStretch().into() }
     }
 
     /// Get the style of this Font (Norma, Oblique, Italic).
-    pub fn style(&self) -> UncheckedEnum<FontStyle> {
-        unsafe { self.ptr.GetStyle().into() }
+    fn style(&self) -> UncheckedEnum<FontStyle> {
+        unsafe { self.raw_font().GetStyle().into() }
     }
 
     /// Get the weight of this Font.
-    pub fn weight(&self) -> FontWeight {
-        unsafe { FontWeight(self.ptr.GetWeight()) }
+    fn weight(&self) -> FontWeight {
+        unsafe { FontWeight(self.raw_font().GetWeight()) }
     }
 
     /// Check if a unicode codepoint is supported by this Font.
-    pub fn has_character(&self, c: char) -> bool {
+    fn has_character(&self, c: char) -> bool {
         unsafe {
             let mut exists = 0;
-            let hr = self.ptr.HasCharacter(c as u32, &mut exists);
+            let hr = self.raw_font().HasCharacter(c as u32, &mut exists);
             SUCCEEDED(hr) && exists != 0
         }
     }
 
     /// Determines if this Font is a "Symbol" Font.
-    pub fn is_symbol_font(&self) -> bool {
-        unsafe { self.ptr.IsSymbolFont() != 0 }
+    fn is_symbol_font(&self) -> bool {
+        unsafe { self.raw_font().IsSymbolFont() != 0 }
+    }
+
+    unsafe fn raw_font(&self) -> &IDWriteFont;
+}
+
+unsafe impl IFont for Font {
+    unsafe fn raw_font(&self) -> &IDWriteFont {
+        &self.ptr
     }
 }

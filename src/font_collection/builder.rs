@@ -1,5 +1,5 @@
 use crate::descriptions::{FontKey, KeyPayload};
-use crate::factory::Factory;
+use crate::factory::IFactory;
 use crate::font_collection::loader::CollectionLoaderHandle;
 use crate::font_collection::FontCollection;
 
@@ -18,7 +18,7 @@ pub struct FontCollectionBuilder<'a, K>
 where
     K: FontKey + ?Sized,
 {
-    factory: &'a Factory,
+    factory: &'a dyn IFactory,
     loader: Option<&'a CollectionLoaderHandle<K>>,
     key: Option<&'a K>,
 }
@@ -27,7 +27,7 @@ impl<'a, K> FontCollectionBuilder<'a, K>
 where
     K: FontKey + ?Sized,
 {
-    pub(super) fn new(factory: &'a Factory) -> Self {
+    pub(super) fn new(factory: &'a dyn IFactory) -> Self {
         FontCollectionBuilder {
             factory,
             loader: None,
@@ -42,7 +42,7 @@ where
         let key = KeyPayload::new(self.key.expect("Key must be specified"));
 
         unsafe {
-            let f = &*self.factory.get_raw();
+            let f = self.factory.raw_f();
 
             let mut ptr = ptr::null_mut();
             let hr = f.CreateCustomFontCollection(
